@@ -304,7 +304,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
                             major_status,
                             acc_sec_min_stat);
 
-		trace(data, "Exiting due to a bad return code\n");
+		trace(data, "Exiting due to a bad return code (1)\n");
 
 		(void) gss_release_buffer(&minor_status, &recv_tok);
             
@@ -322,7 +322,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
             if (cgsi_plugin_send_token(soap, send_tok.value, send_tok.length) < 0) {
                 (void) gss_release_buffer(&minor_status, &send_tok);
 
-		      trace(data, "Exiting due to a bad return code\n");
+		      trace(data, "Exiting due to a bad return code (2)\n");
 
                 /* Soap fault already reported by underlying layer */
                 return -1;
@@ -982,7 +982,7 @@ size_t * token_length;
      rem = SSLHSIZE;
      while (rem>0) {
        /* trace(data, "%d Remaining %d\n", getpid(), rem); */
-       ret = soap_frecv(soap, readbuf, SSLHSIZE);
+       ret = soap_frecv(soap, p, rem);
        if (ret <= 0) { /* BEWARE soap_recv returns 0 when an error occurs ! */
          char buf[BUFSIZE];
          snprintf(buf, BUFSIZE, "Error reading token data: %s\n", strerror(errno));
@@ -1334,7 +1334,7 @@ static int trace(struct cgsi_plugin_data *data, char *tracestr) {
         fprintf(stderr, tracestr);
     } else {
         int fd;
-        fd = open(data->trace_file, O_CREAT|O_WRONLY|O_APPEND);
+        fd = open(data->trace_file, O_CREAT|O_WRONLY|O_APPEND, 0644);
         if (fd <0) return -1;
         write(fd, tracestr, strlen(tracestr));
         close(fd);
@@ -1465,7 +1465,10 @@ int soap_cgsi_init(struct soap *soap, int cgsi_options) {
     int params, rc;
 
     params = cgsi_options;
-    soap_init(soap);
+    if( cgsi_options & CGSI_OPT_KEEP_ALIVE )
+        soap_init2( soap, SOAP_IO_KEEPALIVE, SOAP_IO_KEEPALIVE );
+    else
+	soap_init(soap);
     rc = soap_register_plugin_arg(soap, cgsi_plugin, &params);
     if (rc < 0) return -1;
 

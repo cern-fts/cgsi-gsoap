@@ -15,14 +15,23 @@ SHLIBREQLIBS = -lc
 
 ################################################################################
 ## project flags ##
+
+ifeq ($(GLOBUS), $(EMPTY))
+GLOBUS_LOCATION=/opt/globus
+endif
 GLOBUS_FLAVOUR = gcc32dbg
-GLOBUS_INCLUDE = -I/opt/globus/include/$(GLOBUS_FLAVOUR)
-GLOBUS_LIBS = -L/opt/globus/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
+GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
+GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
 	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
+
+ifeq ($(GSOAP_LOCATION), $(EMPTY))
+GSOAP_LOCATION=/usr/local
+endif
+GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
 
 # initial settings
 CFLAGS += -I. 
-CFLAGS += $(GLOBUS_INCLUDE)
+CFLAGS += $(GLOBUS_INCLUDE) $(GSOAP_INCLUDE)
 LDLIBS += $(GLOBUS_LIBS)
 
 

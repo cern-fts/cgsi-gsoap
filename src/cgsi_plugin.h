@@ -25,6 +25,7 @@
 #define CGSI_OPT_DELEG_FLAG         0x4
 #define CGSI_OPT_SSL_COMPATIBLE     0x8
 #define CGSI_OPT_DISABLE_NAME_CHECK 0x10
+#define CGSI_OPT_KEEP_ALIVE         0x20  
 
 /**
  * Helper function to create the gsoap object and
