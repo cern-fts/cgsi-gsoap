@@ -60,6 +60,7 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg);
 static struct cgsi_plugin_data* get_plugin(struct soap *soap);
 static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, char *tracestr);
+static void cgsi_plugin_globus_modules(int activate);
 
 /******************************************************************************/
 /* Plugin constructor            */
@@ -90,8 +91,7 @@ int cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 
     /* Activate globus modules */
-    (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
-    (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+    cgsi_plugin_globus_modules(1);
 
     p->id = server_plugin_id;
     p->data = (void*)malloc(sizeof(struct cgsi_plugin_data));
@@ -100,6 +100,7 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
     if (p->data) {
         if (server_cgsi_plugin_init(soap, (struct cgsi_plugin_data*)p->data)) {
             free(p->data); /* error: could not init */
+            cgsi_plugin_globus_modules(0);
             return SOAP_EOM; /* return error */
         }
 	cgsi_parse_opts((struct cgsi_plugin_data*)p->data, arg);
@@ -469,8 +470,7 @@ static int server_cgsi_plugin_close(struct soap *soap) {
 int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 
     /* Activate globus modules */
-    (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
-    (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+    cgsi_plugin_globus_modules(1);
 
     p->id = client_plugin_id;
     p->data = (void*)malloc(sizeof(struct cgsi_plugin_data));
@@ -479,6 +479,7 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
     if (p->data) {
         if (client_cgsi_plugin_init(soap, (struct cgsi_plugin_data*)p->data)) {
             free(p->data); /* error: could not init */
+            cgsi_plugin_globus_modules(0);
             return SOAP_EOM; /* return error */
         }     
         cgsi_parse_opts((struct cgsi_plugin_data*)p->data, arg);
@@ -781,6 +782,10 @@ static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct s
     dst->data =  (struct cgsi_plugin_data *)malloc(sizeof(struct cgsi_plugin_data));
     if (dst->data == NULL) return SOAP_FATAL_ERROR;
     memcpy(dst->data, src->data, sizeof(struct cgsi_plugin_data));
+
+    /* Activate globus modules, as the new object will also need them */
+    cgsi_plugin_globus_modules(1);
+
     return SOAP_OK;
 }
 
@@ -789,6 +794,7 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
     struct cgsi_plugin_data *data;
     
     if (p->data == NULL) {
+        cgsi_plugin_globus_modules(0);
         return;
     } else {
         data = (struct cgsi_plugin_data *)p->data;
@@ -811,8 +817,7 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
     free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
 
     /* Deactivate globus modules */
-    (void) globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
-    (void) globus_module_deactivate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+    cgsi_plugin_globus_modules(0);
 }
 
 
@@ -1507,3 +1512,17 @@ int soap_cgsi_init(struct soap *soap, int cgsi_options) {
     return 0;
 }
 
+
+/**
+ * Activate or deactivate required globus modules
+ */
+static void cgsi_plugin_globus_modules(int activate) {
+
+    if (activate) {
+        (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+        (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+    } else {
+        (void) globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
+        (void) globus_module_deactivate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+    }
+}
