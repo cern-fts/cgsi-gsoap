@@ -44,4 +44,9 @@ struct cgsi_plugin_data {
     int context_flags;
     int trace_mode;
     char trace_file[MAXNAMELEN];
+    gss_cred_id_t deleg_credential_handle;
+    int deleg_cred_set;
 };
+
+
+

@@ -116,6 +116,10 @@ static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     data->frecv = soap->frecv;
     data->context_established = 0;
     data->nb_iter = 0;
+    data-> deleg_cred_set = 0;
+    data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
+    data->credential_handle = GSS_C_NO_CREDENTIAL;
+    data->context_handle = GSS_C_NO_CONTEXT;
     setup_trace(data);
     
     soap->fclose = server_cgsi_plugin_close;
@@ -336,7 +340,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
     }
 
     strncpy(data->client_name, name.value, MAXNAMELEN);
-    
+
    {
         char buf[TBUFSIZE];
         snprintf(buf, TBUFSIZE-1,  "The client is:<%s>\n", data->client_name);
@@ -345,6 +349,52 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     /* Setting the flag as even the mapping went ok */
     data->context_established = 1;
+
+    /* Save the delegated credentials */
+    if ((ret_flags & GSS_C_DELEG_FLAG) && (delegated_cred_handle != GSS_C_NO_CREDENTIAL)) {
+        gss_name_t deleg_name;
+        gss_buffer_desc namebuf;
+ 
+        OM_uint32 lifetime;
+        gss_cred_usage_t usage;
+        
+        data->deleg_credential_handle = delegated_cred_handle;
+        data->deleg_cred_set = 1;
+        trace(data, "deleg_cred 1\n");
+
+        /* Now keeping the credentials name in the data structure */
+        major_status = gss_inquire_cred(&minor_status,
+                                        data->deleg_credential_handle,
+                                        &deleg_name,
+                                        &lifetime,
+                                        &usage,
+                                        NULL);
+
+        if (major_status != GSS_S_COMPLETE) {
+            cgsi_gssapi_err(soap,  "Error inquiring delegated credentials", major_status, minor_status);
+            return -1;
+        }
+  
+        /* Keeping the name in the plugin */
+        major_status = gss_display_name(&minor_status, deleg_name , &namebuf, (gss_OID *) NULL);
+        if (major_status != GSS_S_COMPLETE) {
+            cgsi_gssapi_err(soap,  "Error displaying server name", major_status, minor_status);
+            return -1;
+        }
+
+        {
+            char buf[TBUFSIZE];
+            snprintf(buf, TBUFSIZE-1, "The delegated credentials are for:<%s>\n", (char *)namebuf.value);
+            trace(data, buf);
+        }
+        
+        (void)gss_release_name(&minor_status, &server);
+        (void) gss_release_buffer(&minor_status, &name); 
+
+        
+    } else {
+        trace(data, "deleg_cred 0\n");
+    }
     
     (void)gss_release_name(&minor_status, &client);
     (void) gss_release_buffer(&minor_status, &name); 
@@ -439,8 +489,12 @@ static int client_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     soap_frecv = soap->frecv;
     data->fsend = soap->fsend;
     data->frecv = soap->frecv;
-    data->context_established = 0;
+    data->context_established = 0;    
     data->nb_iter = 0;
+    data-> deleg_cred_set = 0;
+    data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
+    data->credential_handle = GSS_C_NO_CREDENTIAL;
+    data->context_handle = GSS_C_NO_CONTEXT;
     setup_trace(data);
     
     soap->fopen = client_cgsi_plugin_open;
@@ -546,10 +600,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
                                             &(data->context_handle),
                                             GSS_C_NO_NAME,
                                             oid,
-                                            /* GSS_C_GLOBUS_SSL_COMPATIBLE | */
-/* 					    GSS_C_DELEG_FLAG| */
-/*                                             GSS_C_MUTUAL_FLAG|GSS_C_CONF_FLAG */
-	                                    data->context_flags,
+                                            data->context_flags,
                                             0,
                                             NULL,	/* no channel bindings */
                                             token_ptr,
@@ -716,7 +767,28 @@ static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct s
 }
 
 static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
-    /* XXX Delect context and credentials ? */ 
+    OM_uint32 min_stat;
+    struct cgsi_plugin_data *data;
+    
+    if (p->data == NULL) {
+        return;
+    } else {
+        data = (struct cgsi_plugin_data *)p->data;
+    }
+
+    /* Freeing delegated credentials if present */
+    if (data->deleg_cred_set != 0) {
+        gss_release_cred(&min_stat, data->deleg_credential_handle);
+    }
+
+    if (data->credential_handle != NULL) {
+        gss_release_cred(&min_stat, data->credential_handle);
+    }
+
+    if (data->context_handle != NULL) {
+        gss_release_cred(&min_stat, data->context_handle);
+    }
+  
     free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
 }
 
@@ -1255,3 +1327,125 @@ static int trace(struct cgsi_plugin_data *data, char *tracestr) {
     }
     return 0;
 }
+
+int export_delegated_credentials(struct soap *soap, char *filename) {
+    OM_uint32 maj_stat, min_stat;
+    gss_buffer_desc buffer = GSS_C_EMPTY_BUFFER;
+    int fd, rc;
+    struct cgsi_plugin_data *data;
+    
+    if (soap == NULL) {
+        return -1;
+    }
+    
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
+                                                        server_plugin_id);
+
+    if (data == NULL) {
+        cgsi_err(soap, "export delegated credentials: could not get data structure");
+        return -1;
+    }
+
+    if (data->deleg_cred_set == 0) {
+        cgsi_err(soap, "export delegated credentials: delegated credentials not set");
+        return -1;
+    }
+
+    maj_stat = gss_export_cred(&min_stat,
+                               data->deleg_credential_handle,
+                               GSS_C_NO_OID,
+                               0,
+                               &buffer);
+
+    if (maj_stat != GSS_S_COMPLETE) {
+        cgsi_gssapi_err(soap,  "Error exporting  credentials", maj_stat, min_stat);
+        return -1;
+    }
+
+
+    fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0600);
+    if (fd < 0) {
+        cgsi_err(soap, "export delegated credentials: could not open temp file");
+        return -1;
+    }
+
+    rc = write(fd, buffer.value, buffer.length); 
+    if (rc != buffer.length) {
+        char buf[TBUFSIZE];
+        snprintf(buf, TBUFSIZE-1, "export delegated credentials: could not write to file (%s)",
+                 strerror(errno));
+        cgsi_err(soap, buf);
+        return -1;
+    }
+
+    rc = close(fd);
+    if (rc < 0) {
+        char buf[TBUFSIZE];
+        snprintf(buf, TBUFSIZE-1, "export delegated credentials: could not close file (%s)",
+                 strerror(errno));
+        cgsi_err(soap, buf);
+        return -1;
+    }
+
+    return 0;
+}
+
+
+#define PROXY_ENV_VAR "X509_USER_PROXY"
+
+int set_default_proxy_file(struct soap *soap, char *filename) {
+    int rc;
+    
+    rc = setenv(PROXY_ENV_VAR, filename, 1);
+    if (rc < 0) {
+        char buf[TBUFSIZE];
+        snprintf(buf, TBUFSIZE-1, "set default proxy file: could not setenv (%s)",
+                 strerror(errno));
+        cgsi_err(soap, buf);
+        return -1;
+    }
+    return 0;
+}
+
+
+void clear_default_proxy_file(int unlink_file) {
+    char *proxy_file;
+
+    /* Removing the credentials file if flagged so */
+    if (unlink_file) {
+        proxy_file = getenv(PROXY_ENV_VAR);
+        if (proxy_file != NULL) {
+            unlink(proxy_file);
+        }
+    }
+
+    /* Clearing the environment variable */
+    unsetenv(PROXY_ENV_VAR);
+}
+
+
+int has_delegated_credentials(struct soap *soap) {
+    struct cgsi_plugin_data *data;
+    
+    if (soap == NULL) {
+        return -1;
+    }
+    
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
+                                                        server_plugin_id);
+
+    if (data == NULL) {
+        cgsi_err(soap, "export delegated credentials: could not get data structure");
+        return -1;
+    }
+
+    if (data->deleg_cred_set != 0) {
+         return 1;
+    }
+    
+    return 0;
+}
+
+
+
+
