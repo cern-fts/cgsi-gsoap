@@ -585,6 +585,12 @@ static int client_cgsi_plugin_open(struct soap *soap,
     }
 
     /* Opening the connection to the server */
+    if (data->fopen == NULL) {
+      cgsi_err(soap, "data->fopen is NULL !");
+      return -1;
+    }
+    
+
     data->socket_fd = data->fopen(soap, endpoint, hostname, port);
     if (data->socket_fd < 0) {
         cgsi_err(soap, "Could not open connection !");
@@ -772,6 +778,9 @@ static int cgsi_plugin_compare_name(const char *dn, const char *hostname) {
 
 static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct soap_plugin *src) {
     *dst = *src;
+    dst->data =  (struct cgsi_plugin_data *)malloc(sizeof(struct cgsi_plugin_data));
+    if (dst->data == NULL) return SOAP_FATAL_ERROR;
+    memcpy(dst->data, src->data, sizeof(struct cgsi_plugin_data));
     return SOAP_OK;
 }
 
@@ -836,8 +845,14 @@ static int cgsi_plugin_close(struct soap *soap, char *plugin_id) {
             data->context_established = 0;
         }
     }
+    if (data->fclose != NULL) {
+      return data->fclose(soap);
+    } else {
+      cgsi_err(soap, "Close: data->fclose is NULL");
+      return -1;      
+    }
     
-    return data->fclose(soap);
+    
 }
 
 

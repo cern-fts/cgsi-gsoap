@@ -1,0 +1,6 @@
+1.1.7
+- Fixed bug in cgsi_plugin_copy (before that it was not duplicating the cgsi_plugin_data)
+- Protected calls to cgsi_plugin_data->fopen and fclose
+
+1.1.6
+- Send error message in faultstring rather rather than in fault detail 
