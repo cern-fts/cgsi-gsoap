@@ -16,6 +16,11 @@
 
 #include <stdsoap2.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /**
  * Options that can be specified when initializing the
  * cgsi_plugin (in the arg parameter) 
@@ -144,6 +149,9 @@ void clear_default_proxy_file(int unlink_file);
 
 
 
+#ifdef __cplusplus
+}
+#endif
 
 
 

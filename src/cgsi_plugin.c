@@ -1137,7 +1137,9 @@ void cgsi_plugin_print_token(data, token, length)
 static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM_uint32 min_stat) {
 
     int ret;
-    char buf[BUFSIZE];
+    char buffer[BUFSIZE];
+    int bufsize;
+    char *buf;
     struct cgsi_plugin_data *data;
     int isclient = 1;
 
@@ -1147,14 +1149,18 @@ static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM
         isclient = 0;
     }
 
-    
-    ret =  cgsi_display_status_1(msg, maj_stat, GSS_C_GSS_CODE, buf, BUFSIZE);
-    cgsi_display_status_1(msg, min_stat, GSS_C_MECH_CODE, buf + ret, BUFSIZE - ret);
+    bufsize = BUFSIZE;
+    strncpy(buffer, CGSI_PLUGIN ": ", bufsize);
+    buf = buffer +strlen(buffer); 
+    bufsize -= strlen(buffer);
+
+    ret =  cgsi_display_status_1(msg, maj_stat, GSS_C_GSS_CODE, buf, bufsize);
+    cgsi_display_status_1(msg, min_stat, GSS_C_MECH_CODE, buf + ret, bufsize - ret);
 
     if (isclient) {
-        soap_sender_fault(soap, CGSI_PLUGIN, buf);
+        soap_sender_fault(soap, buffer, NULL);
     } else {
-        soap_receiver_fault(soap, CGSI_PLUGIN, buf);
+        soap_receiver_fault(soap, buffer, NULL);
     }
 }
 
@@ -1187,6 +1193,9 @@ static void cgsi_err(struct soap *soap, char *msg) {
 
     struct cgsi_plugin_data *data;
     int isclient = 1;
+    char buffer[BUFSIZE];
+    int bufsize;
+    char *buf;
     
     /* Check if we are a client */
     data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, client_plugin_id);
@@ -1194,10 +1203,16 @@ static void cgsi_err(struct soap *soap, char *msg) {
         isclient = 0;
     }
     
+    bufsize = BUFSIZE;
+    strncpy(buffer, CGSI_PLUGIN ": ", bufsize);
+    buf = buffer +strlen(buffer); 
+    bufsize -= strlen(buffer);
+    strncpy(buf, msg, bufsize);
+
     if (isclient) {
-        soap_sender_fault(soap, CGSI_PLUGIN, msg);
+        soap_sender_fault(soap, buffer, NULL);
     } else {
-        soap_receiver_fault(soap, CGSI_PLUGIN, msg);
+        soap_receiver_fault(soap, buffer, NULL);
     }
 }
 
