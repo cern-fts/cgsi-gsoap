@@ -693,6 +693,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         {
             char buf[TBUFSIZE];
             snprintf(buf, TBUFSIZE-1, "Server:<%s>\n", (char *)server_name.value);
+            buf[TBUFSIZE-1] = '\0';
             trace(data, buf);
         }
         
@@ -701,7 +702,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         if (match != 0) {
             snprintf(buf, BUFSIZE-1, "DN %s and hostname %s do NOT match !\n", 
                      (char *)(server_name.value), hostname);
-            buf[BUFSIZE]='\0';
+            buf[BUFSIZE-1]='\0';
         }
 
         
@@ -1296,7 +1297,7 @@ static int setup_trace(struct cgsi_plugin_data *data) {
     char *envar;
 
     data->trace_mode=0;
-    data->trace_file[0]= data->trace_file[MAXNAMELEN]= '\0';
+    data->trace_file[0]= data->trace_file[MAXNAMELEN-1]= '\0';
 
     envar = getenv(CGSI_TRACE);
     if (envar != NULL) {
