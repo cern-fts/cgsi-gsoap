@@ -89,6 +89,10 @@ int cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
  */
 int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 
+    /* Activate globus modules */
+    (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+    (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+
     p->id = server_plugin_id;
     p->data = (void*)malloc(sizeof(struct cgsi_plugin_data));
     p->fcopy = cgsi_plugin_copy;
@@ -464,6 +468,10 @@ static int server_cgsi_plugin_close(struct soap *soap) {
  */
 int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 
+    /* Activate globus modules */
+    (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+    (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+
     p->id = client_plugin_id;
     p->data = (void*)malloc(sizeof(struct cgsi_plugin_data));
     p->fcopy = cgsi_plugin_copy;
@@ -792,6 +800,10 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
     }
   
     free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
+
+    /* Deactivate globus modules */
+    (void) globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
+    (void) globus_module_deactivate(GLOBUS_GSI_GSS_ASSIST_MODULE);
 }
 
 
