@@ -776,17 +776,18 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
         data = (struct cgsi_plugin_data *)p->data;
     }
 
+    /* Deleting the context */
+    if (data->context_handle != NULL) {
+        gss_delete_sec_context(&min_stat, &(data->context_handle), GSS_C_NO_BUFFER);
+    }
+    
     /* Freeing delegated credentials if present */
     if (data->deleg_cred_set != 0) {
-        gss_release_cred(&min_stat, data->deleg_credential_handle);
+        gss_release_cred(&min_stat, &(data->deleg_credential_handle));
     }
 
     if (data->credential_handle != NULL) {
-        gss_release_cred(&min_stat, data->credential_handle);
-    }
-
-    if (data->context_handle != NULL) {
-        gss_release_cred(&min_stat, data->context_handle);
+        gss_release_cred(&min_stat, &(data->credential_handle));
     }
   
     free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
@@ -810,7 +811,7 @@ static int cgsi_plugin_close(struct soap *soap, char *plugin_id) {
     
     if (data->context_established == 1) {
 
-        major_status = gss_delete_sec_context(&minor_status, data->context_handle, output_buffer);
+        major_status = gss_delete_sec_context(&minor_status, &(data->context_handle), output_buffer);
         if (major_status != GSS_S_COMPLETE) {
             cgsi_gssapi_err(soap, 
                             "Error deleting context",
