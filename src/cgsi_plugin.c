@@ -881,7 +881,7 @@ static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, char
         return -1;
     }
 
-    (void *)gss_release_buffer(&minor_status, &output_tok);
+    gss_release_buffer(&minor_status, &output_tok);
     
     return SOAP_OK;
 
@@ -1081,7 +1081,8 @@ int cgsi_plugin_send_token(arg,token,token_length)
 
     {
          char buf[TBUFSIZE];
-         snprintf(buf, TBUFSIZE-1,  "================= SENDING: %x\n", token_length);
+         snprintf(buf, TBUFSIZE-1,  "================= SENDING: %x\n", 
+                  (unsigned int)token_length);
          trace(data, buf);
      }
      cgsi_plugin_print_token(data, token, token_length);
@@ -1096,7 +1097,8 @@ int cgsi_plugin_send_token(arg,token,token_length)
          return -1;
      } else if (ret != SOAP_OK) {
            char buf[BUFSIZE];
-           snprintf(buf, BUFSIZE,  "sending token data: %d of %d bytes written\n", ret, token_length);
+           snprintf(buf, BUFSIZE,  "sending token data: %d of %d bytes written\n", 
+                    ret, (int)token_length);
            cgsi_err(soap, buf);
          return -1;
      }

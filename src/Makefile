@@ -19,7 +19,11 @@ SHLIBREQLIBS = -lc
 ifeq ($(GLOBUS), $(EMPTY))
 GLOBUS_LOCATION=/opt/globus
 endif
+
+ifeq ($(GLOBUS_FLAVOUR), $(EMPTY))
 GLOBUS_FLAVOUR = gcc32dbg
+endif
+
 GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
 GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
 	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
