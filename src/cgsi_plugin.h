@@ -27,6 +27,20 @@
 #define CGSI_OPT_DISABLE_NAME_CHECK 0x10
 
 /**
+ * Helper function to create the gsoap object and
+ * the cgsi_plugin at the same time.
+ * This function assumes that a client plugin is specified,
+ * to create a server plugin, use the CGSI_OPT_SERVER option.
+ *
+ * @param soap The soap structure for the request
+ * @param cgsi_options The parameters for the plugin creation
+ *                     (bitwise or of the different options).
+ *
+ * @return 0 if successful, -1 otherwise
+ */
+int soap_cgsi_init(struct soap *soap, int cgsi_options);
+
+/**
  * Generic contructor for the cgsi_plugin
  *
  * @param soap The soap structure for the request

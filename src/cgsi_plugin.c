@@ -1447,5 +1447,14 @@ int has_delegated_credentials(struct soap *soap) {
 }
 
 
+int soap_cgsi_init(struct soap *soap, int cgsi_options) {
+    int params, rc;
 
+    params = cgsi_options;
+    soap_init(soap);
+    rc = soap_register_plugin_arg(soap, cgsi_plugin, &params);
+    if (rc < 0) return -1;
+
+    return 0;
+}
 
