@@ -393,7 +393,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         }
         
         (void)gss_release_name(&minor_status, &server);
-        (void) gss_release_buffer(&minor_status, &name); 
+        (void) gss_release_buffer(&minor_status, &namebuf); 
 
         
     } else {
