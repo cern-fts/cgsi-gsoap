@@ -831,7 +831,7 @@ static int cgsi_plugin_close(struct soap *soap, char *plugin_id) {
                             major_status,
                             minor_status);
         } else {
-            cgsi_plugin_send_token( (void *)soap, output_buffer->value, output_buffer->length);   
+	  /*cgsi_plugin_send_token( (void *)soap, output_buffer->value, output_buffer->length);*/   
             gss_release_buffer(&minor_status, output_buffer);
             data->context_established = 0;
         }
