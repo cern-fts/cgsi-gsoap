@@ -63,7 +63,7 @@ libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
 # Usage example: make install PREFIX=/usr/local BINDIR=my_executables
 
 # installation directories defaults are generic unix
-PPREFIX=/usr/local
+PPREFIX=/usr
 PREFIX =$(RPM_BUILD_ROOT)$(PPREFIX)# could be /usr/local but you may not have perms
 INCDIR =include
 LIBDIR =lib
