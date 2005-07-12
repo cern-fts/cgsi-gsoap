@@ -1,3 +1,12 @@
+1.1.10
+- Added license
+
+1.1.9
+- Moved the plugin to /usr
+
+1.1.8
+- Included David Smith's activation/deactivation patch to allow running the plugin in a multithreaded server
+
 1.1.7
 - Fixed bug in cgsi_plugin_copy (before that it was not duplicating the cgsi_plugin_data)
 - Protected calls to cgsi_plugin_data->fopen and fclose
