@@ -1474,7 +1474,7 @@ int export_delegated_credentials(struct soap *soap, char *filename) {
     }
 
 
-    fd = open(filename, O_WRONLY | O_CREAT | O_APPEND, 0600);
+    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (fd < 0) {
         cgsi_err(soap, "export delegated credentials: could not open temp file");
         return -1;
