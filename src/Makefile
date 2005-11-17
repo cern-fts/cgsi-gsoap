@@ -107,6 +107,8 @@ MANDIR =man
 # insert space separated files to install (used for cleaning too) here
 BINFILES =
 LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
+SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
+
 ifneq ($(USE_VOMS), $(EMPTY))
 LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).a 
 endif
@@ -121,7 +123,12 @@ MANFILES =
 INSTALL_FLAGS =
 
 # install targets
+ifneq ($(USE_VOMS), $(EMPTY))
+installtargets = installinc installlib installbin installman installshlib installshlibvoms
+else
 installtargets = installinc installlib installbin installman installshlib
+endif
+
 .PHONY: uninstall install $(installtargets)
 install: $(installtargets)
 
@@ -135,8 +142,8 @@ ifneq ($(LIBFILES), $(EMPTY))
 	-mkdir -p $(PREFIX)/$(LIBDIR)
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
-installshlib: $(SHLIBFILES)
-ifneq ($(SHLIBFILES), $(EMPTY))
+
+installshlib: libcgsi_plugin$(GSOAP_VERSION).so
 	-mkdir -p $(PREFIX)/$(LIBDIR)
 ifneq ($(VERSION), $(EMPTY))
 	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
@@ -145,7 +152,18 @@ ifneq ($(VERSION), $(EMPTY))
 else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
+
+installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION).so
+	-mkdir -p $(PREFIX)/$(LIBDIR)
+ifneq ($(VERSION), $(EMPTY))
+	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
+	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
+	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -s $^.$(VERSION) $^)
+else
+	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
+
+
 installbin: $(BINFILES)
 ifneq ($(BINFILES), $(EMPTY))
 	-mkdir -p $(PREFIX)/$(BINDIR)
