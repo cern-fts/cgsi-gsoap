@@ -46,6 +46,10 @@ struct cgsi_plugin_data {
     char trace_file[MAXNAMELEN];
     gss_cred_id_t deleg_credential_handle;
     int deleg_cred_set;
+    /* Pointers to VOMS data */
+    char *voname;
+    char **fqan;
+    int nbfqan;
 };
 
 

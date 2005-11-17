@@ -80,6 +80,11 @@ static char sccsid[] = "@(#)";
  */
 #include <stdio.h>
 #include "cgsi_plugin_int.h" 
+#if defined(USE_VOMS)
+#include "gssapi_openssl.h"
+#include "globus_gsi_credential.h"
+#include "voms_apic.h"
+#endif
 
 #define BUFSIZE 1024
 #define TBUFSIZE 256
@@ -121,6 +126,8 @@ static struct cgsi_plugin_data* get_plugin(struct soap *soap);
 static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, char *tracestr);
 static void cgsi_plugin_globus_modules(int activate);
+static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
+					       gss_ctx_id_t context_handle);
 
 /******************************************************************************/
 /* Plugin constructor            */
@@ -154,7 +161,7 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
     cgsi_plugin_globus_modules(1);
 
     p->id = server_plugin_id;
-    p->data = (void*)malloc(sizeof(struct cgsi_plugin_data));
+    p->data = (void*)calloc(sizeof(struct cgsi_plugin_data), 1);
     p->fcopy = cgsi_plugin_copy;
     p->fdelete = cgsi_plugin_delete;
     if (p->data) {
@@ -185,8 +192,10 @@ static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
     data->credential_handle = GSS_C_NO_CREDENTIAL;
     data->context_handle = GSS_C_NO_CONTEXT;
+    data->voname = NULL;
+    data->fqan = NULL;
+    data->nbfqan = 0;
     setup_trace(data);
-    
     soap->fclose = server_cgsi_plugin_close;
     soap->fsend = server_cgsi_plugin_send;
     soap->frecv = server_cgsi_plugin_recv;
@@ -414,6 +423,9 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     /* Setting the flag as even the mapping went ok */
     data->context_established = 1;
+
+    cgsi_plugin_get_voms_creds_from_ctx(soap, data->context_handle);
+
 
     /* Save the delegated credentials */
     if ((ret_flags & GSS_C_DELEG_FLAG) && (delegated_cred_handle != GSS_C_NO_CREDENTIAL)) {
@@ -873,7 +885,20 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
     if (data->credential_handle != NULL) {
         gss_release_cred(&min_stat, &(data->credential_handle));
     }
-  
+ 
+    /* Clearing the VOMS attributes */
+    if (data->voname != NULL) {
+      free(data->voname);
+    }
+
+    /* fqan is a NULL terminated array of char * */
+    if (data->fqan != NULL) {
+      int i;
+      for (i = 0; i < data->nbfqan; i++)
+	free(data->fqan[i]);
+      free(data->fqan);
+    }
+    
     free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
 
     /* Deactivate globus modules */
@@ -1585,4 +1610,144 @@ static void cgsi_plugin_globus_modules(int activate) {
         (void) globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
         (void) globus_module_deactivate(GLOBUS_GSI_GSS_ASSIST_MODULE);
     }
+}
+
+
+ 
+/*****************************************************************
+ *                                                               *
+ *               VOMS FUNCTIONS                                  *
+ *                                                               *
+ *****************************************************************/
+
+static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
+					       gss_ctx_id_t context_handle){
+
+#if defined(USE_VOMS)
+
+  int error= 0;
+  X509 *px509_cred= NULL;
+  STACK_OF(X509) *px509_chain = NULL;
+  struct vomsdata *vd= NULL;
+  struct voms **volist;
+  /*  struct voms vo; */
+  gss_ctx_id_desc * context;
+  gss_cred_id_t cred;  
+  /* Internally a gss_cred_id_t type is a pointer to a gss_cred_id_desc */
+  gss_cred_id_desc *       cred_desc = NULL;
+  globus_gsi_cred_handle_t gsi_cred_handle;
+  /* X509 * px509 = NULL; */
+  struct cgsi_plugin_data *data;  
+
+  if (soap == NULL) {
+    return -1;
+  }
+    
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
+						      server_plugin_id);
+
+
+  /* Downcasting the context structure  */
+  context = (gss_ctx_id_desc *) context_handle;
+  cred = context->peer_cred_handle;
+
+  /* cast to gss_cred_id_desc */
+  if (cred == GSS_C_NO_CREDENTIAL) {
+    return -1;
+  }
+
+  cred_desc = (gss_cred_id_desc *) cred;
+  
+  if (globus_module_activate(GLOBUS_GSI_CREDENTIAL_MODULE) != GLOBUS_SUCCESS) {
+    return -1;
+  }
+  
+  /* Getting the X509 certicate */
+  gsi_cred_handle = cred_desc->cred_handle;
+  if (globus_gsi_cred_get_cert(gsi_cred_handle, &px509_cred) != GLOBUS_SUCCESS) {
+    globus_module_deactivate(GLOBUS_GSI_CREDENTIAL_MODULE);
+    return -1;
+  }
+  
+  /* Getting the certificate chain */
+  if (globus_gsi_cred_get_cert_chain (gsi_cred_handle, &px509_chain) != GLOBUS_SUCCESS) {
+    X509_free (px509_cred);
+    (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
+    return -1;
+  }
+  
+  /* No need for the globus module anymore, the rest are calls to VOMS */
+  (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
+  
+  if ((vd = VOMS_Init (NULL, NULL)) == NULL) {
+    /* XXX Error processing ? */
+    return -1;
+  }
+  
+  if (VOMS_Retrieve (px509_cred, px509_chain, RECURSE_CHAIN, vd, &error) == 0) {
+    /* XXX Error processing ? */
+    return -1;
+  }
+  
+  volist = vd->data;
+  
+  if (volist !=NULL) {
+    int i = 0;
+    int nbfqan;
+    
+    /* Copying the voname */
+    if ((*volist)->voname != NULL) {
+      data->voname = strdup((*volist)->voname);
+    }
+    
+    
+    /* Counting the fqans before allocating the array */
+    while( volist[0]->fqan[i] != NULL) {
+      i++;
+    }
+    nbfqan = i;
+    
+    if (nbfqan > 0) {
+      data->fqan = malloc(sizeof(char *) * (i+1));
+      if (data->fqan != NULL) {
+	for (i=0; i<nbfqan; i++) {
+	  data->fqan[i] = strdup( volist[0]->fqan[i]);   
+	}
+	data->fqan[nbfqan] = NULL;
+	data->nbfqan = nbfqan;
+      }
+    } /* if (nbfqan > 0) */
+  }
+  
+  VOMS_Destroy (vd);  
+  if (px509_cred) X509_free (px509_cred);
+  if (px509_chain) sk_X509_free(px509_chain);
+
+#endif  
+
+  return 0;
+}
+
+/* Returns the VO name, if it could be retrieved via VOMS */
+char *get_client_voname(struct soap *soap) {
+  struct cgsi_plugin_data *data;  
+
+  if (soap == NULL) return NULL;
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
+						      server_plugin_id);
+
+  return data->voname;
+}
+
+char **get_client_roles(struct soap *soap, int *nbfqan) {
+  struct cgsi_plugin_data *data;  
+
+  if (soap == NULL) return NULL;
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
+						      server_plugin_id);
+
+  if (nbfqan != NULL) {
+    *nbfqan = data->nbfqan;
+  }
+  return data->fqan;
 }

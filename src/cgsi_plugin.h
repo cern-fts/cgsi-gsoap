@@ -207,6 +207,23 @@ int set_default_proxy_file(struct soap *soap, char *filename);
  */
 void clear_default_proxy_file(int unlink_file);
 
+/**
+ * Returns the client VO name if it was provided in the certificate
+ *
+ * @param soap The soap structure for the request
+ *
+ * @return The client voname malloced in the soap structure (DON"T free), NULL otherwise
+ */
+char *get_client_voname(struct soap *soap);
+
+/**
+ * Returns the client VO roles if they were provided in the certificate
+ *
+ * @param soap The soap structure for the request
+ *
+ * @return The client voname malloced in the soap structure (DON"T free), NULL otherwise
+ */
+char ** get_client_roles(struct soap *soap, int* nbfqans);
 
 
 #ifdef __cplusplus

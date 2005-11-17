@@ -39,10 +39,32 @@ CFLAGS += $(GLOBUS_INCLUDE) $(GSOAP_INCLUDE)
 LDLIBS += $(GLOBUS_LIBS)
 
 
+ifeq ($(VOMS_LOCATION), $(EMPTY))
+VOMS_LOCATION=/opt/edg
+endif
+
+ifneq ($(USE_VOMS), $(EMPTY))
+VOMS_FLAVOUR=$(GLOBUS_FLAVOUR)
+VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include
+VOMS_LIBS=-L$(VOMS_LOCATION)/lib -lvomsc
+endif
+
+#CFLAGS += $(VOMS_FLAGS)
+#LDLIBS += $(VOMS_LIBS)
+
+# NO ! the libs should not be added at link time so that the
+#users of CGSI_GSOAP can choose the ones they need to use
+#SHLIBREQLIBS += $(LDLIBS)
+
 ################################################################################
 ## compilation targets ##
 .PHONY: all
+ifneq ($(USE_VOMS), $(EMPTY))
+all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so  libcgsi_plugin_voms$(GSOAP_VERSION).a libcgsi_plugin_voms$(GSOAP_VERSION).so
+else
 all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so 
+endif
+
 
 # dependencies
 cgsi_plugin.o: cgsi_plugin.h cgsi_plugin_int.h
@@ -52,7 +74,19 @@ libcgsi_plugin$(GSOAP_VERSION).a: cgsi_plugin.o
 	$(RANLIB) $@
 
 libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
-	ld $(SHLIBLDFLAGS) -o $@ *.o $(SHLIBREQLIBS)
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+
+ifneq ($(USE_VOMS), $(EMPTY))
+cgsi_plugin_voms.o: cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CC) $(CFLAGS) $(VOMS_FLAGS) -c -o $@ cgsi_plugin.c
+
+libcgsi_plugin_voms$(GSOAP_VERSION).a: cgsi_plugin_voms.o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin_voms$(GSOAP_VERSION).so: cgsi_plugin_voms.o
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+endif
 
 ###############################################
 ## THIS IS STANDARD Makefile BELOW THIS LINE ##
@@ -72,8 +106,15 @@ MANDIR =man
 
 # insert space separated files to install (used for cleaning too) here
 BINFILES =
-LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a
-SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
+LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
+ifneq ($(USE_VOMS), $(EMPTY))
+LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).a 
+endif
+
+ifneq ($(USE_VOMS), $(EMPTY))
+SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).so
+endif
+
 INCFILES =cgsi_plugin.h
 MANFILES =
 
