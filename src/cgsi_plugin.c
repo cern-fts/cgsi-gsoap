@@ -1721,7 +1721,7 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
   
   VOMS_Destroy (vd);  
   if (px509_cred) X509_free (px509_cred);
-  if (px509_chain) sk_X509_free(px509_chain);
+  if (px509_chain) sk_X509_pop_free(px509_chain,X509_free);
 
 #endif  
 
