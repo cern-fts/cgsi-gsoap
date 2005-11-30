@@ -30,8 +30,14 @@ GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
 
 ifeq ($(GSOAP_LOCATION), $(EMPTY))
 GSOAP_LOCATION=/usr/local
+#GSOAP_LOCATION=/afs/cern.ch/user/b/bcouturi/w0/gsoap-slc3/2.3
 endif
 GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
+
+ifeq ($(GSOAP_VERSION), $(EMPTY))
+GSOAP_VERSION=_gsoap_2.3
+endif
+
 
 # initial settings
 CFLAGS += -I. 
