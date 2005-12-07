@@ -1332,7 +1332,7 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg) {
 
   /* Default values */
   p->disable_hostname_check = 0;
-  p->context_flags = GSS_C_CONF_FLAG | GSS_C_MUTUAL_FLAG;
+  p->context_flags = GSS_C_CONF_FLAG | GSS_C_MUTUAL_FLAG | GSS_C_INTEG_FLAG;
 
   if (arg == NULL) {
       /* Default is just confidentiality and mutual authentication */
