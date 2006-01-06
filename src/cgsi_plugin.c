@@ -1623,21 +1623,23 @@ static void cgsi_plugin_globus_modules(int activate) {
 static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
 					       gss_ctx_id_t context_handle){
 
+  int ret = 0;
 #if defined(USE_VOMS)
 
   int error= 0;
   X509 *px509_cred= NULL;
   STACK_OF(X509) *px509_chain = NULL;
   struct vomsdata *vd= NULL;
-  struct voms **volist;
+  struct voms **volist = NULL;
   /*  struct voms vo; */
   gss_ctx_id_desc * context;
   gss_cred_id_t cred;  
   /* Internally a gss_cred_id_t type is a pointer to a gss_cred_id_desc */
   gss_cred_id_desc *       cred_desc = NULL;
   globus_gsi_cred_handle_t gsi_cred_handle;
-  /* X509 * px509 = NULL; */
   struct cgsi_plugin_data *data;  
+  
+  ret = -1;
 
   if (soap == NULL) {
     return -1;
@@ -1653,40 +1655,38 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
 
   /* cast to gss_cred_id_desc */
   if (cred == GSS_C_NO_CREDENTIAL) {
-    return -1;
+    goto leave;
   }
 
   cred_desc = (gss_cred_id_desc *) cred;
   
   if (globus_module_activate(GLOBUS_GSI_CREDENTIAL_MODULE) != GLOBUS_SUCCESS) {
-    return -1;
+    goto leave;
   }
   
   /* Getting the X509 certicate */
   gsi_cred_handle = cred_desc->cred_handle;
   if (globus_gsi_cred_get_cert(gsi_cred_handle, &px509_cred) != GLOBUS_SUCCESS) {
     globus_module_deactivate(GLOBUS_GSI_CREDENTIAL_MODULE);
-    return -1;
+    goto leave;
   }
   
   /* Getting the certificate chain */
   if (globus_gsi_cred_get_cert_chain (gsi_cred_handle, &px509_chain) != GLOBUS_SUCCESS) {
     X509_free (px509_cred);
     (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
-    return -1;
+    goto leave;
   }
   
   /* No need for the globus module anymore, the rest are calls to VOMS */
   (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
   
   if ((vd = VOMS_Init (NULL, NULL)) == NULL) {
-    /* XXX Error processing ? */
-    return -1;
+    goto leave;
   }
   
   if (VOMS_Retrieve (px509_cred, px509_chain, RECURSE_CHAIN, vd, &error) == 0) {
-    /* XXX Error processing ? */
-    return -1;
+    goto leave;
   }
   
   volist = vd->data;
@@ -1719,13 +1719,13 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
     } /* if (nbfqan > 0) */
   }
   
-  VOMS_Destroy (vd);  
+ leave:  
+  if (vd) VOMS_Destroy (vd);  
   if (px509_cred) X509_free (px509_cred);
   if (px509_chain) sk_X509_pop_free(px509_chain,X509_free);
-
 #endif  
 
-  return 0;
+  return ret;
 }
 
 /* Returns the VO name, if it could be retrieved via VOMS */
