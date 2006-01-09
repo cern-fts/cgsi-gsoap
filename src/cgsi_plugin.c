@@ -1648,7 +1648,6 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
   data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
 						      server_plugin_id);
 
-
   /* Downcasting the context structure  */
   context = (gss_ctx_id_desc *) context_handle;
   cred = context->peer_cred_handle;
@@ -1719,6 +1718,8 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
     } /* if (nbfqan > 0) */
   }
   
+  ret = 0;
+
  leave:  
   if (vd) VOMS_Destroy (vd);  
   if (px509_cred) X509_free (px509_cred);
@@ -1735,17 +1736,17 @@ char *get_client_voname(struct soap *soap) {
   if (soap == NULL) return NULL;
   data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
 						      server_plugin_id);
-
+  if (data == NULL) return NULL;
   return data->voname;
 }
 
 char **get_client_roles(struct soap *soap, int *nbfqan) {
   struct cgsi_plugin_data *data;  
-
+  if (nbfqan != NULL) *nbfqan = 0;
   if (soap == NULL) return NULL;
   data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
 						      server_plugin_id);
-
+  if (data == NULL) return NULL;
   if (nbfqan != NULL) {
     *nbfqan = data->nbfqan;
   }
