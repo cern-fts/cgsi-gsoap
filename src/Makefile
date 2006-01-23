@@ -24,9 +24,15 @@ ifeq ($(GLOBUS_FLAVOUR), $(EMPTY))
 GLOBUS_FLAVOUR = gcc32dbg
 endif
 
+GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR)pthr
+
 GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
 GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
 	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
+
+GLOBUS_INCLUDE_PTHR = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR_PTHR)
+GLOBUS_LIBS_PTHR = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR) \
+        -lglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR)
 
 ifeq ($(GSOAP_LOCATION), $(EMPTY))
 GSOAP_LOCATION=/usr/local
@@ -40,19 +46,18 @@ endif
 
 
 # initial settings
-CFLAGS += -I. 
-CFLAGS += $(GLOBUS_INCLUDE) $(GSOAP_INCLUDE)
-LDLIBS += $(GLOBUS_LIBS)
-
+CFLAGS += -I. $(GSOAP_INCLUDE)
 
 ifeq ($(VOMS_LOCATION), $(EMPTY))
 VOMS_LOCATION=/opt/edg
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
-VOMS_FLAVOUR=$(GLOBUS_FLAVOUR)
 VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include
 VOMS_LIBS=-L$(VOMS_LOCATION)/lib -lvomsc
+
+VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include
+VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/lib -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
 endif
 
 #CFLAGS += $(VOMS_FLAGS)
@@ -65,15 +70,21 @@ endif
 ################################################################################
 ## compilation targets ##
 .PHONY: all
+
+
 ifneq ($(USE_VOMS), $(EMPTY))
-all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so  libcgsi_plugin_voms$(GSOAP_VERSION).a libcgsi_plugin_voms$(GSOAP_VERSION).so
+all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so  vomsall
 else
 all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so 
 endif
 
+vomsall: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+
+
 
 # dependencies
 cgsi_plugin.o: cgsi_plugin.h cgsi_plugin_int.h
+	$(CC) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ cgsi_plugin.c
 
 libcgsi_plugin$(GSOAP_VERSION).a: cgsi_plugin.o
 	$(AR) $(ARFLAGS) $@ $?
@@ -83,15 +94,27 @@ libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
 	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
 
 ifneq ($(USE_VOMS), $(EMPTY))
-cgsi_plugin_voms.o: cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
-	$(CC) $(CFLAGS) $(VOMS_FLAGS) -c -o $@ cgsi_plugin.c
+cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o: cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CC) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ cgsi_plugin.c
 
-libcgsi_plugin_voms$(GSOAP_VERSION).a: cgsi_plugin_voms.o
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
-libcgsi_plugin_voms$(GSOAP_VERSION).so: cgsi_plugin_voms.o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+
+cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o: cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CC) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ cgsi_plugin.c
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
+
+
 endif
 
 ###############################################
@@ -116,11 +139,11 @@ LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a
 SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
 
 ifneq ($(USE_VOMS), $(EMPTY))
-LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).a 
+LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a ibcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOURi_PTHR).a
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
-SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).so
+SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
 endif
 
 INCFILES =cgsi_plugin.h
