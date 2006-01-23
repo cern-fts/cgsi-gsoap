@@ -139,7 +139,7 @@ LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a
 SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
 
 ifneq ($(USE_VOMS), $(EMPTY))
-LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a ibcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOURi_PTHR).a
+LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
