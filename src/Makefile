@@ -182,7 +182,7 @@ else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
 
-installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION).so
+installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
 	-mkdir -p $(PREFIX)/$(LIBDIR)
 ifneq ($(VERSION), $(EMPTY))
 	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
