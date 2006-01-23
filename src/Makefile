@@ -153,7 +153,7 @@ INSTALL_FLAGS =
 
 # install targets
 ifneq ($(USE_VOMS), $(EMPTY))
-installtargets = installinc installlib installbin installman installshlib installshlibvoms
+installtargets = installinc installlib installbin installman installshlib installshlibvoms installshlibvomspthr
 else
 installtargets = installinc installlib installbin installman installshlib
 endif
@@ -182,7 +182,7 @@ else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
 
-installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so
 	-mkdir -p $(PREFIX)/$(LIBDIR)
 ifneq ($(VERSION), $(EMPTY))
 	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
@@ -191,6 +191,20 @@ ifneq ($(VERSION), $(EMPTY))
 else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
+
+
+
+installshlibvomspthr: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so 
+	-mkdir -p $(PREFIX)/$(LIBDIR)
+ifneq ($(VERSION), $(EMPTY))
+	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
+	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
+	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -s $^.$(VERSION) $^)
+else
+	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
+endif
+
+
 
 
 installbin: $(BINFILES)
