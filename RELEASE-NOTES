@@ -1,3 +1,9 @@
+1.1.14
+- Create libs for flavours gcc32dbg and gcc32dbgpthr in case of VOMS support
+
+1.1.13
+- Fixed problems with VOMS code
+
 1.1.12
 - Fixed memory leak in case of error in the VOMS code
 
