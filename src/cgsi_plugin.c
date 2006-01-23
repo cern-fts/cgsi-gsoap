@@ -399,7 +399,6 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
             } /* If token has 0 length, then just try again (it is NOT an error condition)! */
             
             
-            (void) gss_release_buffer(&minor_status, &send_tok);
         } 
 
         (void) gss_release_buffer(&minor_status, &send_tok);
@@ -455,7 +454,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         /* Keeping the name in the plugin */
         major_status = gss_display_name(&minor_status, deleg_name , &namebuf, (gss_OID *) NULL);
         if (major_status != GSS_S_COMPLETE) {
-            cgsi_gssapi_err(soap,  "Error displaying server name", major_status, minor_status);
+            cgsi_gssapi_err(soap,  "Error displaying delegated credentials name", major_status, minor_status);
             return -1;
         }
 
@@ -465,7 +464,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
             trace(data, buf);
         }
         
-        (void)gss_release_name(&minor_status, &server);
+        (void)gss_release_name(&minor_status, &deleg_name);
         (void) gss_release_buffer(&minor_status, &namebuf); 
 
         
