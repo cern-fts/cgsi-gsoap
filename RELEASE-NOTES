@@ -1,3 +1,6 @@
+1.1.15
+- moved to the gLite build system
+
 1.1.14
 - Create libs for flavours gcc32dbg and gcc32dbgpthr in case of VOMS support
 

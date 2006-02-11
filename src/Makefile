@@ -2,6 +2,12 @@
 # $id: $
 ##
 
+ifeq ($(SRCDIR), $(EMPTY))
+SRCDIR=.
+else
+VPATH=.:$(SRCDIR)
+endif
+
 
 ################################################################################
 ## implicit rule flags ##
@@ -16,7 +22,7 @@ SHLIBREQLIBS = -lc
 ################################################################################
 ## project flags ##
 
-ifeq ($(GLOBUS), $(EMPTY))
+ifeq ($(GLOBUS_LOCATION), $(EMPTY))
 GLOBUS_LOCATION=/opt/globus
 endif
 
@@ -36,7 +42,6 @@ GLOBUS_LIBS_PTHR = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR
 
 ifeq ($(GSOAP_LOCATION), $(EMPTY))
 GSOAP_LOCATION=/usr/local
-#GSOAP_LOCATION=/afs/cern.ch/user/b/bcouturi/w0/gsoap-slc3/2.3
 endif
 GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
 
@@ -46,7 +51,7 @@ endif
 
 
 # initial settings
-CFLAGS += -I. $(GSOAP_INCLUDE)
+CFLAGS += -I. $(GSOAP_INCLUDE) -I$(SRCDIR)
 
 ifeq ($(VOMS_LOCATION), $(EMPTY))
 VOMS_LOCATION=/opt/edg
@@ -83,8 +88,8 @@ vomsall: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a libcgsi_plugin_
 
 
 # dependencies
-cgsi_plugin.o: cgsi_plugin.h cgsi_plugin_int.h
-	$(CC) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ cgsi_plugin.c
+cgsi_plugin.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
+	$(CC) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ $<
 
 libcgsi_plugin$(GSOAP_VERSION).a: cgsi_plugin.o
 	$(AR) $(ARFLAGS) $@ $?
@@ -94,8 +99,8 @@ libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
 	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
 
 ifneq ($(USE_VOMS), $(EMPTY))
-cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o: cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
-	$(CC) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ cgsi_plugin.c
+cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CC) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o
 	$(AR) $(ARFLAGS) $@ $?
@@ -104,8 +109,8 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a: cgsi_plugin_voms_$(GLOB
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o
 	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
 
-cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o: cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
-	$(CC) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ cgsi_plugin.c
+cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CC) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ $<
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o
 	$(AR) $(ARFLAGS) $@ $?

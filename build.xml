@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+    Copyright (c) Members of the EGEE Collaboration. 2004.
+    See http://public.eu-egee.org/partners/ for details on 
+    the copyright holders.
+    For license conditions see the license file or
+    http://eu-egee.org/license.html
+
+    Authors: 
+         Akos Frohner <Akos.Frohner@cern.ch>
+	Version info: $Id: build.xml,v 1.1 2006/02/11 22:47:50 szamsu Exp $
+-->
+
+<project name="cgsi-gsoap" default="dist">
+
+	<!-- ==============================================
+	      Builds the GLite security cgsi-gsoap component
+	     ============================================== -->
+	
+	<!-- =========================================
+	      Import properties (order is important)
+	     ========================================= -->
+	
+	<!-- Import baseline properties & user properties -->
+	<import file="../org.glite/project/baseline.properties.xml" />
+
+	<!-- import component build properties,
+		        component properties &
+		        component common properties -->
+	<import file="./project/properties.xml"/>
+	
+	<!-- import subsystem build properties,
+		        subsystem properties &
+		        subsystem common properties -->
+	<import file="${subsystem.properties.file}"/>
+
+	<!-- import global build properties &
+		        global properties -->
+	<import file="${global.properties.file}" />
+		
+	<!-- =========================================
+ 	      Load dependency property files (order is important)
+	     ========================================= -->
+	<property file="${user.dependencies.file}"/>
+	<property file="${component.dependencies.file}" />
+	<property file="${subsystem.dependencies.file}" />
+	<property file="${global.dependencies.file}"/>
+
+	<!-- =========================================
+             Load configuration definitions (order is important)
+         ========================================= -->
+    <import file="${global.configure.options.file}"/>
+    <import file="${component.configure.options.file}"/>
+	
+	<!-- =========================================
+      	      Import task definitions (order is important)
+	     ========================================= -->
+	<import file="${subsystem.taskdefs.file}" />
+	<import file="${global.taskdefs.file}" />
+	
+	<!-- =========================================
+		 Load common targets
+	     ========================================= -->
+	<!-- Put your language target (java/c++-ant/c++-autotool/perl) here -->
+	<import file="${global.targets-simple_make.file}" />
+		
+	<!-- =========================================
+		 Load version file 
+	     ========================================= -->
+	<property file="${module.version.file}"/>
+	<property file="${module.build.file}"/>
+	
+	<!-- ==============================================
+		 Local private targets
+	     ============================================== -->
+	
+	<target name="localinit"
+		description="Module specific initialization tasks">
+	</target>
+	
+	<target name="localcompile" description="Module specific compile tasks">
+        <copy file="${module.src.dir}/Makefile" todir="${module.build.dir}"/>
+	</target>
+
+	<target name="localclean"
+		description="Module specific cleaning tasks">
+	</target>
+
+    <!--
+        This local 'doc' target removes compiletest, unittest, unitcoverage
+        as they are not applicable in this project.
+    -->
+    <target name="doc"  depends="compile">
+        <!-- TODO: add the doxygen documentation generation here -->
+    </target>
+
+	
+    <target name="stage" depends="doc">
+        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir}"/>
+    </target>
+
+    <target name="distbin" depends="doc">
+        <!-- do a local install -->
+        <mkdir dir="${module.dir}/tempbuild"/>
+        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${module.dir}/tempbuild"/>
+        
+        <!-- pack everything together -->
+		<if>
+			<isset property="isWindows"/>
+			<then>
+				<zip destfile="${module.dir}/${dist.dir}/${module.package.name}-${module.version}_bin.zip"
+					basedir="tempbuild"
+					includes="**/*"/>
+			</then>
+			<else>
+				<exec executable="tar" dir="tempbuild">
+					<arg line="-czf ${module.dir}/${dist.dir}/${module.package.name}-${module.version}_bin.tar.gz ." />
+				</exec>
+			</else>
+		</if>
+	
+		<!-- clean up: remove temporary directories -->
+		<delete dir="tempbuild" />
+    </target>
+
+    <target name="distsrc" depends="localinit">
+        <!-- Make tarball including all directories -->
+		<if>
+			<isset property="isWindows"/>
+			<then>
+				<zip destfile="${dist.dir}/${module.package.name}-${module.version}_src.zip"
+					basedir="${module.dir}"
+					includes="LICENSE RELEASE-NOTES src/**/*"
+                    excludes="CVS autogen"/>
+			</then>
+			<else>
+				<exec executable="tar">
+					<arg line="-czf ${dist.dir}/${module.package.name}-${module.version}_src.tar.gz --exclude=CVS --exclude=autogen LICENSE RELEASE-NOTES src" />
+				</exec>
+			</else>
+		</if>
+    </target>
+
+    <!--
+      The package name depends on the gSOAP version, so we need
+      some pre-processing on the spec file.
+      -->
+    <target name="local.package.spec">
+        <copy file="${module.project.dir}/${module.package.name}.spec.template" 
+              toFile="${module.project.dir}/${module.package.name}.spec">
+			<filterset>
+				<filter token="GSOAP.VERSION" value="2.6" />
+			</filterset>
+		</copy>
+    </target>
+    
+    <target name="dist" depends="stage, distsrc, distbin, local.package.spec, package.spec, packager"/>
+
+</project>		
