@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.4 2006/02/13 13:29:47 szamsu Exp $
+	Version info: $Id: build.xml,v 1.5 2006/02/13 13:57:26 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -169,16 +169,7 @@
 		<mkdir dir="${rpm.build.path}/SRPMS" />
 		<mkdir dir="${rpm.build.path}/SPECS" />
 
-        <fail message="${module.project.dir}/${package.name.correct}.spec file not present" unless="spec.file.exists" />
-        <exec executable="rpm" dir="." failonerror="true">
-            <arg line="-q --qf '%{PREFIXES}\n'"/>
-            <arg line="--specfile ${module.project.dir}/${package.name.correct}.spec"/>
-            <redirector outputproperty="package.prefix">
-                <outputfilterchain>
-                    <headfilter lines="1"/>
-                </outputfilterchain>
-            </redirector>
-        </exec>
+        <property name="package.prefix" value="/usr"/>
 		<mkdir dir="${rpm.tmp.path}/${package.prefix}" />
 
 		<exec executable="pwd" dir="." outputproperty="current.abs.dir" failonerror="true" />
