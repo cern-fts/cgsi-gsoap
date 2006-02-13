@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.5 2006/02/13 13:57:26 szamsu Exp $
+	Version info: $Id: build.xml,v 1.6 2006/02/13 14:32:31 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -76,6 +76,8 @@
 	
 	<target name="localinit"
 		description="Module specific initialization tasks">
+        <propertyregex property="ext.gsoap.version.simple" input="${ext.gsoap.version}"
+            regexp="^(\d+)\.(\d+)\." select="\1.\2"/>
 	</target>
 	
 	<target name="localcompile" description="Module specific compile tasks">
@@ -84,6 +86,11 @@
 
 	<target name="localclean"
 		description="Module specific cleaning tasks">
+	</target>
+
+    <target name="compile" depends="checkstyle,localcompile"
+		description="Compiles the source code">
+	    <make target="all" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
 	</target>
 
     <!--
@@ -96,13 +103,13 @@
 
 	
     <target name="stage" depends="doc">
-        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir} VERSION=${module.version}"/>
+        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir} VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
     </target>
 
     <target name="distbin" depends="doc">
         <!-- do a local install -->
         <mkdir dir="${module.dir}/tempbuild"/>
-        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${module.dir}/tempbuild VERSION=${module.version}"/>
+        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${module.dir}/tempbuild VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
         
         <!-- pack everything together -->
 		<if>
@@ -149,7 +156,7 @@
         <copy file="${module.project.dir}/${module.package.name}.spec.template" 
               toFile="${module.project.dir}/${module.package.name}.spec">
 			<filterset>
-				<filter token="GSOAP.VERSION" value="2.6" />
+				<filter token="GSOAP.VERSION" value="${ext.gsoap.version.simple}" />
 			</filterset>
 		</copy>
     </target>
