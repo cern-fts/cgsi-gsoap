@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.2 2006/02/13 11:44:48 szamsu Exp $
+	Version info: $Id: build.xml,v 1.3 2006/02/13 11:52:16 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -155,5 +155,31 @@
     </target>
     
     <target name="dist" depends="stage, distsrc, distbin, local.package.spec, package.spec, packager"/>
+
+    <!-- !!!! local hack to be able to build with the '/usr' prefix instead of '/opt/glite' !!!! -->
+	<!-- Creates directories and prepares necessary environment for rpm building -->
+	<target name="rpm.init" depends="init.rpm.properties">
+		<!-- Create necessary directories -->
+                <delete dir="${rpm.build.path}"/>
+                <delete dir="${module.dir}/RPMS"/>
+		<mkdir dir="${rpm.build.path}" />
+		<mkdir dir="${rpm.build.path}/SOURCES" />
+		<mkdir dir="${rpm.build.path}/BUILD" />
+		<mkdir dir="${rpm.build.path}/RPMS" />
+		<mkdir dir="${rpm.build.path}/SRPMS" />
+		<mkdir dir="${rpm.build.path}/SPECS" />
+		<mkdir dir="${rpm.tmp.path}/usr" />
+
+		<exec executable="pwd" dir="." outputproperty="current.abs.dir" failonerror="true" />
+		<!-- repackage the tarball files to have correct path -->
+		<exec executable="tar" dir="${rpm.tmp.path}/usr" failonerror="true">
+			<arg line="xzf ${current.abs.dir}/${dist.dir}/${component.dist.file}" />
+		</exec>
+		<exec executable="tar" dir="${rpm.tmp.path}" failonerror="true">
+			<arg line="czf ${rpm.build.path}/SOURCES/${package.name.correct}-${module.version}_bin.tar.gz --exclude=*.la ." />
+		</exec>
+		<!--delete dir="${rpm.tmp.path}" /-->
+	</target>
+
 
 </project>		
