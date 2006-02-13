@@ -544,7 +544,7 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
     cgsi_plugin_globus_modules(1);
 
     p->id = client_plugin_id;
-    p->data = (void*)malloc(sizeof(struct cgsi_plugin_data));
+    p->data = (void*)calloc(sizeof(struct cgsi_plugin_data), 1);
     p->fcopy = cgsi_plugin_copy;
     p->fdelete = cgsi_plugin_delete;
     if (p->data) {
