@@ -54,14 +54,14 @@ endif
 CFLAGS += -I. $(GSOAP_INCLUDE) -I$(SRCDIR)
 
 ifeq ($(VOMS_LOCATION), $(EMPTY))
-VOMS_LOCATION=/opt/edg
+VOMS_LOCATION=/opt/glite
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
-VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include
+VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
 VOMS_LIBS=-L$(VOMS_LOCATION)/lib -lvomsc
 
-VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include
+VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
 VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/lib -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
 endif
 
