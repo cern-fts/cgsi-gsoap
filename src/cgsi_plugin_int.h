@@ -1,6 +1,9 @@
-/* 
- * Copyright (C) 2003 by CERN/IT/ADC/CA 
- * All rights reserved
+/*
+ * Copyright (c) Members of the EGEE Collaboration. 2004.
+ * See http://public.eu-egee.org/partners/ for details on 
+ * the copyright holders.
+ * For license conditions see the license file or
+ * http://eu-egee.org/license.html
  */
 
 /** cgsi_plugin_int.h - Header file for the GSI gSOAP plugin
