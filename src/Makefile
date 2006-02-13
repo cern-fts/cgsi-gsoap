@@ -182,7 +182,7 @@ installshlib: libcgsi_plugin$(GSOAP_VERSION).so
 ifneq ($(VERSION), $(EMPTY))
 	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
 	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -s $^.$(VERSION) $^)
+	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -sf $^.$(VERSION) $^)
 else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
@@ -192,7 +192,7 @@ installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so
 ifneq ($(VERSION), $(EMPTY))
 	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
 	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -s $^.$(VERSION) $^)
+	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -sf $^.$(VERSION) $^)
 else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif
@@ -204,7 +204,7 @@ installshlibvomspthr: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)
 ifneq ($(VERSION), $(EMPTY))
 	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
 	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -s $^.$(VERSION) $^)
+	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -sf $^.$(VERSION) $^)
 else
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
 endif

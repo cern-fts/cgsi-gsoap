@@ -7,8 +7,8 @@ Vendor: CERN/IT/ADC/CA Benjamin Couturier
 Packager: Benjamin Couturier <ben.couturier@cern.ch>
 License:Open Source EGEE License
 Group: Application/File
-BuildRoot: %{_builddir}/%{name}-%{version}-root
-Prefix: /usr
+BuildRoot: %{_builddir}/%{name}-%{version}
+Prefix: /opt/glite
 Provides: libcgsi_plugin@GSOAP.VERSION@.so libcgsi_plugin_voms@GSOAP.VERSION@_gcc32dbg.so libcgsi_plugin_voms@GSOAP.VERSION@_gcc32dbgppthr.so
 %define __spec_install_post %{nil}
 %define debug_package %{nil}
@@ -24,7 +24,7 @@ This package contains the header and static library for
 development.
 
 %prep
-%setup -q
+%setup -c
 
 %build
 

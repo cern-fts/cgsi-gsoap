@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.1 2006/02/11 22:47:50 szamsu Exp $
+	Version info: $Id: build.xml,v 1.2 2006/02/13 11:44:48 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -96,13 +96,13 @@
 
 	
     <target name="stage" depends="doc">
-        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir}"/>
+        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir} VERSION=${module.version}"/>
     </target>
 
     <target name="distbin" depends="doc">
         <!-- do a local install -->
         <mkdir dir="${module.dir}/tempbuild"/>
-        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${module.dir}/tempbuild"/>
+        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${module.dir}/tempbuild VERSION=${module.version}"/>
         
         <!-- pack everything together -->
 		<if>
