@@ -122,6 +122,9 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so: cgsi_plugin_voms_
 
 endif
 
+doc: doxygenConfig
+	SRCDIR=$(SRCDIR) VERSION=$(VERSION) doxygen $<
+
 ###############################################
 ## THIS IS STANDARD Makefile BELOW THIS LINE ##
 ###############################################
@@ -136,7 +139,8 @@ PREFIX =$(RPM_BUILD_ROOT)$(PPREFIX)# could be /usr/local but you may not have pe
 INCDIR =include
 LIBDIR =lib
 BINDIR =bin
-MANDIR =man
+MANDIR =share
+DOCDIR =share/doc/CGSI$(GSOAP_VERSION)
 
 # insert space separated files to install (used for cleaning too) here
 BINFILES =
@@ -152,15 +156,14 @@ SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_pl
 endif
 
 INCFILES =cgsi_plugin.h
-MANFILES =
 
 INSTALL_FLAGS =
 
 # install targets
 ifneq ($(USE_VOMS), $(EMPTY))
-installtargets = installinc installlib installbin installman installshlib installshlibvoms installshlibvomspthr
+installtargets = installinc installlib installbin installman installdoc installshlib installshlibvoms installshlibvomspthr
 else
-installtargets = installinc installlib installbin installman installshlib
+installtargets = installinc installlib installbin installman installdoc installshlib
 endif
 
 .PHONY: uninstall install $(installtargets)
@@ -217,15 +220,14 @@ ifneq ($(BINFILES), $(EMPTY))
 	-mkdir -p $(PREFIX)/$(BINDIR)
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(BINDIR)
 endif
-installman: $(MANFILES)
-# this creates 'man3/foo.3' from 'foo.3'
-ifneq ($(MANFILES), $(EMPTY))
-	$(foreach MANFILE, $^, \
-	-mkdir -p $(PREFIX)/$(MANDIR)/$(subst .,man,$(suffix $(MANFILE))); \
-	install $(INSTALL_FLAGS) -m 644 $(MANFILE) \
-	$(PREFIX)/$(MANDIR)/$(subst .,man,$(suffix $(MANFILE)))/$(MANFILE); )
-endif
 
+installman: man
+	-mkdir -p $(PREFIX)/share
+	-cp -r $^ $(PREFIX)/share/
+
+installdoc: html
+	-mkdir -p $(PREFIX)/$(DOCDIR)
+	-cp -r $^ $(PREFIX)/$(DOCDIR)/
 
 uninstall:
 # minor hack - the subst in rmdir avoids trying to remove current dir '.'
@@ -240,10 +242,6 @@ endif
 ifneq ($(BINFILES), $(EMPTY))
 	$(RM) $(foreach file, $(BINFILES), $(PREFIX)/$(BINDIR)/$(file))
 	-rmdir -p $(subst ./,,$(PREFIX)/$(BINDIR))
-endif
-ifneq ($(MANFILES), $(EMPTY))
-	$(RM) $(foreach file, $(MANFILES), $(PREFIX)/$(MANDIR)/*/$(file))
-	-rmdir -p $(subst ./,,$(PREFIX)/$(MANDIR)/*)
 endif
 
 

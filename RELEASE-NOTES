@@ -3,6 +3,7 @@
 - moved the VOMS dependant libraries into a -voms RPM
 - changed structure init to calloc that the memory is zeroad
   it fixes a segfault, if the non-voms library is used
+- added interface documentation in HTML and man formats
 
 1.1.14
 - Create libs for flavours gcc32dbg and gcc32dbgpthr in case of VOMS support
