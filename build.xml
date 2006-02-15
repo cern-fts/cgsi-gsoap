@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.6.2.2 2006/02/15 15:19:08 szamsu Exp $
+	Version info: $Id: build.xml,v 1.6.2.3 2006/02/15 17:13:47 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -80,7 +80,8 @@
             regexp="^(\d+)\.(\d+)\." select="\1.\2"/>
 	</target>
 	
-	<target name="localcompile" description="Module specific compile tasks">
+	<target name="localcompile" depends="localinit"
+        description="Module specific compile tasks">
         <copy file="${module.src.dir}/Makefile" todir="${module.build.dir}"/>
 	</target>
 
@@ -98,7 +99,7 @@
         as they are not applicable in this project.
     -->
     <target name="doc"  depends="compile">
-        <!-- TODO: add the doxygen documentation generation here -->
+        <make target="doc" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir} VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
     </target>
 
 	
