@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.6 2006/02/13 14:32:31 szamsu Exp $
+	Version info: $Id: build.xml,v 1.6.2.1 2006/02/15 13:46:41 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -157,6 +157,8 @@
               toFile="${module.project.dir}/${module.package.name}.spec">
 			<filterset>
 				<filter token="GSOAP.VERSION" value="${ext.gsoap.version.simple}" />
+				<filter token="GLOBUS.DBG.NOTHR.FLAVOUR" value="${with.globus.dbg.nothr.flavor}" />
+				<filter token="GLOBUS.DBG.THR.FLAVOUR" value="${with.globus.dbg.thr.flavor}" />
 			</filterset>
 		</copy>
     </target>
