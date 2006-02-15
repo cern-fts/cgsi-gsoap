@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.6.2.1 2006/02/15 13:46:41 szamsu Exp $
+	Version info: $Id: build.xml,v 1.6.2.2 2006/02/15 15:19:08 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
