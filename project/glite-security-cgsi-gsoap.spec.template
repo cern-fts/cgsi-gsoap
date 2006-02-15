@@ -21,7 +21,7 @@ side.
 %package dev
 Summary: GSI plugin for gSOAP -- development files
 Group:  Application/File
-Requires: vdt_globus_essentials
+Requires: vdt_globus_sdk
 Requires: glite-security-voms-api
 %description dev
 CGSI allows writing gSOAP clients with GSI authentication.
