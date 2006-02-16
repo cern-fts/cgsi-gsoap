@@ -66,11 +66,6 @@ the servers side.
 %{prefix}/lib/libcgsi_plugin_voms_gsoap_*.so
 %{prefix}/lib/libcgsi_plugin_voms_gsoap_*.so.%{version}
 
-%files voms
-%defattr(-,root,root)
-%{prefix}/lib/libcgsi_plugin_voms_gsoap_*.so
-%{prefix}/lib/libcgsi_plugin_voms_gsoap_*.so.%{version}
-
 %post
 if [ $(id -u) -eq 0 ]; then
     ldconfig
