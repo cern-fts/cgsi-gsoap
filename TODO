@@ -1,0 +1,12 @@
+Overall: feature set shall be synchronized with csec.
+
+Problematic: currently only one VO and its attributes are returned,
+    however there might be more than one VOMS AC in a proxy.
+
+Optional: Using gridsite, instead of voms-api-c for AC parsing.
+
+DN check: currently looks for the "host/" prefix, or else
+    the check has to be disabled. Option for no prefix or
+    custom prefix would be desirable.
+
+Long term: Unification of gsoap-plugin and cgsi-gsoap packages.
