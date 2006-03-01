@@ -9,4 +9,16 @@ DN check: currently looks for the "host/" prefix, or else
     the check has to be disabled. Option for no prefix or
     custom prefix would be desirable.
 
+GT4 compatibility:
+   Date: Thu, 23 Feb 2006 23:00:09 +0200
+   From: Aleksandr Konstantinov <aleksandr.konstantinov@fys.uio.no>
+   
+   Minor issue in CGSI. Function gss_init_sec_context of Globus GSSAPI
+   library (at least version I have installed, GT4.0.1, ver. 4.8) does not accept
+   undefined target name if GSS_C_DELEG_FLAG flag is set. That was causing
+   CGSI fail even before attempting handshake. Fix was simply to use
+   globus_gss_assist_authorization_host_name() to generate required name.
+   
+
+
 Long term: Unification of gsoap-plugin and cgsi-gsoap packages.
