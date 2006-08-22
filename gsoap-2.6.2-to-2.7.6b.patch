@@ -1,0 +1,20 @@
+Index: src/cgsi_plugin.c
+===================================================================
+RCS file: /cvs/glite/org.glite.security.cgsi-gsoap/src/cgsi_plugin.c,v
+retrieving revision 1.23
+diff -u -r1.23 cgsi_plugin.c
+--- src/cgsi_plugin.c	13 Feb 2006 11:17:29 -0000	1.23
++++ src/cgsi_plugin.c	22 Aug 2006 16:13:42 -0000
+@@ -606,7 +606,11 @@
+     }
+     
+ 
+-    data->socket_fd = data->fopen(soap, endpoint, hostname, port);
++    /* gSOAP 2.7.x will try to open a https endpoint with SSL, 
++     * if it was built WITH_SLL. Since endpoint is only used 
++     * to compare the first six bytes, we pass one, which does
++     * not start with 'https://'. */
++    data->socket_fd = data->fopen(soap, endpoint+1, hostname, port);
+     if (data->socket_fd < 0) {
+         cgsi_err(soap, "Could not open connection !");
+         return -1;
