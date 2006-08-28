@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.8 2006/02/15 17:11:46 szamsu Exp $
+	Version info: $Id: build.xml,v 1.9 2006/08/28 16:03:23 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -78,20 +78,42 @@
 		description="Module specific initialization tasks">
         <propertyregex property="ext.gsoap.version.simple" input="${ext.gsoap.version}"
             regexp="^(\d+)\.(\d+)\." select="\1.\2"/>
+        <mkdir dir="${module.build.dir}/src"/>
+        <echo file="${module.build.dir}/src/Makefile">
+SRCDIR=${module.src.dir}
+GSOAP_LOCATION=${with.gsoap.prefix}
+GLOBUS_LOCATION=${with.globus.prefix}
+OS=${ext.gsoap.platform}
+GLOBUS_FLAVOUR=${with.globus.dbg.nothr.flavor}
+GLOBUS_FLAVOUR_PTHR=${with.globus.dbg.thr.flavor}
+USE_VOMS=yes
+VOMS_LOCATION=${stage.abs.dir}
+VERSION=${module.version}
+GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}
+include $(SRCDIR)/Makefile
+        </echo>
+        <mkdir dir="${module.build.dir}/test"/>
+        <echo file="${module.build.dir}/test/Makefile">
+SRCDIR=${module.test.dir}
+GSOAP_LOCATION=${with.gsoap.prefix}
+GLOBUS_LOCATION=${with.globus.prefix}
+OS=${ext.gsoap.platform}
+GLOBUS_FLAVOUR=${with.globus.dbg.nothr.flavor}
+GLOBUS_FLAVOUR_PTHR=${with.globus.dbg.thr.flavor}
+USE_VOMS=yes
+VOMS_LOCATION=${stage.abs.dir}
+VERSION=${module.version}
+GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}
+include $(SRCDIR)/Makefile
+        </echo>
 	</target>
+
+    <target name="localcompile"/>
+    <target name="localclean"/>
 	
-	<target name="localcompile" depends="localinit"
-        description="Module specific compile tasks">
-        <copy file="${module.src.dir}/Makefile" todir="${module.build.dir}"/>
-	</target>
-
-	<target name="localclean"
-		description="Module specific cleaning tasks">
-	</target>
-
     <target name="compile" depends="checkstyle,localcompile"
 		description="Compiles the source code">
-	    <make target="all" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
+	    <make target="all" dir="${module.build.dir}/src" failonerror="${failonerror}"/>
 	</target>
 
     <!--
@@ -99,18 +121,18 @@
         as they are not applicable in this project.
     -->
     <target name="doc"  depends="compile">
-        <make target="doc" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir} VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
+        <make target="doc" dir="${module.build.dir}/src" failonerror="${failonerror}" args="PREFIX=${stage.abs.dir}"/>
     </target>
 
 	
     <target name="stage" depends="doc">
-        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${stage.abs.dir} VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
+        <make target="install" dir="${module.build.dir}/src" failonerror="${failonerror}" args="PREFIX=${stage.abs.dir}"/>
     </target>
 
     <target name="distbin" depends="doc">
         <!-- do a local install -->
         <mkdir dir="${module.dir}/tempbuild"/>
-        <make target="install" dir="${module.build.dir}" failonerror="${failonerror}" args="${build.make.arguments} PREFIX=${module.dir}/tempbuild VERSION=${module.version} GSOAP_VERSION=_gsoap_${ext.gsoap.version.simple}"/>
+        <make target="install" dir="${module.build.dir}/src" failonerror="${failonerror}" args="PREFIX=${module.dir}/tempbuild"/>
         
         <!-- pack everything together -->
 		<if>
