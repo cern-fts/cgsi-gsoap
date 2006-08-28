@@ -221,6 +221,9 @@ ifneq ($(BINFILES), $(EMPTY))
 	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(BINDIR)
 endif
 
+man: doc
+html: doc
+
 installman: man
 	-mkdir -p $(PREFIX)/share
 	-cp -r $^ $(PREFIX)/share/
