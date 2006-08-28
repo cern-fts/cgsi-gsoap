@@ -33,7 +33,6 @@ int main(int argc, char **argv) {
     int i, ret;
     int s; // slave socket
     struct soap *psoap;
-    char *attributes = NULL;
     char endpoint[] = "https://localhost:8111/cgsi-gsoap-test";
 
     printf("CGSI-gSOAP test server\n");
@@ -77,10 +76,10 @@ int main(int argc, char **argv) {
             break;
         }
         fprintf(stderr, "%d: accepted connection from IP=%d.%d.%d.%d socket=%d\n", i,
-            (psoap->ip >> 24)&0xFF, 
-            (psoap->ip >> 16)&0xFF, 
-            (psoap->ip >> 8)&0xFF, 
-            psoap->ip&0xFF, s);
+            (int)((psoap->ip >> 24) & 0xFF), 
+            (int)((psoap->ip >> 16) & 0xFF), 
+            (int)((psoap->ip >> 8) & 0xFF), 
+            (int)(psoap->ip & 0xFF), s);
          if (soap_serve(psoap) != SOAP_OK) // process RPC request
             soap_print_fault(psoap, stderr); // print error
          fprintf(stderr, "request served\n");
