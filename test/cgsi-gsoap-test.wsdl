@@ -5,32 +5,16 @@
     xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" 
     xmlns:tns="http://glite.org/namespaces/cgsi-gsoap-1"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
- <wsdl:types>
-  <xsd:schema targetNamespace="http://glite.org/namespaces/cgsi-gsoap-1">
-   <xsd:element name="TestException">
-    <xsd:complexType>
-     <xsd:sequence>
-      <xsd:element name="msg" type="xsd:string" nillable="true"/>
-     </xsd:sequence>
-    </xsd:complexType>
-   </xsd:element>
-  </xsd:schema>
- </wsdl:types>
 
    <wsdl:message name="getAttributesRequest"/>
    <wsdl:message name="getAttributesResponse">
       <wsdl:part name="getAttributesReturn" type="xsd:string"/>
    </wsdl:message>
 
-   <wsdl:message name="TestException_Fault">
-      <wsdl:part name="fault" element="tns:TestException"/>
-   </wsdl:message>
-
    <wsdl:portType name="Test">
       <wsdl:operation name="getAttributes">
          <wsdl:input message="tns:getAttributesRequest" name="getAttributesRequest"/>
          <wsdl:output message="tns:getAttributesResponse" name="getAttributesResponse"/>
-         <wsdl:fault message="tns:TestException_Fault" name="TestException"/>
       </wsdl:operation>
    </wsdl:portType>
 
@@ -45,9 +29,6 @@
          <wsdl:output name="getAttributesResponse">
             <wsdlsoap:body namespace="http://glite.org/namespaces/cgsi-gsoap-1" use="literal"/>
          </wsdl:output>
-         <wsdl:fault name="TestException">
-            <wsdlsoap:fault name="TestException" use="literal"/>
-         </wsdl:fault>
       </wsdl:operation>
    </wsdl:binding>
 
