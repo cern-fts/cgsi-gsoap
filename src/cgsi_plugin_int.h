@@ -53,6 +53,7 @@ struct cgsi_plugin_data {
     char *voname;
     char **fqan;
     int nbfqan;
+    int disable_mapping;
 };
 
 

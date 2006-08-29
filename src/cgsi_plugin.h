@@ -34,6 +34,7 @@ extern "C" {
 #define CGSI_OPT_SSL_COMPATIBLE     0x8
 #define CGSI_OPT_DISABLE_NAME_CHECK 0x10
 #define CGSI_OPT_KEEP_ALIVE         0x20  
+#define CGSI_OPT_DISABLE_MAPPING    0x40
 
 /**
  * Helper function to create the gsoap object and
@@ -155,7 +156,8 @@ void clear_default_proxy_file(int unlink_file);
  *
  * @param soap The soap structure for the request
  *
- * @return The client voname malloced in the soap structure (DON"T free), NULL otherwise
+ * @return The client voname is malloced in the soap structure (DON"T free), 
+ *         NULL otherwise
  */
 char *get_client_voname(struct soap *soap);
 
@@ -164,7 +166,8 @@ char *get_client_voname(struct soap *soap);
  *
  * @param soap The soap structure for the request
  *
- * @return The client voname malloced in the soap structure (DON"T free), NULL otherwise
+ * @return The client roles are malloced in the soap structure (DON"T free), 
+ *         NULL otherwise
  */
 char ** get_client_roles(struct soap *soap, int* nbfqans);
 

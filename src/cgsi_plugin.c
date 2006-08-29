@@ -185,11 +185,13 @@ static size_t server_cgsi_plugin_recv(struct soap *soap, char *buf, size_t len){
         trace(data, "### Context already established!\n");
     }
 
-    /* Now doing username uid gid lookup */
-    /* Performing the user mapping ! */
-    if (server_cgsi_map_dn(soap)!=0){
-        /* Soap fault already filled */
-        return 0;
+    if (data->disable_mapping == 0) {
+        /* Now doing username uid gid lookup */
+        /* Performing the user mapping ! */
+        if (server_cgsi_map_dn(soap)!=0){
+            /* Soap fault already filled */
+            return 0;
+        }
     }
 
     return cgsi_plugin_recv(soap, buf, len, server_plugin_id); 
@@ -363,11 +365,13 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         trace(data, buf);
     }
 
+    if (cgsi_plugin_get_voms_creds_from_ctx(soap, data->context_handle) != 0) {
+        /* the error description should be already set */
+        return -1;
+    }
+
     /* Setting the flag as even the mapping went ok */
     data->context_established = 1;
-
-    cgsi_plugin_get_voms_creds_from_ctx(soap, data->context_handle);
-
 
     /* Save the delegated credentials */
     if ((ret_flags & GSS_C_DELEG_FLAG) && (delegated_cred_handle != GSS_C_NO_CREDENTIAL)) {
@@ -1274,6 +1278,7 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg) {
 
   /* Default values */
   p->disable_hostname_check = 0;
+  p->disable_mapping = 0;
   p->context_flags = GSS_C_CONF_FLAG | GSS_C_MUTUAL_FLAG | GSS_C_INTEG_FLAG;
 
   if (arg == NULL) {
@@ -1293,6 +1298,10 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg) {
   
   if (opts & CGSI_OPT_DISABLE_NAME_CHECK) {
     p->disable_hostname_check = 1;
+  }
+  
+  if (opts & CGSI_OPT_DISABLE_MAPPING) {
+    p->disable_mapping = 1;
   }
   
   return 0;
@@ -1627,6 +1636,9 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
   }
   
   if (VOMS_Retrieve (px509_cred, px509_chain, RECURSE_CHAIN, vd, &error) == 0) {
+    char buffer[BUFSIZE];
+    VOMS_ErrorMessage(vd, error, buffer, BUFSIZE);
+    cgsi_err(soap, buffer);
     goto leave;
   }
   
