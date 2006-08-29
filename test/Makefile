@@ -50,7 +50,6 @@ endif
 
 # local references to CGSI-gSOAP
 CFLAGS += -I. -I$(SRCDIR) -I$(SRCDIR)/../src
-LDLIBS += -L../src -lcgsi_plugin$(GSOAP_VERSION) 
 
 ifeq ($(VOMS_LOCATION), $(EMPTY))
 VOMS_LOCATION=/opt/glite
@@ -91,13 +90,26 @@ cgsi-gsoap-client.o: cgsi-gsoap-client.c cgsi_gsoap_testH.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 cgsi-gsoap-client: cgsi-gsoap-client.o cgsi_gsoap_testClient.o cgsi_gsoap_testC.o
-	$(CC) -o $@ $^ $(LDLIBS) 
+	$(CC) -o $@ $^ ../src/libcgsi_plugin$(GSOAP_VERSION).so $(LDLIBS) 
 
 cgsi-gsoap-server.o: cgsi-gsoap-server.c cgsi_gsoap_testH.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 cgsi-gsoap-server: cgsi-gsoap-server.o cgsi_gsoap_testServer.o cgsi_gsoap_testC.o
-	$(CC) -o $@ $^ $(LDLIBS) 
+	$(CC) -o $@ $^ ../src/libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so $(LDLIBS) 
 
 clean:
 	rm -f *.o *.c *.h *.xml *.nsmap
+
+################################################################################
+## test targets ##
+
+test: cgsi-gsoap-client cgsi-gsoap-server
+	$(SRCDIR)/test-client-server.sh
+
+################################################################################
+## maintenance targets ##
+
+shunit:
+	cp -u $(SRCDIR)/../../org.glite.data.util-c/test/shunit shunit
+
