@@ -47,6 +47,10 @@ struct soap *test_setup(const char *endpoint) {
         exit(EXIT_FAILURE);
     }
 
+    // making these short for tests
+    psoap->recv_timeout = 5;
+    psoap->send_timeout = 5;
+
     return psoap;
 }
 
@@ -69,6 +73,7 @@ char *getAttributes(struct soap *psoap, const char *endpoint) {
 void test_destroy(struct soap *psoap) {
     soap_destroy(psoap);
     soap_end(psoap);
+    soap_done(psoap);
     free(psoap);
 }
 
