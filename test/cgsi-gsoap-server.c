@@ -23,8 +23,30 @@ const static char HTTPG_PREFIX[] = "httpg:";
 
 int cgsi_USCOREgsoap_USCOREtest__getAttributes(struct soap *psoap, 
     struct cgsi_USCOREgsoap_USCOREtest__getAttributesResponse *response) {
+    char **roles;
+    char *attributes;
+    int nbfqans, i;
+    int length = 1000;
+    
+    roles = get_client_roles(psoap, &nbfqans);
+    length += nbfqans;
+    for (i = 0; i < nbfqans; i++) {
+        length += strlen(roles[i]);
+    }
+    attributes = malloc(length);
+    get_client_dn(psoap, attributes, length);
+    strncat(attributes, "\nFQANs:\n", length);
+    for (i = 0; i < nbfqans; i++) {
+        strncat(attributes, roles[i], length);
+        strncat(attributes, "\n", length);
+    }
 
-    response->getAttributesReturn = soap_strdup(psoap, "works!");
+    fprintf(stdout, "INFO: Client with the following attributes:\n%s\n", attributes);
+    fflush(stdout);
+
+    response->getAttributesReturn = soap_strdup(psoap, attributes);
+
+    free(attributes);
 
     return SOAP_OK;
 }
@@ -34,60 +56,74 @@ int main(int argc, char **argv) {
     int s; // slave socket
     struct soap *psoap;
     char endpoint[] = "https://localhost:8111/cgsi-gsoap-test";
+    int to_serve = 1;
 
-    printf("CGSI-gSOAP test server\n");
+    if (argc > 1) {
+        to_serve = atoi(argv[1]);
+    }
+    fprintf(stdout, "INFO: CGSI-gSOAP test server is going to serve %d requests.\n", to_serve);
+    fflush(stdout);
 
     psoap = soap_new();
 
     /* Register the CGSI plugin if secure communication is requested */
     if (endpoint && !strncmp(endpoint, HTTPS_PREFIX, strlen(HTTPS_PREFIX)))
-        ret = soap_cgsi_init(psoap, CGSI_OPT_SERVER | CGSI_OPT_SSL_COMPATIBLE);
+        ret = soap_cgsi_init(psoap, CGSI_OPT_SERVER | CGSI_OPT_DISABLE_MAPPING | CGSI_OPT_SSL_COMPATIBLE);
     else if (endpoint && !strncmp(endpoint, HTTPG_PREFIX, strlen(HTTPG_PREFIX)))
-        ret = soap_cgsi_init(psoap, CGSI_OPT_SERVER | CGSI_OPT_DELEG_FLAG);
+        ret = soap_cgsi_init(psoap, CGSI_OPT_SERVER | CGSI_OPT_DISABLE_MAPPING |CGSI_OPT_DELEG_FLAG);
     else {
-        printf("ERROR: Not secure endpoint '%s'\n", endpoint);
+        fprintf(stdout, "ERROR: Not secure endpoint '%s'\n", endpoint);
         exit(EXIT_FAILURE);
     }
 
     if (ret) {
-        printf("ERROR: Failed to initialize the SOAP layer\n");
+        fprintf(stdout, "ERROR: Failed to initialize the SOAP layer\n");
         exit(EXIT_FAILURE);
     }
 
     if (soap_set_namespaces(psoap, namespaces)) {
-        printf("ERROR: Failed to set namespaces\n");
-        soap_print_fault(psoap, stderr);
+        fprintf(stdout, "ERROR: Failed to set namespaces\n");
+        soap_print_fault(psoap, stdout);
         exit(EXIT_FAILURE);
     }
 
+    // making these short for tests
+    psoap->max_keep_alive = 5;
+    psoap->accept_timeout = 60;
+    psoap->recv_timeout = 5;
+    psoap->send_timeout = 5;
+
     if( soap_bind(psoap, NULL, 8111, 100) < 0 ) {
-        printf("ERROR in bind.\n");
-        soap_print_fault(psoap, stderr);
+        fprintf(stdout, "ERROR: soap_bind has failed.\n");
+        soap_print_fault(psoap, stdout);
         soap_destroy(psoap);
         exit(EXIT_FAILURE);
     }
 
     /* main loop */
 
-    for (i = 0; i < 1; i++) {
+    for (i = 0; i < to_serve; i++) {
         s = soap_accept(psoap);
         if (s < 0) {
-            soap_print_fault(psoap, stderr);
+            soap_print_fault(psoap, stdout);
             break;
         }
-        fprintf(stderr, "%d: accepted connection from IP=%d.%d.%d.%d socket=%d\n", i,
+        fprintf(stdout, "\nINFO: ==================================================\n");
+        fprintf(stdout, "INFO: %d: accepted connection from IP=%d.%d.%d.%d socket=%d\n", i,
             (int)((psoap->ip >> 24) & 0xFF), 
             (int)((psoap->ip >> 16) & 0xFF), 
             (int)((psoap->ip >> 8) & 0xFF), 
             (int)(psoap->ip & 0xFF), s);
          if (soap_serve(psoap) != SOAP_OK) // process RPC request
-            soap_print_fault(psoap, stderr); // print error
-         fprintf(stderr, "request served\n");
+            soap_print_fault(psoap, stdout); // print error
+         fprintf(stdout, "INFO: request served\n");
+         fflush(stdout);
          soap_destroy(psoap); // clean up class instances
          soap_end(psoap); // clean up everything and close socket
     }
 
     soap_done(psoap);
+    fprintf(stdout, "server is properly shut down\n");
 
     return EXIT_SUCCESS;
 }
