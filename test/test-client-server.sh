@@ -55,7 +55,7 @@ export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme-Gproduction.pem
 test_success /org.acme/production cgsi-gsoap-client
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/vomswv-acme.pem
-test_failure "SOAP FAULT" cgsi-gsoap-client
+test_failure "CGSI-gSOAP: Cannot find certificate of AC issuer for vo org.acme" cgsi-gsoap-client
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
 test_success /org.acme cgsi-gsoap-client

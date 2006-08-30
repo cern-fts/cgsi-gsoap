@@ -152,6 +152,17 @@ int set_default_proxy_file(struct soap *soap, char *filename);
 void clear_default_proxy_file(int unlink_file);
 
 /**
+ * Parses the optional VOMS extension of the peer certificate.
+ * It has to be called before get_client_voname() and get_client_roles()!
+ *
+ * @param soap The soap structure for the request
+ *
+ * @return 0 if successful, -1 otherwise
+ *           SOAP Fault structure contains the detailed description.
+ */
+int retrieve_voms_credentials(struct soap *soap);
+
+/**
  * Returns the client VO name if it was provided in the certificate
  *
  * @param soap The soap structure for the request

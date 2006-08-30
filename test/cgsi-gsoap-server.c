@@ -8,7 +8,7 @@
  * Authors: 
  *      Akos Frohner <Akos.Frohner@cern.ch>
  *
- * Simple test client for CGSI-gSOAP.
+ * Simple test server for CGSI-gSOAP.
  */
 
 #include <stdio.h>
@@ -28,17 +28,28 @@ int cgsi_USCOREgsoap_USCOREtest__getAttributes(struct soap *psoap,
     int nbfqans, i;
     int length = 1000;
     
-    roles = get_client_roles(psoap, &nbfqans);
-    length += nbfqans;
-    for (i = 0; i < nbfqans; i++) {
-        length += strlen(roles[i]);
+    if (retrieve_voms_credentials(psoap)) {
+        return SOAP_SVR_FAULT;
     }
+    
+    roles = get_client_roles(psoap, &nbfqans);
+    
+    if (roles != NULL) {
+        length += nbfqans;
+        for (i = 0; i < nbfqans; i++) {
+            length += strlen(roles[i]);
+        }
+    }
+
     attributes = malloc(length);
     get_client_dn(psoap, attributes, length);
-    strncat(attributes, "\nFQANs:\n", length);
-    for (i = 0; i < nbfqans; i++) {
-        strncat(attributes, roles[i], length);
-        strncat(attributes, "\n", length);
+    
+    if (roles != NULL) {
+        strncat(attributes, "\nFQANs:\n", length);
+        for (i = 0; i < nbfqans; i++) {
+            strncat(attributes, roles[i], length);
+            strncat(attributes, "\n", length);
+        }
     }
 
     fprintf(stdout, "INFO: Client with the following attributes:\n%s\n", attributes);
@@ -122,6 +133,7 @@ int main(int argc, char **argv) {
          soap_end(psoap); // clean up everything and close socket
     }
 
+    soap_closesock(psoap);
     soap_done(psoap);
     fprintf(stdout, "server is properly shut down\n");
 

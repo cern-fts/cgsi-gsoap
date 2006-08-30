@@ -4,17 +4,15 @@
  * the copyright holders.
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
+ *
+ * $Id: cgsi_plugin.c,v 1.26 2006/08/30 14:00:47 szamsu Exp $
  */
-
-#ifndef lint
-static char sccsid[] = "@(#)";
-#endif /* not lint */
-
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
  *
  * @file cgsi_plugin.c
  * @author Ben Couturier CERN, IT/ADC
+ * @author Akos Frohner CERN, IT/GD
  *
  * This is a GSI plugin for gSOAP. It uses the globus GSI libraries to implement
  * GSI secure authentification and encryption on top of gSOAP.
@@ -69,8 +67,6 @@ static struct cgsi_plugin_data* get_plugin(struct soap *soap);
 static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, char *tracestr);
 static void cgsi_plugin_globus_modules(int activate);
-static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
-       gss_ctx_id_t context_handle);
 
 /******************************************************************************/
 /* Plugin constructor            */
@@ -364,9 +360,20 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         trace(data, buf);
     }
 
-    if (cgsi_plugin_get_voms_creds_from_ctx(soap, data->context_handle) != 0) {
-        /* the error description should be already set */
-        return -1;
+    /* Clearing the VOMS attributes. */
+    if (data->voname != NULL) {
+      free(data->voname);
+      data->voname = NULL;
+    }
+
+    /* fqan is a NULL terminated array of char * */
+    if (data->fqan != NULL) {
+      int i;
+      for (i = 0; i < data->nbfqan; i++)
+        free(data->fqan[i]);
+      free(data->fqan);
+      data->fqan = NULL;
+      data->nbfqan = 0;
     }
 
     /* Setting the flag as even the mapping went ok */
@@ -834,6 +841,7 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
     /* Clearing the VOMS attributes */
     if (data->voname != NULL) {
       free(data->voname);
+      data->voname = NULL;
     }
 
     /* fqan is a NULL terminated array of char * */
@@ -842,6 +850,7 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
       for (i = 0; i < data->nbfqan; i++)
         free(data->fqan[i]);
       free(data->fqan);
+      data->fqan = NULL;
     }
     
     free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
@@ -1569,8 +1578,7 @@ static void cgsi_plugin_globus_modules(int activate) {
  *                                                               *
  *****************************************************************/
 
-static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
-       gss_ctx_id_t context_handle){
+int retrieve_voms_credentials(struct soap *soap) {
 
   int ret = 0;
 #if defined(USE_VOMS)
@@ -1595,9 +1603,13 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
   }
     
   data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
+  if (data == NULL) {
+    cgsi_err(soap, "retrieve_voms: could not get data structure");
+    return -1;
+  }
 
   /* Downcasting the context structure  */
-  context = (gss_ctx_id_desc *) context_handle;
+  context = (gss_ctx_id_desc *) data->context_handle;
   cred = context->peer_cred_handle;
 
   /* cast to gss_cred_id_desc */
@@ -1686,19 +1698,40 @@ char *get_client_voname(struct soap *soap) {
 
   if (soap == NULL) return NULL;
   data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
-  if (data == NULL) return NULL;
+  if (data == NULL) {
+    cgsi_err(soap, "get_client_voname: could not get data structure");
+    return NULL;
+  }
+
+  if (data->voname == NULL) {
+    return NULL;
+  }
+
   return data->voname;
 }
 
 char **get_client_roles(struct soap *soap, int *nbfqan) {
   struct cgsi_plugin_data *data;  
-  if (nbfqan != NULL) *nbfqan = 0;
+
   if (soap == NULL) return NULL;
-  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
-						      server_plugin_id);
-  if (data == NULL) return NULL;
-  if (nbfqan != NULL) {
-    *nbfqan = data->nbfqan;
+
+  if (nbfqan == NULL) {
+    cgsi_err(soap, "get_client_roles: nbfqan is NULL, cannot return FQAN number");
+    return NULL;
   }
+  *nbfqan = 0;
+
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
+
+  if (data == NULL) {
+    cgsi_err(soap, "get_client_roles: could not get data structure");
+    return NULL;
+  }
+
+  if (data->fqan == NULL) {
+      return NULL;
+  }
+
+  *nbfqan = data->nbfqan;
   return data->fqan;
 }
