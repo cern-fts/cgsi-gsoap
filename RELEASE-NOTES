@@ -1,3 +1,14 @@
+1.1.16
+- VOMS parsing is no longer implicit, but one has to call
+  retrieve_voms_credentials() to make it happen. It returns 
+  -1 in case of error and fills the SOAP Fault sturture with 
+  the details. This fixes:
+  #19355: CGSI-gSOAP shall refuse requests with invalid VOMS AC
+- New server side option: CGSI_OPT_DISABLE_MAPPING, to disable gridmap-file
+  lookup of the DN (for example server does its own authorization).
+- Simple client-server test suite, for regression testing.
+- gSOAP 2.7.x compatibility fix.
+
 1.1.15
 - moved to the gLite build system
 - moved the VOMS dependant libraries into a -voms RPM
