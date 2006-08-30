@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.26 2006/08/30 14:00:47 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.27 2006/08/30 15:35:07 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -616,7 +616,11 @@ static int client_cgsi_plugin_open(struct soap *soap,
     }
     
 
-    data->socket_fd = data->fopen(soap, endpoint, hostname, port);
+    /* gSOAP 2.7.x will try to open a https endpoint with SSL, 
+     * if it was built WITH_SLL. Since endpoint is only used 
+     * to compare the first six bytes, we pass one, which does
+     * not start with 'https://'. */
+    data->socket_fd = data->fopen(soap, endpoint+1, hostname, port);
     if (data->socket_fd < 0) {
         cgsi_err(soap, "Could not open connection !");
         return -1;
