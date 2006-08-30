@@ -89,14 +89,14 @@ cgsi_gsoap_testServer.o: cgsi_gsoap_testServer.c
 cgsi-gsoap-client.o: cgsi-gsoap-client.c cgsi_gsoap_testH.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-cgsi-gsoap-client: cgsi-gsoap-client.o cgsi_gsoap_testClient.o cgsi_gsoap_testC.o
-	$(CC) -o $@ $^ ../src/libcgsi_plugin$(GSOAP_VERSION).so $(LDLIBS) 
+cgsi-gsoap-client: cgsi-gsoap-client.o cgsi_gsoap_testClient.o cgsi_gsoap_testC.o ../src/libcgsi_plugin$(GSOAP_VERSION).so 
+	$(CC) -o $@ $^ $(LDLIBS) 
 
 cgsi-gsoap-server.o: cgsi-gsoap-server.c cgsi_gsoap_testH.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-cgsi-gsoap-server: cgsi-gsoap-server.o cgsi_gsoap_testServer.o cgsi_gsoap_testC.o
-	$(CC) -o $@ $^ ../src/libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so $(LDLIBS) 
+cgsi-gsoap-server: cgsi-gsoap-server.o cgsi_gsoap_testServer.o cgsi_gsoap_testC.o ../src/libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so
+	$(CC) -o $@ $^ $(LDLIBS) 
 
 clean:
 	rm -f *.o *.c *.h *.xml *.nsmap
