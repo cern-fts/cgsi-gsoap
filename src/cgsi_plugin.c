@@ -70,7 +70,7 @@ static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, char *tracestr);
 static void cgsi_plugin_globus_modules(int activate);
 static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
-					       gss_ctx_id_t context_handle);
+       gss_ctx_id_t context_handle);
 
 /******************************************************************************/
 /* Plugin constructor            */
@@ -113,7 +113,7 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
             cgsi_plugin_globus_modules(0);
             return SOAP_EOM; /* return error */
         }
-	cgsi_parse_opts((struct cgsi_plugin_data*)p->data, arg);
+        cgsi_parse_opts((struct cgsi_plugin_data*)p->data, arg);
     }
     return SOAP_OK;
 }
@@ -296,9 +296,8 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         if (cgsi_plugin_recv_token(soap, &(recv_tok.value), &(recv_tok.length)) < 0) {
             /* Soap fault already reported ! */
 
-		trace(data, "Error receiving token !\n");
-
-		return -1;
+            trace(data, "Error receiving token !\n");
+            return -1;
         }
         
         major_status = gss_accept_sec_context(&acc_sec_min_stat,
@@ -319,9 +318,9 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
                             major_status,
                             acc_sec_min_stat);
 
-		trace(data, "Exiting due to a bad return code (1)\n");
+            trace(data, "Exiting due to a bad return code (1)\n");
 
-		(void) gss_release_buffer(&minor_status, &recv_tok);
+            (void) gss_release_buffer(&minor_status, &recv_tok);
             
             if (data->context_handle != GSS_C_NO_CONTEXT)
                 (void)gss_delete_sec_context(&minor_status,
@@ -337,7 +336,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
             if (cgsi_plugin_send_token(soap, send_tok.value, send_tok.length) < 0) {
                 (void) gss_release_buffer(&minor_status, &send_tok);
 
-		      trace(data, "Exiting due to a bad return code (2)\n");
+                trace(data, "Exiting due to a bad return code (2)\n");
 
                 /* Soap fault already reported by underlying layer */
                 return -1;
@@ -359,7 +358,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     strncpy(data->client_name, name.value, MAXNAMELEN);
 
-   {
+    {
         char buf[TBUFSIZE];
         snprintf(buf, TBUFSIZE-1,  "The client is:<%s>\n", data->client_name);
         trace(data, buf);
@@ -635,12 +634,12 @@ static int client_cgsi_plugin_open(struct soap *soap,
                                             oid,
                                             data->context_flags,
                                             0,
-                                            NULL,	/* no channel bindings */
+                                            NULL,   /* no channel bindings */
                                             token_ptr,
-                                            NULL,	/* ignore mech type */
+                                            NULL,   /* ignore mech type */
                                             &send_tok,
                                             &ret_flags,
-                                            NULL);	/* ignore time_rec */
+                                            NULL);  /* ignore time_rec */
   
         if (data->context_handle == NULL) {
             cgsi_gssapi_err(soap, "Error creating context", major_status, minor_status);
@@ -841,7 +840,7 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
     if (data->fqan != NULL) {
       int i;
       for (i = 0; i < data->nbfqan; i++)
-	free(data->fqan[i]);
+        free(data->fqan[i]);
       free(data->fqan);
     }
     
@@ -876,7 +875,7 @@ static int cgsi_plugin_close(struct soap *soap, char *plugin_id) {
                             major_status,
                             minor_status);
         } else {
-	  /*cgsi_plugin_send_token( (void *)soap, output_buffer->value, output_buffer->length);*/   
+            /*cgsi_plugin_send_token( (void *)soap, output_buffer->value, output_buffer->length);*/   
             gss_release_buffer(&minor_status, output_buffer);
             data->context_established = 0;
         }
@@ -1085,7 +1084,7 @@ size_t * token_length;
 
      memcpy(tok, readbuf, SSLHSIZE);
      rem = len;
-     p = (char *) (tok + SSLHSIZE);	
+     p = (char *) (tok + SSLHSIZE);
      
      /* Looping on the data still to read */
      while (rem > 0) { 
@@ -1518,8 +1517,7 @@ int has_delegated_credentials(struct soap *soap) {
         return -1;
     }
     
-    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
-                                                        server_plugin_id);
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
 
     if (data == NULL) {
         cgsi_err(soap, "export delegated credentials: could not get data structure");
@@ -1541,7 +1539,7 @@ int soap_cgsi_init(struct soap *soap, int cgsi_options) {
     if( cgsi_options & CGSI_OPT_KEEP_ALIVE )
         soap_init2( soap, SOAP_IO_KEEPALIVE, SOAP_IO_KEEPALIVE );
     else
-	soap_init(soap);
+        soap_init(soap);
     rc = soap_register_plugin_arg(soap, cgsi_plugin, &params);
     if (rc < 0) return -1;
 
@@ -1572,7 +1570,7 @@ static void cgsi_plugin_globus_modules(int activate) {
  *****************************************************************/
 
 static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
-					       gss_ctx_id_t context_handle){
+       gss_ctx_id_t context_handle){
 
   int ret = 0;
 #if defined(USE_VOMS)
@@ -1596,8 +1594,7 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
     return -1;
   }
     
-  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
-						      server_plugin_id);
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
 
   /* Downcasting the context structure  */
   context = (gss_ctx_id_desc *) context_handle;
@@ -1663,11 +1660,11 @@ static int cgsi_plugin_get_voms_creds_from_ctx(struct soap *soap,
     if (nbfqan > 0) {
       data->fqan = malloc(sizeof(char *) * (i+1));
       if (data->fqan != NULL) {
-	for (i=0; i<nbfqan; i++) {
-	  data->fqan[i] = strdup( volist[0]->fqan[i]);   
-	}
-	data->fqan[nbfqan] = NULL;
-	data->nbfqan = nbfqan;
+        for (i=0; i<nbfqan; i++) {
+          data->fqan[i] = strdup( volist[0]->fqan[i]);   
+        }
+        data->fqan[nbfqan] = NULL;
+        data->nbfqan = nbfqan;
       }
     } /* if (nbfqan > 0) */
   }
@@ -1688,8 +1685,7 @@ char *get_client_voname(struct soap *soap) {
   struct cgsi_plugin_data *data;  
 
   if (soap == NULL) return NULL;
-  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap,
-						      server_plugin_id);
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
   if (data == NULL) return NULL;
   return data->voname;
 }
