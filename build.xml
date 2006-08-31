@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.9 2006/08/28 16:03:23 szamsu Exp $
+	Version info: $Id: build.xml,v 1.10 2006/08/31 13:31:03 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -116,11 +116,17 @@ include $(SRCDIR)/Makefile
 	    <make target="all" dir="${module.build.dir}/src" failonerror="${failonerror}"/>
 	</target>
 
-    <!--
-        This local 'doc' target removes compiletest, unittest, unitcoverage
-        as they are not applicable in this project.
-    -->
-    <target name="doc"  depends="compile">
+    <target name="compiletest" depends="compile"
+		description="Compiles the test code">
+	    <make target="all" dir="${module.build.dir}/test" failonerror="${failonerror}"/>
+	</target>
+
+    <target name="unittest" depends="compiletest"
+		description="Compiles the test code">
+	    <make target="test" dir="${module.build.dir}/test" failonerror="${failonerror}"/>
+	</target>
+
+    <target name="doc"  depends="compile, unittest">
         <make target="doc" dir="${module.build.dir}/src" failonerror="${failonerror}" args="PREFIX=${stage.abs.dir}"/>
     </target>
 
