@@ -54,6 +54,7 @@ struct cgsi_plugin_data {
     char **fqan;
     int nbfqan;
     int disable_mapping;
+    int disable_connect_voms;
 };
 
 

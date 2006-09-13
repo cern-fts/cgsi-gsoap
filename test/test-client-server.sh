@@ -18,7 +18,6 @@ if [ -f 'shunit' ]; then source shunit; fi
 if [ -f '../../test/shunit' ]; then source ../../test/shunit; fi
 
 function server_start {
-    to_serve=$1
     export X509_USER_CERT=$TEST_CERT_DIR/grid-security/hostcert.pem
     export X509_USER_KEY=$TEST_CERT_DIR/grid-security/hostkey.pem
     unset X509_USER_PROXY
@@ -28,7 +27,7 @@ function server_start {
         echo "  export X509_USER_KEY=$X509_USER_KEY"
         #export CGSI_TRACE='yes'
     fi
-    cgsi-gsoap-server $to_serve >$tempbase.server.log 2>&1 &
+    cgsi-gsoap-server $@ >$tempbase.server.log 2>&1 &
     echo $! >$tempbase.server.pid
 }
 
@@ -40,25 +39,61 @@ function server_stop {
     rm $tempbase.server.pid $tempbase.server.log
 }
 
-server_start 5
+echo "------------------------------------------------------------"
+echo " testing the old behaviour with connection time VOMS parsing"
+echo "------------------------------------------------------------"
+
+PORT=8110
+ENDPOINT="https://localhost:$PORT/cgsi-gsoap-test"
+
+server_start -r 5 -s -p $PORT
 
 unset X509_USER_CERT
 unset X509_USER_KEY
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
-test_success /org.acme cgsi-gsoap-client
+test_success /org.acme cgsi-gsoap-client $ENDPOINT
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme-Radmin.pem
-test_success /org.acme/Role=Admin cgsi-gsoap-client
+test_success /org.acme/Role=Admin cgsi-gsoap-client $ENDPOINT
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme-Gproduction.pem
-test_success /org.acme/production cgsi-gsoap-client
+test_success /org.acme/production cgsi-gsoap-client $ENDPOINT
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/vomswv-acme.pem
-test_failure "CGSI-gSOAP: Cannot find certificate of AC issuer for vo org.acme" cgsi-gsoap-client
+test_failure "CGSI-gSOAP: Error reading token data: Transport endpoint is not connected" cgsi-gsoap-client $ENDPOINT
 
 export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
-test_success /org.acme cgsi-gsoap-client
+test_success /org.acme cgsi-gsoap-client $ENDPOINT
+
+server_stop
+
+echo "-----------------------------------------------------"
+echo " testing the new behaviour with explicit VOMS parsing"
+echo "-----------------------------------------------------"
+
+PORT=8111
+ENDPOINT="https://localhost:$PORT/cgsi-gsoap-test"
+
+server_start -r 5 -s -p $PORT -o
+
+unset X509_USER_CERT
+unset X509_USER_KEY
+
+export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
+test_success /org.acme cgsi-gsoap-client $ENDPOINT
+
+export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme-Radmin.pem
+test_success /org.acme/Role=Admin cgsi-gsoap-client $ENDPOINT
+
+export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme-Gproduction.pem
+test_success /org.acme/production cgsi-gsoap-client $ENDPOINT
+
+export X509_USER_PROXY=$TEST_CERT_DIR/home/vomswv-acme.pem
+test_failure "CGSI-gSOAP: Cannot find certificate of AC issuer for vo org.acme" cgsi-gsoap-client $ENDPOINT
+
+export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
+test_success /org.acme cgsi-gsoap-client $ENDPOINT
 
 server_stop
 

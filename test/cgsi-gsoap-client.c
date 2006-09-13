@@ -80,9 +80,12 @@ void test_destroy(struct soap *psoap) {
 int main(int argc, char **argv) {
     struct soap *psoap;
     char *attributes = NULL;
-    char endpoint[] = "https://localhost:8111/cgsi-gsoap-test";
+    char *endpoint = "https://localhost:8111/cgsi-gsoap-test";
 
-    printf("CGSI-gSOAP test client\n");
+    if (argc > 1) {
+        endpoint = argv[1];
+    }
+    printf("CGSI-gSOAP test client using endpoint='%s'\n", endpoint);
 
     psoap = test_setup(endpoint);
 

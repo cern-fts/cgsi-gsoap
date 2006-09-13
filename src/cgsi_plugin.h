@@ -26,15 +26,25 @@ extern "C" {
 
 /**
  * Options that can be specified when initializing the
- * cgsi_plugin (in the arg parameter) 
+ * cgsi_plugin (in the arg parameter):
  */
+/** The program acts as a client. */
 #define CGSI_OPT_CLIENT             0x1
+/** The program acts as a server. */
 #define CGSI_OPT_SERVER             0x2
+/** Initiate delegation over the HTTPG protocol. */
 #define CGSI_OPT_DELEG_FLAG         0x4
+/** Using pure SSL protocol, for compatibility. */
 #define CGSI_OPT_SSL_COMPATIBLE     0x8
+/** Disable comparing the server's host name with its certificate's CN. */
 #define CGSI_OPT_DISABLE_NAME_CHECK 0x10
+/** Keep alive the HTTP connection. */
 #define CGSI_OPT_KEEP_ALIVE         0x20  
+/** Disable DN->userid mapping via gridmap-file. */
 #define CGSI_OPT_DISABLE_MAPPING    0x40
+/** Disable connect time VOMS parsing for better error handling 
+ *  via an explicit call to retrieve_voms_credentials() */
+#define CGSI_OPT_DISABLE_CONNECT_VOMS 0x80
 
 /**
  * Helper function to create the gsoap object and

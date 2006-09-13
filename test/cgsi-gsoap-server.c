@@ -11,15 +11,12 @@
  * Simple test server for CGSI-gSOAP.
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <unistd.h>
 #include "cgsi_plugin.h"
 #include "cgsi_gsoap_testH.h"
 #include "cgsi_gsoap_test.nsmap"
-
-const static char HTTP_PREFIX[]  = "http:";
-const static char HTTPS_PREFIX[] = "https:";
-const static char HTTPG_PREFIX[] = "httpg:";
 
 int cgsi_USCOREgsoap_USCOREtest__getAttributes(struct soap *psoap, 
     struct cgsi_USCOREgsoap_USCOREtest__getAttributesResponse *response) {
@@ -62,32 +59,76 @@ int cgsi_USCOREgsoap_USCOREtest__getAttributes(struct soap *psoap,
     return SOAP_OK;
 }
 
+void parse_options(int argc, char **argv, int *flags, int *port, int *to_serve) {
+    *flags = CGSI_OPT_SERVER | CGSI_OPT_DISABLE_MAPPING;
+    *port = 8111;
+    *to_serve = 1;
+    int c;
+     
+    while ((c = getopt(argc, argv, "p:r:sgo")) != -1) switch (c) {
+        case 'h':
+            printf("Usage: %s -p PORT (-s|-g) -o\n", argv[0]);
+            fflush(stdout);
+            exit (EXIT_SUCCESS);
+            break;
+        case 'p':
+            *port = atoi(optarg);
+            fprintf(stdout, "INFO: port number = %d\n", *port);
+            fflush(stdout);
+            break;
+        case 'r':
+            *to_serve = atoi(optarg);
+            fprintf(stdout, "INFO: requests to be served = %d\n", *to_serve);
+            fflush(stdout);
+            break;
+        case 's':
+            *flags |= CGSI_OPT_SSL_COMPATIBLE;
+            fprintf(stdout, "INFO: SSL compatible mode\n");
+            fflush(stdout);
+            break;
+        case 'g':
+            *flags |= CGSI_OPT_DELEG_FLAG;
+            fprintf(stdout, "INFO: enabled HTTPG delegation\n");
+            fflush(stdout);
+            break;
+        case 'o':
+            *flags |= CGSI_OPT_DISABLE_CONNECT_VOMS;
+            fprintf(stdout, "INFO: disabled VOMS parsing during authentication\n");
+            fflush(stdout);
+            break;
+        case ':':
+            fprintf(stderr, "ERROR: Option argument is missing\n");
+            fflush(stderr);
+            exit(EXIT_FAILURE);
+        case '?':
+            fprintf(stderr, "ERROR: Unknown command line option\n");
+            fflush(stderr);
+            exit(EXIT_FAILURE);
+        default:
+            fprintf(stderr, "ERROR: Illegal command line arguments:%s\n", optarg);
+            fflush(stderr);
+            exit(EXIT_FAILURE);
+    }
+}
+
 int main(int argc, char **argv) {
-    int i, ret;
     int s; // slave socket
     struct soap *psoap;
-    char endpoint[] = "https://localhost:8111/cgsi-gsoap-test";
+    int flags, i;
+    int port = 8111;
     int to_serve = 1;
 
-    if (argc > 1) {
-        to_serve = atoi(argv[1]);
-    }
+    parse_options(argc, argv, &flags, &port, &to_serve);
     fprintf(stdout, "INFO: CGSI-gSOAP test server is going to serve %d requests.\n", to_serve);
     fflush(stdout);
 
     psoap = soap_new();
-
-    /* Register the CGSI plugin if secure communication is requested */
-    if (endpoint && !strncmp(endpoint, HTTPS_PREFIX, strlen(HTTPS_PREFIX)))
-        ret = soap_cgsi_init(psoap, CGSI_OPT_SERVER | CGSI_OPT_DISABLE_MAPPING | CGSI_OPT_SSL_COMPATIBLE);
-    else if (endpoint && !strncmp(endpoint, HTTPG_PREFIX, strlen(HTTPG_PREFIX)))
-        ret = soap_cgsi_init(psoap, CGSI_OPT_SERVER | CGSI_OPT_DISABLE_MAPPING |CGSI_OPT_DELEG_FLAG);
-    else {
-        fprintf(stdout, "ERROR: Not secure endpoint '%s'\n", endpoint);
+    if (psoap == NULL) {
+        fprintf(stdout, "ERROR: Failed to create a SOAP instance\n");
         exit(EXIT_FAILURE);
     }
 
-    if (ret) {
+    if (soap_cgsi_init(psoap, flags)) {
         fprintf(stdout, "ERROR: Failed to initialize the SOAP layer\n");
         exit(EXIT_FAILURE);
     }
@@ -104,7 +145,7 @@ int main(int argc, char **argv) {
     psoap->recv_timeout = 5;
     psoap->send_timeout = 5;
 
-    if( soap_bind(psoap, NULL, 8111, 100) < 0 ) {
+    if( soap_bind(psoap, NULL, port, 100) < 0 ) {
         fprintf(stdout, "ERROR: soap_bind has failed.\n");
         soap_print_fault(psoap, stdout);
         soap_destroy(psoap);
