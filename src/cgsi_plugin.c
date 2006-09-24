@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.28 2006/09/13 22:34:24 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.29 2006/09/24 23:39:58 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -1006,7 +1006,7 @@ static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *p
         return 0;
     }
 
-    if (output_token->length > len) {
+    if (output_token->length + 1 > len) {
         cgsi_err(soap, "Message too long for buffer\n");
         return 0;
     }
@@ -1014,11 +1014,12 @@ static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *p
 
     memcpy(buf, output_token->value, output_token->length);
     tmplen = output_token->length;
+    buf[tmplen] = '\0';
     
     gss_release_buffer(&minor_status1,
                        output_token);
    
-    trace(data, "<Recving SOAP Packet>-------------\n");
+    trace(data, "<Receiving SOAP Packet>-------------\n");
     trace(data, buf);
     trace(data, "\n----------------------------------\n");
     
