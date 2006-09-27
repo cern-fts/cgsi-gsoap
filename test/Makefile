@@ -84,6 +84,10 @@ cgsi_gsoap_test.h: cgsi-gsoap-test.wsdl typemap.dat
 
 cgsi_gsoap_testH.h cgsi_gsoap_testClientLib.c cgsi_gsoap_testServerLib.c: cgsi_gsoap_test.h
 	$(GSOAP_LOCATION)/bin/soapcpp2 -I$(GSOAP_LOCATION)/include -p cgsi_gsoap_test $<
+	# gSOAP 2.6.2 vs 2.7.6b workaround:
+	if [ -f cgsi_USCOREgsoap_USCOREtest.nsmap ] ; \
+		then mv cgsi_USCOREgsoap_USCOREtest.nsmap cgsi_gsoap_test.nsmap ; \
+	fi
 
 
 cgsi_gsoap_testC.o: cgsi_gsoap_testC.c
