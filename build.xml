@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.10 2006/08/31 13:31:03 szamsu Exp $
+	Version info: $Id: build.xml,v 1.11 2006/10/03 15:38:22 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -126,7 +126,7 @@ include $(SRCDIR)/Makefile
 	    <make target="test" dir="${module.build.dir}/test" failonerror="${failonerror}"/>
 	</target>
 
-    <target name="doc"  depends="compile, unittest">
+    <target name="doc"  depends="compile, compiletest">
         <make target="doc" dir="${module.build.dir}/src" failonerror="${failonerror}" args="PREFIX=${stage.abs.dir}"/>
     </target>
 
