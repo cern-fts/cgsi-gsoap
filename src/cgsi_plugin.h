@@ -44,7 +44,7 @@ extern "C" {
 #define CGSI_OPT_DISABLE_MAPPING    0x40
 /** Disable connect time VOMS parsing for better error handling 
  *  via an explicit call to retrieve_voms_credentials() */
-#define CGSI_OPT_DISABLE_CONNECT_VOMS 0x80
+#define CGSI_OPT_DISABLE_VOMS_CHECK 0x80
 
 /**
  * Helper function to create the gsoap object and

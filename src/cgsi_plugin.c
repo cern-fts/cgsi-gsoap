@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.29 2006/09/24 23:39:58 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.30 2006/10/17 12:36:25 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -377,7 +377,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
     }
 
     /* by default check VOMS credentials, and fail if invalid */
-    if (! data->disable_connect_voms) {
+    if (! data->disable_voms_check) {
         if (retrieve_voms_credentials(soap)) {
             cgsi_err(soap, "Error retrieveing the VOMS credentials");
             return -1;
@@ -1300,7 +1300,7 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg) {
   /* Default values */
   p->disable_hostname_check = 0;
   p->disable_mapping = 0;
-  p->disable_connect_voms = 0;
+  p->disable_voms_check = 0;
   p->context_flags = GSS_C_CONF_FLAG | GSS_C_MUTUAL_FLAG | GSS_C_INTEG_FLAG;
 
   if (arg == NULL) {
@@ -1326,8 +1326,8 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg) {
     p->disable_mapping = 1;
   }
   
-  if (opts & CGSI_OPT_DISABLE_CONNECT_VOMS) {
-    p->disable_connect_voms = 1;
+  if (opts & CGSI_OPT_DISABLE_VOMS_CHECK) {
+    p->disable_voms_check = 1;
   }
   
   return 0;

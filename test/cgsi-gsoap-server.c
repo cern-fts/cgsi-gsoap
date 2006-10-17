@@ -92,7 +92,7 @@ void parse_options(int argc, char **argv, int *flags, int *port, int *to_serve) 
             fflush(stdout);
             break;
         case 'o':
-            *flags |= CGSI_OPT_DISABLE_CONNECT_VOMS;
+            *flags |= CGSI_OPT_DISABLE_VOMS_CHECK;
             fprintf(stdout, "INFO: disabled VOMS parsing during authentication\n");
             fflush(stdout);
             break;
