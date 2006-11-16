@@ -8,6 +8,7 @@
   lookup of the DN (for example server does its own authorization).
 - Simple client-server test suite, for regression testing.
 - gSOAP 2.7.x compatibility fix.
+- Fixed when CGSI_TRACE was printing garbage.
 
 1.1.15
 - moved to the gLite build system
