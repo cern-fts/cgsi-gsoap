@@ -1,5 +1,5 @@
 1.1.16
-- VOMS parsing is no longer implicit, if CGSI_OPT_DISABLE_CONNECT_VOMS
+- VOMS parsing is no longer implicit, if CGSI_OPT_DISABLE_VOMS_CHECK
   option is used on the server side: one has to call retrieve_voms_credentials() 
   to make it happen. It returns -1 in case of error and fills the SOAP Fault 
   sturture with  the details. This fixes:
