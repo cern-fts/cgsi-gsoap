@@ -3,8 +3,7 @@ Name: CGSI_gSOAP_@GSOAP.VERSION@
 Version: @MODULE.VERSION@
 Release: @MODULE.BUILD@
 Source0: glite-security-cgsi-gsoap-%{version}_bin.tar.gz
-Vendor: CERN/IT/ADC/CA Benjamin Couturier
-Packager: Benjamin Couturier <ben.couturier@cern.ch>
+Vendor: CERN/IT/GD
 License:Open Source EGEE License
 Group: Application/File
 BuildRoot: %{_builddir}/%{name}-%{version}
