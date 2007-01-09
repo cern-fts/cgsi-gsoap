@@ -8,7 +8,7 @@
 
     Authors: 
          Akos Frohner <Akos.Frohner@cern.ch>
-	Version info: $Id: build.xml,v 1.12 2007/01/08 14:11:03 szamsu Exp $
+	Version info: $Id: build.xml,v 1.13 2007/01/09 10:41:08 szamsu Exp $
 -->
 
 <project name="cgsi-gsoap" default="dist">
@@ -188,6 +188,9 @@ include $(SRCDIR)/Makefile
 				<filter token="GLOBUS.DBG.THR.FLAVOUR" value="${with.globus.dbg.thr.flavor}" />
 			</filterset>
 		</copy>
+        <concat append="yes" destfile="${module.project.dir}/${module.package.name}.spec">
+            <filelist dir="${module.dir}" files="RELEASE-NOTES"/>
+        </concat>
     </target>
     
     <target name="dist" depends="stage, distsrc, distbin, local.package.spec, package.spec, packager"/>

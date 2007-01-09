@@ -75,3 +75,5 @@ if [ $(id -u) -eq 0 ]; then
     ldconfig
 fi
 
+%changelog
+

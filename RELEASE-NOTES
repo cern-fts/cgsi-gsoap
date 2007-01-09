@@ -1,4 +1,10 @@
-1.1.16
+* Tue Jan  9 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.16-3
+
+- enabling gSOAP 2.6.x and 2.7.x gLite builds from the same source
+- maintainer has been changed to CERN/IT/GD
+
+* Thu Aug 31 2006 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.16
+
 - VOMS parsing is no longer implicit, if CGSI_OPT_DISABLE_VOMS_CHECK
   option is used on the server side: one has to call retrieve_voms_credentials() 
   to make it happen. It returns -1 in case of error and fills the SOAP Fault 
@@ -10,37 +16,34 @@
 - gSOAP 2.7.x compatibility fix.
 - Fixed when CGSI_TRACE was printing garbage.
 
-1.1.15
+* Mon Feb 13 2006 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.15
+
 - moved to the gLite build system
 - moved the VOMS dependant libraries into a -voms RPM
 - changed structure init to calloc that the memory is zeroad
   it fixes a segfault, if the non-voms library is used
 - added interface documentation in HTML and man formats
 
-1.1.14
+* Thu Feb  9 2006 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.14
 - Create libs for flavours gcc32dbg and gcc32dbgpthr in case of VOMS support
 
-1.1.13
+* Mon Jan  9 2006 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.13
 - Fixed problems with VOMS code
 
-1.1.12
+* Mon Jan  9 2006 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.12
 - Fixed memory leak in case of error in the VOMS code
 
-1.1.11
+* Thu Nov 17 2005 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.11
 - VOMS Integration: Added new library libcgsi_plugin_voms....
 
-1.1.10
+* Tue Jul 12 2005 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.10
 - Added license
 
-1.1.9
+* Fri Jul  8 2005 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.9
 - Moved the plugin to /usr
-
-1.1.8
-- Included David Smith's activation/deactivation patch to allow running the plugin in a multithreaded server
-
-1.1.7
+- Included David Smith's activation/deactivation patch to allow 
+  running the plugin in a multithreaded server
 - Fixed bug in cgsi_plugin_copy (before that it was not duplicating the cgsi_plugin_data)
 - Protected calls to cgsi_plugin_data->fopen and fclose
-
-1.1.6
 - Send error message in faultstring rather rather than in fault detail 
+
