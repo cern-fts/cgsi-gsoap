@@ -1,3 +1,7 @@
+* Fri Jan 12 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.17-1
+
+- having no VOMS extension (i.e. grid-proxy-init) is not an error
+
 * Tue Jan  9 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.16-3
 
 - enabling gSOAP 2.6.x and 2.7.x gLite builds from the same source
