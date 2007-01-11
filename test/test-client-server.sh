@@ -101,6 +101,31 @@ function test_new_behaviour {
     server_stop
 }
 
+function test_plain_proxy {
+    echo "-----------------------------------------------"
+    echo " testing the plain proxy without VOMS extension"
+    echo "-----------------------------------------------"
+
+    PORT=8112
+    ENDPOINT="https://localhost:$PORT/cgsi-gsoap-test"
+
+    server_start -r 3 -s -p $PORT -o
+
+    unset X509_USER_CERT
+    unset X509_USER_KEY
+
+    export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
+    test_success /org.acme cgsi-gsoap-client $ENDPOINT
+
+    export X509_USER_PROXY=$TEST_CERT_DIR/home/vomswv-acme.pem
+    test_failure "CGSI-gSOAP: Cannot find certificate of AC issuer for vo org.acme" cgsi-gsoap-client $ENDPOINT
+
+    export X509_USER_PROXY=$TEST_CERT_DIR/home/userproxy.pem
+    test_success "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=$LOGNAME" cgsi-gsoap-client $ENDPOINT
+
+    server_stop
+}
+
 function test_stress {
     echo "---------------------------------------"
     echo " stress test with explicit VOMS parsing"
@@ -129,7 +154,8 @@ function test_stress {
 
 test_old_behaviour
 test_new_behaviour
-test_stress
+test_plain_proxy
+#test_stress
 
 test_summary
 

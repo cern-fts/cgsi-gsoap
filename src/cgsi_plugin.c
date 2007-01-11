@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.30 2006/10/17 12:36:25 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.31 2007/01/11 23:22:09 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -1662,7 +1662,8 @@ int retrieve_voms_credentials(struct soap *soap) {
     goto leave;
   }
   
-  if (VOMS_Retrieve (px509_cred, px509_chain, RECURSE_CHAIN, vd, &error) == 0) {
+  if ((VOMS_Retrieve (px509_cred, px509_chain, RECURSE_CHAIN, vd, &error) == 0) &&
+      (error != VERR_NOEXT)) {
     char buffer[BUFSIZE];
     VOMS_ErrorMessage(vd, error, buffer, BUFSIZE);
     cgsi_err(soap, buffer);
