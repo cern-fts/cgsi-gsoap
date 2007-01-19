@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.31 2007/01/11 23:22:09 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.32 2007/01/19 17:03:39 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -1624,6 +1624,12 @@ int retrieve_voms_credentials(struct soap *soap) {
   if (data == NULL) {
     cgsi_err(soap, "retrieve_voms: could not get data structure");
     return -1;
+  }
+
+  /* fqan is set, if this function was already called */
+  /* connection initialization resets this structure  */
+  if (data->fqan != NULL) {
+      return 0;
   }
 
   /* Downcasting the context structure  */
