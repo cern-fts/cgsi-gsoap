@@ -1,0 +1,77 @@
+#
+# Copyright (c) Members of the EGEE Collaboration. 2006.
+# See http://public.eu-egee.org/partners/ for details on 
+# the copyright holders.
+# For license conditions see the license file or
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Authors: 
+#      Akos Frohner <Akos.Frohner@cern.ch>
+#
+# Makefile for ETICS
+
+default: help
+
+help:
+	@echo "Please use '$(MAKE) -f project/Makefile.etics <target>'!"
+
+
+BUILDDIR=build
+
+include project/version.properties
+
+init: initsrc inittest spec
+
+initsrc:
+	-mkdir -p $(BUILDDIR)/src
+	echo 'SRCDIR=$(SRCDIR)' >$(BUILDDIR)/src/Makefile
+	echo 'GSOAP_LOCATION=$(GSOAP_LOCATION)' >>$(BUILDDIR)/src/Makefile
+	echo 'GLOBUS_LOCATION=$(GLOBUS_LOCATION)' >>$(BUILDDIR)/src/Makefile
+	echo 'OS=$(OS)' >>$(BUILDDIR)/src/Makefile
+	echo 'GLOBUS_FLAVOUR=$(GLOBUS_FLAVOUR)' >>$(BUILDDIR)/src/Makefile
+	echo 'GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR_PTHR)' >>$(BUILDDIR)/src/Makefile
+	echo 'USE_VOMS=yes' >>$(BUILDDIR)/src/Makefile
+	echo 'VOMS_LOCATION=$(VOMS_LOCATION)' >>$(BUILDDIR)/src/Makefile
+	echo 'VERSION=$(module.version)' >>$(BUILDDIR)/src/Makefile
+	echo 'GSOAP_VERSION=_gsoap_$(GSOAP_VERSION)' >>$(BUILDDIR)/src/Makefile
+	echo 'include $$(SRCDIR)/Makefile' >>$(BUILDDIR)/src/Makefile
+
+inittest:
+	-mkdir -p $(BUILDDIR)/test
+	echo 'SRCDIR=$(SRCDIR)' >$(BUILDDIR)/test/Makefile
+	echo 'GSOAP_LOCATION=$(GSOAP_LOCATION)' >>$(BUILDDIR)/test/Makefile
+	echo 'GLOBUS_LOCATION=$(GLOBUS_LOCATION)' >>$(BUILDDIR)/test/Makefile
+	echo 'OS=$(OS)' >>$(BUILDDIR)/test/Makefile
+	echo 'GLOBUS_FLAVOUR=$(GLOBUS_FLAVOUR)' >>$(BUILDDIR)/test/Makefile
+	echo 'GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR_PTHR)' >>$(BUILDDIR)/test/Makefile
+	echo 'USE_VOMS=yes' >>$(BUILDDIR)/test/Makefile
+	echo 'VOMS_LOCATION=$(VOMS_LOCATION)' >>$(BUILDDIR)/test/Makefile
+	echo 'VERSION=$(module.version)' >>$(BUILDDIR)/test/Makefile
+	echo 'GSOAP_VERSION=_gsoap_$(GSOAP_VERSION)' >>$(BUILDDIR)/test/Makefile
+	echo 'include $$(SRCDIR)/Makefile' >>$(BUILDDIR)/test/Makefile
+
+spec:
+	sed -e 's/@MODULE.VERSION@/$(module.version)/g' \
+		-e 's/@MODULE.BUILD@/$(module.age)/g' \
+		-e 's/@GSOAP.VERSION@/$(GSOAP_VERSION)/g' \
+		-e 's/@GLOBUS.DBG.NOTHR.FLAVOUR/$(GLOBUS_FLAVOUR)/g' \
+		-e 's/@GLOBUS.DBG.THR.FLAVOUR@/$(GLOBUS_FLAVOUR_PTHR)/g' \
+		project/glite-security-cgsi-gsoap.spec.template >project/glite-security-cgsi-gsoap-$(GSOAP_VERSION).spec
+	cat RELEASE-NOTES >>project/glite-security-cgsi-gsoap-$(GSOAP_VERSION).spec
+
+compile:
+	$(MAKE) -C $(BUILDDIR)/src all
+
+compiletest: compile
+	$(MAKE) -C $(BUILDDIR)/test all
+
+unittest: compiletest
+	$(MAKE) -C $(BUILDDIR)/test test
+
+install: compile
+	$(MAKE) -C $(BUILDDIR)/src PREFIX=$(prefix) install
+
+clean:
+	-rm -rf $(BUILDDIR) RPMS tgz
+
+	
