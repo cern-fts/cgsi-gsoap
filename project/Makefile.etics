@@ -24,10 +24,9 @@ init: initsrc inittest spec
 
 initsrc:
 	-mkdir -p $(BUILDDIR)/src
-	echo 'SRCDIR=$(SRCDIR)' >$(BUILDDIR)/src/Makefile
+	echo 'SRCDIR=$(SRCDIR)/src' >$(BUILDDIR)/src/Makefile
 	echo 'GSOAP_LOCATION=$(GSOAP_LOCATION)' >>$(BUILDDIR)/src/Makefile
 	echo 'GLOBUS_LOCATION=$(GLOBUS_LOCATION)' >>$(BUILDDIR)/src/Makefile
-	echo 'OS=$(OS)' >>$(BUILDDIR)/src/Makefile
 	echo 'GLOBUS_FLAVOUR=$(GLOBUS_FLAVOUR)' >>$(BUILDDIR)/src/Makefile
 	echo 'GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR_PTHR)' >>$(BUILDDIR)/src/Makefile
 	echo 'USE_VOMS=yes' >>$(BUILDDIR)/src/Makefile
@@ -38,10 +37,9 @@ initsrc:
 
 inittest:
 	-mkdir -p $(BUILDDIR)/test
-	echo 'SRCDIR=$(SRCDIR)' >$(BUILDDIR)/test/Makefile
+	echo 'SRCDIR=$(SRCDIR)/test' >$(BUILDDIR)/test/Makefile
 	echo 'GSOAP_LOCATION=$(GSOAP_LOCATION)' >>$(BUILDDIR)/test/Makefile
 	echo 'GLOBUS_LOCATION=$(GLOBUS_LOCATION)' >>$(BUILDDIR)/test/Makefile
-	echo 'OS=$(OS)' >>$(BUILDDIR)/test/Makefile
 	echo 'GLOBUS_FLAVOUR=$(GLOBUS_FLAVOUR)' >>$(BUILDDIR)/test/Makefile
 	echo 'GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR_PTHR)' >>$(BUILDDIR)/test/Makefile
 	echo 'USE_VOMS=yes' >>$(BUILDDIR)/test/Makefile
