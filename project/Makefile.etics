@@ -54,7 +54,7 @@ spec:
 		-e 's/@GSOAP.VERSION@/$(GSOAP_VERSION)/g' \
 		-e 's/@GLOBUS.DBG.NOTHR.FLAVOUR/$(GLOBUS_FLAVOUR)/g' \
 		-e 's/@GLOBUS.DBG.THR.FLAVOUR@/$(GLOBUS_FLAVOUR_PTHR)/g' \
-		project/glite-security-cgsi-gsoap.spec.template >project/glite-security-cgsi-gsoap-$(GSOAP_VERSION).spec
+		project/glite-security-cgsi-gsoap.spec.template.etics >project/glite-security-cgsi-gsoap-$(GSOAP_VERSION).spec
 	cat RELEASE-NOTES >>project/glite-security-cgsi-gsoap-$(GSOAP_VERSION).spec
 
 compile:
