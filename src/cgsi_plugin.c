@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.32 2007/01/19 17:03:39 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.33 2007/02/01 10:01:59 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -1184,23 +1184,17 @@ void cgsi_plugin_print_token(data, token, length)
     int length;
 {
     int i;
-    unsigned char *p = token;
+    // printing the characters as unsigned hex digits
+    unsigned char *p = (unsigned char *)token;
     char buf[TBUFSIZE];
     
     for (i=0; i < length; i++, p++) {
-/*         if (i== 100) */
-/*             goto exit_loop; */
         snprintf(buf, TBUFSIZE,"%02x ", *p);
         trace(data, buf);
         if ((i % 16) == 15) { 
-/*              fprintf(f, "\t        "); */
-/*              for (j=15; j >= 0; j--) { */
-/*                  fprintf(f, "%c", *(p-j)); */
-/*              } */
              trace(data, "\n");
         }
     }
-/*   exit_loop: */
     trace(data, "\n");
 }
 
