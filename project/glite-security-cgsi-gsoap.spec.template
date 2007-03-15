@@ -2,7 +2,7 @@ Summary: GSI plugin for gSOAP
 Name: CGSI_gSOAP_@GSOAP.VERSION@
 Version: @MODULE.VERSION@
 Release: @MODULE.BUILD@
-Source0: glite-security-cgsi-gsoap-@GSOAP.VERSION@-%{version}_bin.tar.gz
+Source0: glite-security-cgsi-gsoap-%{version}_bin.tar.gz
 Vendor: CERN/IT/GD
 License:Open Source EGEE License
 Group: Application/File
