@@ -1,0 +1,45 @@
+Index: project/build.properties
+===================================================================
+RCS file: /cvs/glite/org.glite.security.cgsi-gsoap/project/build.properties,v
+retrieving revision 1.2
+diff -u -r1.2 build.properties
+--- project/build.properties	8 Jan 2007 14:13:02 -0000	1.2
++++ project/build.properties	19 Mar 2007 08:11:27 -0000
+@@ -1,3 +1,3 @@
+-ext.gsoap.version=2.6.2
+-ext.gsoap.version.simple=2.6
++ext.gsoap.version=2.7.6b
++ext.gsoap.version.simple=2.7
+ build.rpm.spec.file=true
+Index: project/glite-security-cgsi-gsoap.spec.template
+===================================================================
+RCS file: /cvs/glite/org.glite.security.cgsi-gsoap/project/glite-security-cgsi-gsoap.spec.template,v
+retrieving revision 1.12
+diff -u -r1.12 glite-security-cgsi-gsoap.spec.template
+--- project/glite-security-cgsi-gsoap.spec.template	15 Mar 2007 16:26:34 -0000	1.12
++++ project/glite-security-cgsi-gsoap.spec.template	19 Mar 2007 08:11:27 -0000
+@@ -2,7 +2,7 @@
+ Name: CGSI_gSOAP_@GSOAP.VERSION@
+ Version: @MODULE.VERSION@
+ Release: @MODULE.BUILD@
+-Source0: glite-security-cgsi-gsoap-%{version}_bin.tar.gz
++Source0: glite-security-cgsi-gsoap-2.7-%{version}_bin.tar.gz
+ Vendor: CERN/IT/GD
+ License:Open Source EGEE License
+ Group: Application/File
+Index: project/properties.xml
+===================================================================
+RCS file: /cvs/glite/org.glite.security.cgsi-gsoap/project/properties.xml,v
+retrieving revision 1.3
+diff -u -r1.3 properties.xml
+--- project/properties.xml	15 Mar 2007 16:24:13 -0000	1.3
++++ project/properties.xml	19 Mar 2007 08:11:27 -0000
+@@ -33,7 +33,7 @@
+ 	     ====================================================== -->
+ 		 		
+ 	<!-- Component name prefix -->
+-	<property name="component.prefix" value="cgsi-gsoap" />
++	<property name="component.prefix" value="cgsi-gsoap-2.7" />
+ 			
+ 	<!-- ======================================================
+               Define general component properties
