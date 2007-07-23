@@ -2,7 +2,7 @@ Summary: GSI plugin for gSOAP
 Name: CGSI_gSOAP_@GSOAP.VERSION@
 Version: @MODULE.VERSION@
 Release: @MODULE.BUILD@
-Source0: CGSI-gSOAP-@GSOAP.VERSION@-%{version}-%{release}.tar.gz
+Source0: CGSI_gSOAP_@GSOAP.VERSION@-%{version}-%{release}.tar.gz
 Vendor: CERN/IT/GD
 License:Open Source EGEE License
 Group: Application/File
