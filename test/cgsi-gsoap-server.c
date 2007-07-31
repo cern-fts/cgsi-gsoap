@@ -49,9 +49,15 @@ int cgsi_USCOREgsoap_USCOREtest__getAttributes(struct soap *psoap,
         }
     }
 
-    fprintf(stdout, "INFO: Client with the following attributes:\n%s\n", attributes);
+    fprintf(stdout, "INFO: Client with the following attributes:\n%s", attributes);
+    if (has_delegated_credentials(psoap)) {
+      fprintf(stdout, "INFO: Server has a credential delegated from the client\n");
+      strncat(attributes, "Server has a credential delegated from the client\n", length - strlen(attributes) - 1);
+    }
+    fprintf(stdout,"\n");
     fflush(stdout);
 
+    attributes[length-1] = '\0';
     response->getAttributesReturn = soap_strdup(psoap, attributes);
 
     free(attributes);
@@ -65,9 +71,9 @@ void parse_options(int argc, char **argv, int *flags, int *port, int *to_serve) 
     *to_serve = 1;
     int c;
      
-    while ((c = getopt(argc, argv, "p:r:sgo")) != -1) switch (c) {
+    while ((c = getopt(argc, argv, "p:r:sgol")) != -1) switch (c) {
         case 'h':
-            printf("Usage: %s -p PORT (-s|-g) -o\n", argv[0]);
+            printf("Usage: %s -p PORT (-s|-g) -o -l\n", argv[0]);
             fflush(stdout);
             exit (EXIT_SUCCESS);
             break;
@@ -96,6 +102,11 @@ void parse_options(int argc, char **argv, int *flags, int *port, int *to_serve) 
             fprintf(stdout, "INFO: disabled VOMS parsing during authentication\n");
             fflush(stdout);
             break;
+        case 'l':
+            *flags |= CGSI_OPT_ALLOW_ONLY_SELF;
+            fprintf(stdout, "INFO: will only allow clients that share the server's identity to connect\n");
+            fflush(stdout);
+            break;
         case ':':
             fprintf(stderr, "ERROR: Option argument is missing\n");
             fflush(stderr);
@@ -108,6 +119,11 @@ void parse_options(int argc, char **argv, int *flags, int *port, int *to_serve) 
             fprintf(stderr, "ERROR: Illegal command line arguments:%s\n", optarg);
             fflush(stderr);
             exit(EXIT_FAILURE);
+    }
+
+    if ((*flags & CGSI_OPT_DELEG_FLAG) && (*flags & CGSI_OPT_SSL_COMPATIBLE)) {
+      fprintf(stdout, "WARNING: it is not useful to set both delegation and ssl compatible flags\n");
+      fflush(stdout);
     }
 }
 

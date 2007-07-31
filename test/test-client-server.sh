@@ -126,6 +126,25 @@ function test_plain_proxy {
     server_stop
 }
 
+function test_delegation {
+    echo "-----------------------------------------------"
+    echo " testing delegation                            "
+    echo "-----------------------------------------------"
+
+    PORT=8112
+    ENDPOINT="httpg://`hostname -f`:$PORT/cgsi-gsoap-test"
+
+    server_start -r 1 -p $PORT -o
+
+    unset X509_USER_CERT
+    unset X509_USER_KEY
+
+    export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
+    test_success "Server has a credential delegated from the client" cgsi-gsoap-client -d $ENDPOINT
+
+    server_stop
+}
+
 function test_stress {
     echo "---------------------------------------"
     echo " stress test with explicit VOMS parsing"
@@ -155,7 +174,7 @@ function test_stress {
 test_old_behaviour
 test_new_behaviour
 test_plain_proxy
+test_delegation
 #test_stress
 
 test_summary
-

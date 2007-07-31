@@ -55,7 +55,6 @@ struct cgsi_plugin_data {
     int nbfqan;
     int disable_mapping;
     int disable_voms_check;
+    int allow_only_self;
+    int had_send_error;
 };
-
-
-

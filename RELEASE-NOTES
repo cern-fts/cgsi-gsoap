@@ -1,3 +1,29 @@
+* Tue Jul 31 2007 David Smith <David.Smith@cern.ch>
+- improve relase of resources on error during gss_init_sec_context()
+  or gss_accept_sec_context() loops and on send error in
+  cgsi_plugin_send().
+- Send errors are now noted and the plugin will not attempt to
+  wrap and send any further data with the context.
+- change peer identitiy check in client_cgsi_plugin_open()
+  from an explicit check after the security context is established
+  to an internal check handled by gss_init_sec_context()
+- Change of behavior of CGSI_OPT_DISABLE_NAME_CHECK. Without
+  the option set a client checks the server presents an
+  identnity compatible with the hostname specified to
+  client_cgsi_plugin_open(). (Which was the previous behavior).
+  Without CGSI_OPT_DISABLE_NAME_CHECK the client does a reverse
+  lookup of the server's name and uses that in the identity check.
+- Added new option CGSI_OPT_ALLOW_ONLY_SELF which affects both
+  client and servers and causes them to only connect/accept
+  connections with peers which have the same credentials. This
+  overrides CGSI_OPT_DISABLE_NAME_CHECK.
+- Read/write attempts without a security context having first
+  been established fail but no longer reset the error. It is
+  assumed that the reason for the context establish failure has
+  already been recorded, resetting the error leads to a poor
+  diagnostic message.
+- Small optimisation in cgsi_plugin_print_token().
+
 * Fri Jan 19 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.17-2
 
 - avoiding memory leak, if retrieve_voms_credentials() called multiple times

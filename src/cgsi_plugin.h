@@ -45,6 +45,9 @@ extern "C" {
 /** Disable connect time VOMS parsing for better error handling 
  *  via an explicit call to retrieve_voms_credentials() */
 #define CGSI_OPT_DISABLE_VOMS_CHECK 0x80
+/** Allow client and server to only connect together when
+ *  they have the same identity */
+#define CGSI_OPT_ALLOW_ONLY_SELF    0x100
 
 /**
  * Helper function to create the gsoap object and
@@ -196,9 +199,3 @@ char ** get_client_roles(struct soap *soap, int* nbfqans);
 #ifdef __cplusplus
 }
 #endif
-
-
-
-
-
-

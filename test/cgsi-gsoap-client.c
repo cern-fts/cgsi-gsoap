@@ -21,21 +21,27 @@ const static char HTTP_PREFIX[]  = "http:";
 const static char HTTPS_PREFIX[] = "https:";
 const static char HTTPG_PREFIX[] = "httpg:";
 
-struct soap *test_setup(const char *endpoint) {
+struct soap *test_setup(const char *endpoint, int delegate, int namecheck, int allow_only_self) {
     struct soap *psoap;
-    int ret;
+    int ret,flags;
 
     psoap = soap_new();
 
     /* Register the CGSI plugin if secure communication is requested */
-    if (endpoint && !strncmp(endpoint, HTTPS_PREFIX, strlen(HTTPS_PREFIX)))
-        ret = soap_cgsi_init(psoap, CGSI_OPT_DISABLE_NAME_CHECK | CGSI_OPT_SSL_COMPATIBLE);
-    else if (endpoint && !strncmp(endpoint, HTTPG_PREFIX, strlen(HTTPG_PREFIX)))
-        ret = soap_cgsi_init(psoap, CGSI_OPT_DISABLE_NAME_CHECK);
-    else {
+    if (endpoint && !strncmp(endpoint, HTTPS_PREFIX, strlen(HTTPS_PREFIX))) {
+        flags = CGSI_OPT_SSL_COMPATIBLE;
+    } else if (endpoint && !strncmp(endpoint, HTTPG_PREFIX, strlen(HTTPG_PREFIX))) {
+        flags = 0;
+    } else {
         printf("ERROR: Not secure endpoint '%s'\n", endpoint);
         exit(EXIT_FAILURE);
     }
+
+    if (allow_only_self) flags |= CGSI_OPT_ALLOW_ONLY_SELF;
+    if (!namecheck) flags |= CGSI_OPT_DISABLE_NAME_CHECK;
+    if (delegate) flags |= CGSI_OPT_DELEG_FLAG;
+
+    ret = soap_cgsi_init(psoap, flags);
 
     if (ret) {
         printf("ERROR: Failed to initialize the SOAP layer\n");
@@ -81,23 +87,39 @@ int main(int argc, char **argv) {
     struct soap *psoap;
     char *attributes = NULL;
     char *endpoint = "https://localhost:8111/cgsi-gsoap-test";
+    int i, delegate=0, namecheck=0, allow_only_self=0;
 
-    if (argc > 1) {
-        endpoint = argv[1];
+    for(i=0;i<argc;i++) {
+      if (!strcmp(argv[i],"-d")) delegate++;
+      else if (!strcmp(argv[i],"-n")) namecheck++;
+      else if (!strcmp(argv[i],"-l")) allow_only_self++;
+      else endpoint = argv[i];
     }
+
     printf("CGSI-gSOAP test client using endpoint='%s'\n", endpoint);
 
-    psoap = test_setup(endpoint);
+    if (delegate) {
+      printf("INFO: Going to try to delegate credentials to server\n");
+    }
+
+    if (allow_only_self) {
+      printf("INFO: will require that the server has the same identity as the client\n");
+    } else if (!namecheck) {
+      printf("INFO: will do reverse name check of the server's IP and match it aginst the DN\n");
+    } else {
+      printf("INFO: will match the hostname specified in the endpoint against the server's DN\n");
+    }
+
+    psoap = test_setup(endpoint,delegate,namecheck,allow_only_self);
 
     attributes = getAttributes(psoap, endpoint);
     if (attributes) {
-        printf("Server responded: %s\n", attributes);
-        free(attributes);
-        attributes = NULL;
+      printf("Server responded: %s\n", attributes);
+      free(attributes);
+      attributes = NULL;
     }
 
     test_destroy(psoap);
 
     return EXIT_SUCCESS;
 }
-
