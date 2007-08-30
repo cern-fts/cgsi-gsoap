@@ -50,20 +50,20 @@ the servers side.
 
 %files
 %defattr(-,root,root)
-%{prefix}/lib/libcgsi_plugin_gsoap_*.so
-%{prefix}/lib/libcgsi_plugin_gsoap_*.so.%{version}
+%{prefix}/%{_lib}/libcgsi_plugin_gsoap_*.so
+%{prefix}/%{_lib}/libcgsi_plugin_gsoap_*.so.%{version}
 
 %files dev
 %defattr(-,root,root)
 %{prefix}/include/cgsi_plugin.h
-%{prefix}/lib/libcgsi_plugin*.a
+%{prefix}/%{_lib}/libcgsi_plugin*.a
 %doc %{prefix}/share/doc
 %doc %{prefix}/share/man
 
 %files voms
 %defattr(-,root,root)
-%{prefix}/lib/libcgsi_plugin_voms_gsoap_*.so
-%{prefix}/lib/libcgsi_plugin_voms_gsoap_*.so.%{version}
+%{prefix}/%{_lib}/libcgsi_plugin_voms_gsoap_*.so
+%{prefix}/%{_lib}/libcgsi_plugin_voms_gsoap_*.so.%{version}
 
 %post
 if [ $(id -u) -eq 0 ]; then
