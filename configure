@@ -1,0 +1,138 @@
+#!/bin/bash
+#
+# Copyright (c) Members of the EGEE Collaboration. 2006-2007.
+# See http://public.eu-egee.org/partners/ for details on
+# the copyright holders.
+# For license conditions see the license file or
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Authors:
+#      Akos Frohner <Akos.Frohner@cern.ch>
+#
+# Poor man's adapter to work around ETICS newline and backslash handling problems.
+
+basedir=$(cd $(dirname $0); echo $PWD)
+
+if [ "$basedir" = "$PWD" ]; then
+	echo "Please use a differnt build directory than the toplevel source!"
+	echo "For example:"
+	echo "  mkdir -p build"
+	echo "  cd build"
+	echo "  ../configure $@"
+	exit 2
+fi
+
+USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=...  "
+
+TEMP=$(getopt -o h --long help,with-version:,with-release:,with-globus-prefix:,with-globus-thr-flavor:,with-globus-nothr-flavor:,with-gsoap-location:,with-gsoap-version:,with-voms-location: -- "$@")
+eval set -- "$TEMP"
+
+echo "$@" >${basedir}/config.status
+
+if [ $(uname -m) = 'x86_64' ]; then
+    GLOBUS_FLAVOUR=gcc64dbg
+    GLOBUS_FLAVOUR_PTHR=gcc64dbgpthr
+else
+    GLOBUS_FLAVOUR=gcc32dbg
+    GLOBUS_FLAVOUR_PTHR=gcc32dbgpthr
+fi
+
+while true; do
+    case "$1" in
+        -h|--help)
+            echo $USAGE
+            exit
+            ;;
+        --with-version)
+            shift
+            VERSION="$1"
+            shift
+            ;;  
+        --with-release)
+            shift
+            RELEASE="$1"
+            shift
+            ;;  
+        --with-globus-prefix)
+            shift
+            GLOBUS_LOCATION="$1"
+            shift
+            ;;  
+        --with-globus-thr-flavor)
+            shift
+            GLOBUS_FLAVOUR_PTHR="$1"
+            shift
+            ;;  
+        --with-globus-nothr-flavor)
+            shift
+            GLOBUS_FLAVOUR="$1"
+            shift
+            ;; 
+        --with-gsoap-location)
+            shift
+            GSOAP_LOCATION="$1"
+            shift
+            ;;
+        --with-gsoap-version)
+            shift
+            GSOAP_VERSION="$1"
+            shift
+            ;;  
+        --with-voms-location)
+            shift
+            VOMS_LOCATION="$1"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Unknown option '$1'"
+            exit 2
+            ;;
+    esac
+done
+
+GSOAP_MAJOR_MINOR_VERSION=$(echo ${GSOAP_VERSION} | cut -d . -f1,2)
+
+mkdir -p src
+cat >src/Makefile <<EOF
+SRCDIR=${basedir}/src
+VERSION=${VERSION}
+
+GSOAP_LOCATION=${GSOAP_LOCATION:-/usr/local}
+GSOAP_VERSION=_gsoap_${GSOAP_MAJOR_MINOR_VERSION}
+GLOBUS_LOCATION=${GLOBUS_LOCATION:-/opt/globus}
+GLOBUS_FLAVOUR=${GLOBUS_FLAVOUR}
+GLOBUS_FLAVOUR_PTHR=${GLOBUS_FLAVOUR_PTHR}
+USE_VOMS=yes
+VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
+
+include \$(SRCDIR)/Makefile
+EOF
+
+mkdir -p test
+cat >test/Makefile <<EOF
+SRCDIR=${basedir}/test
+VERSION=${VERSION}
+
+GSOAP_LOCATION=${GSOAP_LOCATION:-/usr/local}
+GSOAP_VERSION=_gsoap_${GSOAP_MAJOR_MINOR_VERSION}
+GLOBUS_LOCATION=${GLOBUS_LOCATION:-/opt/globus}
+GLOBUS_FLAVOUR=${GLOBUS_FLAVOUR}
+GLOBUS_FLAVOUR_PTHR=${GLOBUS_FLAVOUR_PTHR}
+USE_VOMS=yes
+VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
+
+include \$(SRCDIR)/Makefile
+EOF
+
+sed -e "s/@MODULE.VERSION@/${VERSION}/g" \
+	-e "s/@MODULE.BUILD@/${RELEASE}/g" \
+	-e "s/@GSOAP.VERSION@/${GSOAP_MAJOR_MINOR_VERSION}/g" \
+	-e "s/@GLOBUS.DBG.NOTHR.FLAVOUR/${GLOBUS_FLAVOUR}/g" \
+	-e "s/@GLOBUS.DBG.THR.FLAVOUR@/${GLOBUS_FLAVOUR_PTHR}/g" \
+	${basedir}/project/glite-security-cgsi-gsoap.spec.template.etics >glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
+cat ${basedir}/RELEASE-NOTES >>glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
+
