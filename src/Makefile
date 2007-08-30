@@ -46,7 +46,7 @@ endif
 GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
 
 ifeq ($(GSOAP_VERSION), $(EMPTY))
-GSOAP_VERSION=_gsoap_2.3
+GSOAP_VERSION=_gsoap_2.7
 endif
 
 
