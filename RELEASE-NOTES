@@ -1,4 +1,7 @@
-* Tue Jul 31 2007 David Smith <David.Smith@cern.ch> 1.2.0-1
+* Thu Aug 30 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.0-1
+- using lib64 on x86_64 platform for the libraries
+
+* Tue Jul 31 2007 David Smith <David.Smith@cern.ch> 
 - improve relase of resources on error during gss_init_sec_context()
   or gss_accept_sec_context() loops and on send error in
   cgsi_plugin_send().
