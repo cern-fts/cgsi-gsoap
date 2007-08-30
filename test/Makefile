@@ -33,15 +33,15 @@ GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
 GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
 	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
 # This is not nice: libtool by hand...
-GLOBUS_LIBS += $(shell awk -F"[=']+" '/^dependency_libs/ { print $$2 }' $(GLOBUS_LOCATION)/lib/libglobus_gssapi_gsi_$(GLOBUS_FLAVOUR).la)
-GLOBUS_LIBS += $(shell awk -F"[=']+" '/^dependency_libs/ { print $$2 }' $(GLOBUS_LOCATION)/lib/libglobus_gss_assist_$(GLOBUS_FLAVOUR).la)
+GLOBUS_LIBS += $(shell $(SRCDIR)/libtool $(GLOBUS_LOCATION)/lib/libglobus_gssapi_gsi_$(GLOBUS_FLAVOUR).la)
+GLOBUS_LIBS += $(shell $(SRCDIR)/libtool $(GLOBUS_LOCATION)/lib/libglobus_gss_assist_$(GLOBUS_FLAVOUR).la)
 
 GLOBUS_INCLUDE_PTHR = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR_PTHR)
 GLOBUS_LIBS_PTHR = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR) \
         -lglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR)
 # This is not nice: libtool by hand...
-GLOBUS_LIBS_PTHR += $(shell awk -F"[=']+" '/^dependency_libs/ { print $$2 }' $(GLOBUS_LOCATION)/lib/libglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR).la)
-GLOBUS_LIBS_PTHR += $(shell awk -F"[=']+" '/^dependency_libs/ { print $$2 }' $(GLOBUS_LOCATION)/lib/libglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR).la)
+GLOBUS_LIBS_PTHR += $(shell $(SRCDIR)/libtool $(GLOBUS_LOCATION)/lib/libglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR).la)
+GLOBUS_LIBS_PTHR += $(shell $(SRCDIR)/libtool $(GLOBUS_LOCATION)/lib/libglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR).la)
 
 LDLIBS += $(GLOBUS_LIBS) 
 

@@ -1,0 +1,64 @@
+#!/usr/bin/perl -w
+#
+# poor man's libtool
+#
+# (c) 2006. FROHNER Ákos <Akos.Frohner@cern.ch>
+#
+# License: GPL http://www.gnu.org/licenses/gpl.txt
+#
+
+use strict;
+use FileHandle;
+use File::Basename;
+
+my $verbose = 0;
+my @dependencies = @ARGV;
+my %seen_dependency = ();
+my @LDADD = ();
+
+while ($#dependencies >= 0) {
+    my $dep = pop(@dependencies);
+
+    # check, if we have seen this before
+    next if $seen_dependency{$dep};
+    $seen_dependency{$dep} = 1;
+    
+    print "INFO: dependency: $dep \n" if $verbose;
+    if ( $dep =~ /.*\.la/ and -f $dep) {
+        print "INFO: processing '$dep' file\n" if $verbose;
+
+        # adding the base library to the dependencies
+        my ($name, $path, $suffix) = fileparse($dep, ('.la'));
+        push(@dependencies, '-L' . $path);
+        $name =~ s/^lib//;
+        push(@dependencies, '-l' . $name);
+
+        my $fla = new FileHandle("$dep",'r') 
+            or die "Could not open '$dep' for reading!\n";
+
+        while(<$fla>) {
+            next unless /^dependency_libs\s*=/;
+            my ($libs) = (/^dependency_libs\s*=\s*'([^']*)'/);
+            print "INFO: new dependencies: $libs\n" if $verbose;
+            push(@dependencies, split(/\s+/, $libs));
+        }
+    
+        $fla->close();
+    }
+    elsif ( $dep =~ /^-L/ ) {
+        print "INFO: checking if the '$dep' directory exists\n" if $verbose;
+        if ( -d substr($dep, 2)) {
+            push(@LDADD, $dep);
+        }
+        elsif ($verbose) {
+            warn "WARN: '$dep' does not refer to a real directory!\n";
+        }
+    }
+    else {
+        print "INFO: adding '$dep' to LDADD\n" if $verbose;
+        push(@LDADD, $dep);
+    }
+}
+
+print join(' ', @LDADD), "\n";
+
