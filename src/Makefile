@@ -137,7 +137,11 @@ doc: doxygenConfig
 PPREFIX=/usr
 PREFIX =$(RPM_BUILD_ROOT)$(PPREFIX)# could be /usr/local but you may not have perms
 INCDIR =include
+# handling x86_64's lib64 directory
 LIBDIR =lib
+ifeq ($(shell uname -m), x86_64)
+LIBDIR =lib64
+endif
 BINDIR =bin
 MANDIR =share
 DOCDIR =share/doc/CGSI$(GSOAP_VERSION)
