@@ -11,11 +11,20 @@
 #
 
 TEST_MODULE='CGSI-gSOAP'
-TEST_REQUIRES='cgsi-gsoap-client cgsi-gsoap-server'
+TEST_REQUIRES='cgsi-gsoap-client cgsi-gsoap-server glite-test-certs'
 export PATH=$PATH:.
 
-if [ -f 'shunit' ]; then source shunit; fi
-if [ -f '../../test/shunit' ]; then source ../../test/shunit; fi
+if [ -f 'shunit' ]; then
+	source shunit
+elif [ -f '../../test/shunit' ]; then
+	source ../../test/shunit
+else
+	echo "ERROR: cannot find 'shunit'!" >&2
+fi
+
+TEST_CERT_DIR=$PWD
+glite-test-certs --certdir=$TEST_CERT_DIR --some --env --wrong
+source $TEST_CERT_DIR/home/env_settings.sh
 
 function server_start {
     export X509_USER_CERT=$TEST_CERT_DIR/grid-security/hostcert.pem
@@ -62,7 +71,7 @@ function test_old_behaviour {
     test_success /org.acme/production cgsi-gsoap-client $ENDPOINT
 
     export X509_USER_PROXY=$TEST_CERT_DIR/home/vomswv-acme.pem
-    test_failure "CGSI-gSOAP: Error reading token data: Transport endpoint is not connected" cgsi-gsoap-client $ENDPOINT
+    test_failure "CGSI-gSOAP: Error reading token data" cgsi-gsoap-client $ENDPOINT
 
     export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
     test_success /org.acme cgsi-gsoap-client $ENDPOINT
@@ -120,7 +129,7 @@ function test_plain_proxy {
     export X509_USER_PROXY=$TEST_CERT_DIR/home/vomswv-acme.pem
     test_failure "CGSI-gSOAP: Cannot find certificate of AC issuer for vo org.acme" cgsi-gsoap-client $ENDPOINT
 
-    export X509_USER_PROXY=$TEST_CERT_DIR/home/userproxy.pem
+    export X509_USER_PROXY=$TEST_CERT_DIR/home/user_grid_proxy.pem
     test_success "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=$LOGNAME" cgsi-gsoap-client $ENDPOINT
 
     server_stop
@@ -131,8 +140,8 @@ function test_delegation {
     echo " testing delegation                            "
     echo "-----------------------------------------------"
 
-    PORT=8112
-    ENDPOINT="httpg://`hostname -f`:$PORT/cgsi-gsoap-test"
+    PORT=8113
+    ENDPOINT="httpg://localhost:$PORT/cgsi-gsoap-test"
 
     server_start -r 1 -p $PORT -o
 
@@ -150,7 +159,7 @@ function test_stress {
     echo " stress test with explicit VOMS parsing"
     echo "---------------------------------------"
 
-    PORT=8112
+    PORT=8114
     ENDPOINT="https://localhost:$PORT/cgsi-gsoap-test"
     ITERATIONS=1000
 

@@ -121,6 +121,7 @@ test: cgsi-gsoap-client cgsi-gsoap-server
 ################################################################################
 ## maintenance targets ##
 
-shunit:
-	cp -u $(SRCDIR)/../../org.glite.data.util-c/test/shunit shunit
+test-utils:
+	cp -u $(SRCDIR)/../../org.glite.data.test-utils/shunit .
+	cp -u $(SRCDIR)/../../org.glite.data.test-utils/glite-test-certs .
 
