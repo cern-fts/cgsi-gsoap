@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.34 2007/07/31 11:24:22 dhsmith Exp $
+ * $Id: cgsi_plugin.c,v 1.35 2007/09/12 15:58:16 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -1396,6 +1396,8 @@ static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM
 
     bufsize = BUFSIZE;
     strncpy(buffer, CGSI_PLUGIN ": ", bufsize);
+    strncat(buffer, msg, bufsize);
+    strncat(buffer, "\n", bufsize);
     buf = buffer +strlen(buffer); 
     bufsize -= strlen(buffer);
 
