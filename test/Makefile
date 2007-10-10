@@ -45,6 +45,12 @@ GLOBUS_LIBS_PTHR += $(shell $(SRCDIR)/libtool $(GLOBUS_LOCATION)/lib/libglobus_g
 
 LDLIBS += $(GLOBUS_LIBS) 
 
+# handling x86_64's lib64 directory
+LIBDIR =lib
+ifeq ($(shell uname -m), x86_64)
+LIBDIR =lib64
+endif
+
 ifeq ($(GSOAP_LOCATION), $(EMPTY))
 GSOAP_LOCATION=/usr/local
 endif
@@ -64,10 +70,10 @@ endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
 VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
-VOMS_LIBS=-L$(VOMS_LOCATION)/lib -lvomsc
+VOMS_LIBS=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsc
 
 VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
-VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/lib -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
+VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
 
 CFLAGS += $(VOMS_FLAGS)
 LDLIBS += $(VOMS_LIBS)
