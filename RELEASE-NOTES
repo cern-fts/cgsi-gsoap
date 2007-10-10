@@ -1,3 +1,6 @@
+* Wed Oct 10 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.1-2
+- VOMS libs are in 'lib64' on x86_64 starting with VOMS v1.7.23
+
 * Fri Sep 21 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.1-1
 - Adding the CGSI_gSOAP error messages to the returned SOAP errors.
 - updated to use glite-test-certs, instead of glite-security-test-utils

@@ -57,12 +57,18 @@ ifeq ($(VOMS_LOCATION), $(EMPTY))
 VOMS_LOCATION=/opt/glite
 endif
 
+# handling x86_64's lib64 directory
+LIBDIR =lib
+ifeq ($(shell uname -m), x86_64)
+LIBDIR =lib64
+endif
+
 ifneq ($(USE_VOMS), $(EMPTY))
 VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
-VOMS_LIBS=-L$(VOMS_LOCATION)/lib -lvomsc
+VOMS_LIBS=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsc
 
 VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
-VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/lib -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
+VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
 endif
 
 #CFLAGS += $(VOMS_FLAGS)
@@ -137,11 +143,6 @@ doc: doxygenConfig
 PPREFIX=/usr
 PREFIX =$(RPM_BUILD_ROOT)$(PPREFIX)# could be /usr/local but you may not have perms
 INCDIR =include
-# handling x86_64's lib64 directory
-LIBDIR =lib
-ifeq ($(shell uname -m), x86_64)
-LIBDIR =lib64
-endif
 BINDIR =bin
 MANDIR =share
 DOCDIR =share/doc/CGSI$(GSOAP_VERSION)
