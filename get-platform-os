@@ -1,0 +1,46 @@
+#!/bin/sh
+
+platform_os='unknown'
+set +e
+
+IFS_SAVED="$IFS"
+IFS=':'
+while read pattern os; do
+    egrep -qi "$pattern" /etc/issue.net
+    if [ $? -eq 0 ]; then
+        platform_os="$os"
+    fi
+done <<EOF
+taroon:rhel3
+scientific linux.*release 3:sl3
+scientific linux.*cern.*release 3:slc3
+centos.*release 3:centos3
+scientific linux.*release 4:sl4
+scientific linux.*cern.*release 4:slc4
+centos.*release 4:centos4
+debian:debian
+EOF
+IFS="$IFS_SAVED"
+
+# do a more expensive check if /etc/issue.net is unrecognizable
+if [ "$platform_os" = 'unknown' -a -x '/bin/rpm' ]; then
+    rpmname=$(rpm -qf /etc/issue.net)
+    case $rpmname in 
+        sl-release-4.*.cern-*)
+            platform_os='slc4'
+            ;;
+        sl-release-4.*)
+            platform_os='sl4'
+            ;;
+        sl-release-3.*.cern-*)
+            platform_os='slc3'
+            ;;
+        sl-release-3.*)
+            platform_os='sl3'
+            ;;
+    esac
+fi
+
+set -e
+
+echo ${platform_os}
