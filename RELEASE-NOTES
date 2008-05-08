@@ -1,3 +1,13 @@
+* Thu May 8 2008 David Smith <David.Smith@cern.ch> HEAD
+- Added new function, export_delegated_credentials(), to make
+  a delegated credential token available in memory suitable for
+  storage and later reuse by the user
+- Removed some spurious trailing newlines from error messages
+- Fixed descriptor and connection leak on the client side
+  when the authenitcation negociation to a server fails
+- Enhanced some error messages to cover more of the error message
+  recommendations in bug #35320
+
 * Wed Oct 10 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.1-2
 - VOMS libs are in 'lib64' on x86_64 starting with VOMS v1.7.23
 

@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.35 2007/09/12 15:58:16 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.36 2008/05/08 09:50:27 dhsmith Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -19,6 +19,8 @@
  * The globus GSI bundle is necessary for the plugin to compile and run.
  *
  */
+#include <netdb.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "cgsi_plugin_int.h" 
 #include <openssl/err.h>
@@ -68,6 +70,7 @@ static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, char *tracestr);
 static void cgsi_plugin_globus_modules(int activate);
 static int is_loopback(struct sockaddr *);
+static void free_conn_state(struct cgsi_plugin_data *data);
 
 /******************************************************************************/
 /* Plugin constructor            */
@@ -118,7 +121,9 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 /**
  * Initializes the plugin data object
  */
-static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *data) { 
+static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *data) {
+
+    /* data structure must be zeroed at this point */
     
     /* Setting up the functions */
     data->fclose = soap->fclose;
@@ -126,16 +131,11 @@ static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     soap_frecv = soap->frecv;
     data->fsend = soap->fsend;
     data->frecv = soap->frecv;
-    data->context_established = 0;
-    data->nb_iter = 0;
-    data->deleg_cred_set = 0;
+
     data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
     data->credential_handle = GSS_C_NO_CREDENTIAL;
     data->context_handle = GSS_C_NO_CONTEXT;
-    data->voname = NULL;
-    data->fqan = NULL;
-    data->nbfqan = 0;
-    data->had_send_error = 0;
+
     setup_trace(data);
     soap->fclose = server_cgsi_plugin_close;
     soap->fsend = server_cgsi_plugin_send;
@@ -218,17 +218,13 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         return -1;
     }
 
-    /* make sure we don't have any security context */
-    (void) gss_delete_sec_context (&tmp_status, &data->context_handle,GSS_C_NO_BUFFER);
-
-    /* make sure we don't have any credentials */
-    (void) gss_release_cred (&tmp_status, &data->credential_handle);
+    free_conn_state(data);
 
     /* despite the name ret_flags are also used as an input */
     ret_flags = data->context_flags;
     {
         char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1, "Server accepting context with flags: %xd\n", ret_flags);
+        snprintf(buf, TBUFSIZE, "Server accepting context with flags: %xd\n", ret_flags);
         trace(data, buf);
     }
 
@@ -280,7 +276,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     {
         char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1, "The server is:<%s>\n", data->server_name);
+        snprintf(buf, TBUFSIZE, "The server is:<%s>\n", data->server_name);
         trace(data, buf);
     }
 
@@ -344,7 +340,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     {
         char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1,  "The client is:<%s>\n", data->client_name);
+        snprintf(buf, TBUFSIZE,  "The client is:<%s>\n", data->client_name);
         trace(data, buf);
     }
 
@@ -363,22 +359,6 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     (void)gss_release_name(&tmp_status, &client);
     (void)gss_release_name(&tmp_status, &server);
-
-    /* Clearing the VOMS attributes. */
-    if (data->voname != NULL) {
-      free(data->voname);
-      data->voname = NULL;
-    }
-
-    /* fqan is a NULL terminated array of char * */
-    if (data->fqan != NULL) {
-      int i;
-      for (i = 0; i < data->nbfqan; i++)
-        free(data->fqan[i]);
-      free(data->fqan);
-      data->fqan = NULL;
-      data->nbfqan = 0;
-    }
 
     /* by default check VOMS credentials, and fail if invalid */
     if (! data->disable_voms_check) {
@@ -423,8 +403,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
         {
             char buf[TBUFSIZE];
-            snprintf(buf, TBUFSIZE-1, "The delegated credentials are for:<%s>\n", (char *)namebuf.value);
-            buf[TBUFSIZE-1]='\0';
+            snprintf(buf, TBUFSIZE, "The delegated credentials are for:<%s>\n", (char *)namebuf.value);
             trace(data, buf);
         }
 
@@ -480,7 +459,7 @@ static int server_cgsi_map_dn(struct soap *soap) {
 
         {
             char buf[TBUFSIZE];
-            snprintf(buf, TBUFSIZE-1, "The client is mapped to user:<%s>\n", data->username);
+            snprintf(buf, TBUFSIZE, "The client is mapped to user:<%s>\n", data->username);
             trace(data, buf);
         }
 
@@ -490,12 +469,12 @@ static int server_cgsi_map_dn(struct soap *soap) {
 
         {
             char buf[TBUFSIZE];
-            snprintf(buf, TBUFSIZE-1, "Could not find mapping for: %s\n", data->client_name);
+            snprintf(buf, TBUFSIZE, "Could not find mapping for: %s\n", data->client_name);
             trace(data, buf);
         }
         
         data->username[0]=0;
-        snprintf(buf, BUFSIZE, "Could not find mapping for: %s\n", data->client_name);
+        snprintf(buf, BUFSIZE, "Could not find mapping for: %s", data->client_name);
         cgsi_err(soap, buf);
         return -1;
     }
@@ -542,6 +521,7 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
 
 static int client_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *data) { 
 
+    /* data structure must be zeroed at this point */
 
     /* Setting up the functions */
     data->fopen = soap->fopen;
@@ -550,13 +530,10 @@ static int client_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     soap_frecv = soap->frecv;
     data->fsend = soap->fsend;
     data->frecv = soap->frecv;
-    data->context_established = 0;    
-    data->nb_iter = 0;
-    data->deleg_cred_set = 0;
+
     data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
     data->credential_handle = GSS_C_NO_CREDENTIAL;
     data->context_handle = GSS_C_NO_CONTEXT;
-    data->had_send_error = 0;
     setup_trace(data);
     
     soap->fopen = client_cgsi_plugin_open;
@@ -588,11 +565,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         return -1;
     }
 
-    /* make sure we don't have any security context */
-    (void) gss_delete_sec_context (&tmp_status, &data->context_handle,GSS_C_NO_BUFFER);
-
-    /* make sure we don't have any credentials */
-    (void) gss_release_cred(&tmp_status, &data->credential_handle);
+    free_conn_state(data);
     
     /* Getting the credenttials */
     major_status = gss_acquire_cred(&minor_status,
@@ -640,7 +613,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
        
     {
         char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1, "The client is:<%s>\n", data->client_name);
+        snprintf(buf, TBUFSIZE, "The client is:<%s>\n", data->client_name);
         trace(data, buf);
     }
 
@@ -656,10 +629,11 @@ static int client_cgsi_plugin_open(struct soap *soap,
      * not start with 'https://'. */
     data->socket_fd = data->fopen(soap, endpoint+1, hostname, port);
     if (data->socket_fd < 0) {
-        cgsi_err(soap, "Could not open connection !");
-        goto error;
+      char buf[BUFSIZE];
+      snprintf(buf, BUFSIZE, "could not open connection to %s", hostname);
+      cgsi_err(soap, buf);
+      goto error;
     }
-
 
     /* setting 'target_name':
      * if CGSI_OPT_ALLOW_ONLY_SELF is in effect we check that the peer's
@@ -799,7 +773,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
 
         {
             char buf[TBUFSIZE];
-            snprintf(buf, TBUFSIZE-1, "Iteration:<%d>\n", data->nb_iter);
+            snprintf(buf, TBUFSIZE, "Iteration:<%d>\n", data->nb_iter);
             trace(data, buf);
         }
 
@@ -887,8 +861,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
 
         {
           char buf[TBUFSIZE];
-          snprintf(buf, TBUFSIZE-1, "Server:<%s>\n", (char *)server_name.value);
-          buf[TBUFSIZE-1] = '\0';
+          snprintf(buf, TBUFSIZE, "Server:<%s>\n", (char *)server_name.value);
           trace(data, buf);
         }
         
@@ -906,6 +879,10 @@ static int client_cgsi_plugin_open(struct soap *soap,
 error:
     (void) gss_delete_sec_context (&tmp_status, &data->context_handle, GSS_C_NO_BUFFER);
     (void) gss_release_cred (&tmp_status, &data->credential_handle);
+    if (data->socket_fd >= 0) {
+        (void) close(data->socket_fd);
+        data->socket_fd = -1;
+    }
     ret = -1;
 
 exit:
@@ -937,19 +914,38 @@ static int client_cgsi_plugin_close(struct soap *soap) {
 /******************************************************************************/
 
 static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct soap_plugin *src) {
+    struct cgsi_plugin_data *dst_data;
+
     *dst = *src;
     dst->data =  (struct cgsi_plugin_data *)malloc(sizeof(struct cgsi_plugin_data));
     if (dst->data == NULL) return SOAP_FATAL_ERROR;
+
     memcpy(dst->data, src->data, sizeof(struct cgsi_plugin_data));
+
+    /* We do not support deep copy of plugin data's connection related parameters.
+       Expect soap structure should only be copied just after soap_accept(), before
+       the connection parameters are filled.
+    */
+
+    dst_data = dst->data;
+
+    /* don't want to share these with the source */
+    dst_data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
+    dst_data->credential_handle = GSS_C_NO_CREDENTIAL;
+    dst_data->context_handle = GSS_C_NO_CONTEXT;
+    dst_data->voname = NULL;
+    dst_data->deleg_credential_token = NULL;
+    dst_data->fqan = NULL;
+
+    /* reset everything else connection related */
+    free_conn_state(dst_data);
 
     /* Activate globus modules, as the new object will also need them */
     cgsi_plugin_globus_modules(1);
-
     return SOAP_OK;
 }
 
 static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
-    OM_uint32 min_stat;
     struct cgsi_plugin_data *data;
     
     if (p->data == NULL) {
@@ -959,36 +955,9 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
         data = (struct cgsi_plugin_data *)p->data;
     }
 
-    /* Deleting the context */
-    if (data->context_handle != NULL) {
-        gss_delete_sec_context(&min_stat, &(data->context_handle), GSS_C_NO_BUFFER);
-    }
-    
-    /* Freeing delegated credentials if present */
-    if (data->deleg_cred_set != 0) {
-        gss_release_cred(&min_stat, &(data->deleg_credential_handle));
-    }
-
-    if (data->credential_handle != NULL) {
-        gss_release_cred(&min_stat, &(data->credential_handle));
-    }
- 
-    /* Clearing the VOMS attributes */
-    if (data->voname != NULL) {
-      free(data->voname);
-      data->voname = NULL;
-    }
-
-    /* fqan is a NULL terminated array of char * */
-    if (data->fqan != NULL) {
-      int i;
-      for (i = 0; i < data->nbfqan; i++)
-        free(data->fqan[i]);
-      free(data->fqan);
-      data->fqan = NULL;
-    }
-    
-    free(p->data); /* free allocated plugin data (this function is not called for shared plugin data) */
+    free_conn_state(data);
+    free(p->data);
+    p->data = NULL;
 
     /* Deactivate globus modules */
     cgsi_plugin_globus_modules(0);
@@ -1153,7 +1122,7 @@ static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *p
     }
 
     if (output_token->length + 1 > len) {
-        cgsi_err(soap, "Message too long for buffer\n");
+        cgsi_err(soap, "Message too long for buffer");
         gss_release_buffer(&minor_status1,
                            output_token);
         return 0;
@@ -1208,13 +1177,13 @@ size_t * token_length;
          char buf[BUFSIZE];
 
          if (soap->errnum)
-           snprintf(buf, BUFSIZE, "Error reading token data header: %s\n", strerror(soap->errnum));
+           snprintf(buf, BUFSIZE, "Error reading token data header: %s", strerror(soap->errnum));
          else if (errno)
-           snprintf(buf, BUFSIZE, "Error reading token data header: %s\n", strerror(errno));
+           snprintf(buf, BUFSIZE, "Error reading token data header: %s", strerror(errno));
          else if (soap->error)
-           snprintf(buf, BUFSIZE, "Error reading token data header: SOAP error %d\n", soap->error);
+           snprintf(buf, BUFSIZE, "Error reading token data header: SOAP error %d", soap->error);
          else
-           snprintf(buf, BUFSIZE, "Error reading token data header: Connection closed\n");
+           snprintf(buf, BUFSIZE, "Error reading token data header: Connection closed");
 
          cgsi_err(soap, buf);
          return -1;
@@ -1258,7 +1227,7 @@ size_t * token_length;
 
      tok  = (char *) malloc(len + SSLHSIZE);
      if ( (len+SSLHSIZE) && tok == NULL) {
-         cgsi_err(soap, "Out of memory allocating token data\n");
+         cgsi_err(soap, "Out of memory allocating token data");
          return -1;
      }
 
@@ -1276,13 +1245,13 @@ size_t * token_length;
          char buf[BUFSIZE];
 
          if (soap->errnum)
-           snprintf(buf, BUFSIZE, "Error reading token data: %s\n", strerror(soap->errnum));
+           snprintf(buf, BUFSIZE, "Error reading token data: %s", strerror(soap->errnum));
          else if (errno)
-           snprintf(buf, BUFSIZE, "Error reading token data: %s\n", strerror(errno));
+           snprintf(buf, BUFSIZE, "Error reading token data: %s", strerror(errno));
          else if (soap->error)
-           snprintf(buf, BUFSIZE, "Error reading token data: SOAP error %d\n", soap->error);
+           snprintf(buf, BUFSIZE, "Error reading token data: SOAP error %d", soap->error);
          else
-           snprintf(buf, BUFSIZE, "Error reading token data: Connection closed\n");
+           snprintf(buf, BUFSIZE, "Error reading token data: Connection closed");
 
          cgsi_err(soap, buf);
          free(tok);
@@ -1294,7 +1263,7 @@ size_t * token_length;
 
      {
          char buf[TBUFSIZE];
-         snprintf(buf, TBUFSIZE-1,  "================= RECVING: %x\n", len + SSLHSIZE);
+         snprintf(buf, TBUFSIZE,  "================= RECVING: %x\n", len + SSLHSIZE);
          trace(data, buf);
      }
      cgsi_plugin_print_token(data, tok, len+SSLHSIZE);
@@ -1323,7 +1292,7 @@ int cgsi_plugin_send_token(arg,token,token_length)
 
     {
          char buf[TBUFSIZE];
-         snprintf(buf, TBUFSIZE-1,  "================= SENDING: %x\n", 
+         snprintf(buf, TBUFSIZE,  "================= SENDING: %x\n", 
                   (unsigned int)token_length);
          trace(data, buf);
      }
@@ -1334,12 +1303,12 @@ int cgsi_plugin_send_token(arg,token,token_length)
      ret =  soap_fsend(soap, token, token_length);
      if (ret < 0) {
          char buf[BUFSIZE];
-         snprintf(buf, BUFSIZE,"Error sending token data: %s\n", strerror(errno));
+         snprintf(buf, BUFSIZE,"Error sending token data: %s", strerror(errno));
          cgsi_err(soap, buf);
          return -1;
      } else if (ret != SOAP_OK) {
            char buf[BUFSIZE];
-           snprintf(buf, BUFSIZE,  "sending token data: %d of %d bytes written\n", 
+           snprintf(buf, BUFSIZE,  "sending token data: %d of %d bytes written", 
                     ret, (int)token_length);
            cgsi_err(soap, buf);
          return -1;
@@ -1382,7 +1351,7 @@ void cgsi_plugin_print_token(data, token, length)
 static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM_uint32 min_stat) {
 
     int ret;
-    char buffer[BUFSIZE];
+    char buffer[BUFSIZE],hostname[NI_MAXHOST];
     int bufsize;
     char *buf;
     struct cgsi_plugin_data *data;
@@ -1394,15 +1363,24 @@ static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM
         isclient = 0;
     }
 
+    if (gethostname(hostname, sizeof(hostname))<0) {
+      strncpy(hostname, "unknown", sizeof(hostname));
+    }
+    hostname[sizeof(hostname)-1] = '\0';
+
     bufsize = BUFSIZE;
-    strncpy(buffer, CGSI_PLUGIN ": ", bufsize);
-    strncat(buffer, msg, bufsize);
-    strncat(buffer, "\n", bufsize);
+    snprintf(buffer, bufsize, CGSI_PLUGIN " running on %s reports %s\n", hostname, msg);
     buf = buffer +strlen(buffer); 
     bufsize -= strlen(buffer);
 
     ret =  cgsi_display_status_1(msg, maj_stat, GSS_C_GSS_CODE, buf, bufsize);
-    cgsi_display_status_1(msg, min_stat, GSS_C_MECH_CODE, buf + ret, bufsize - ret);
+    if (bufsize-ret > 1) {
+      strcat(buf, "\n");
+      ret++;
+    }
+    buf += ret;
+    bufsize -= ret;
+    cgsi_display_status_1(msg, min_stat, GSS_C_MECH_CODE, buf, bufsize);
 
     if (isclient) {
         soap_sender_fault(soap, buffer, NULL);
@@ -1418,9 +1396,14 @@ static int cgsi_display_status_1(char *m, OM_uint32 code, int type, char *buf, i
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;
      OM_uint32 msg_ctx;
-     int ret;
+     int count,ret;
+     char *buf0 = buf;
+
+     if (buflen<=1)
+       return(0);
 
      msg_ctx = 0;
+     count = 0;
      while (1) {
          maj_stat = gss_display_status(&min_stat, code,
                                        type, GSS_C_NULL_OID,
@@ -1428,33 +1411,49 @@ static int cgsi_display_status_1(char *m, OM_uint32 code, int type, char *buf, i
          
          ret = snprintf(buf, buflen, "%s\n", (char *)msg.value); 
          (void) gss_release_buffer(&min_stat, &msg);
+
+         if (ret < 0) {
+           *buf = '\0';
+           break;
+         }
+
+         if (ret >= buflen)
+           ret = buflen - 1;
+
+         count += ret;
+         buf += ret;
+         buflen -= ret;
          
-         if (!msg_ctx)
+         if (!msg_ctx || buflen<=1)
              break;
      }
 
-     return ret;
+     if (count>0 && buf0[count-1] == '\n') {
+       buf0[count-1] = '\0';
+       count--;
+     }
+
+     return count;
 }
 
 static void cgsi_err(struct soap *soap, char *msg) {
 
     struct cgsi_plugin_data *data;
     int isclient = 1;
-    char buffer[BUFSIZE];
-    int bufsize;
-    char *buf;
+    char buffer[BUFSIZE],hostname[NI_MAXHOST];
     
     /* Check if we are a client */
     data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, client_plugin_id);
     if (data == NULL) {
         isclient = 0;
     }
+
+    if (gethostname(hostname, sizeof(hostname))<0) {
+      strncpy(hostname, "unknown", sizeof(hostname));
+    }
+    hostname[sizeof(hostname)-1] = '\0';
     
-    bufsize = BUFSIZE;
-    strncpy(buffer, CGSI_PLUGIN ": ", bufsize);
-    buf = buffer +strlen(buffer); 
-    bufsize -= strlen(buffer);
-    strncpy(buf, msg, bufsize);
+    snprintf(buffer, sizeof(buffer), CGSI_PLUGIN " running on %s reports %s", hostname, msg);
 
     if (isclient) {
         soap_sender_fault(soap, buffer, NULL);
@@ -1618,13 +1617,13 @@ static int trace(struct cgsi_plugin_data *data, char *tracestr) {
     return 0;
 }
 
-int export_delegated_credentials(struct soap *soap, char *filename) {
+int get_delegated_credentials(struct soap *soap, void **buffer, size_t *length) {
     OM_uint32 maj_stat, min_stat;
-    gss_buffer_desc buffer = GSS_C_EMPTY_BUFFER;
-    int fd, rc;
+    gss_buffer_desc buffer_desc = GSS_C_EMPTY_BUFFER;
     struct cgsi_plugin_data *data;
     
-    if (soap == NULL) {
+    if (soap == NULL || buffer == NULL || length == NULL) {
+        cgsi_err(soap, "invalid argument passed to get_delegated_credentials");
         return -1;
     }
     
@@ -1632,12 +1631,18 @@ int export_delegated_credentials(struct soap *soap, char *filename) {
                                                         server_plugin_id);
 
     if (data == NULL) {
-        cgsi_err(soap, "export delegated credentials: could not get data structure");
+        cgsi_err(soap, "get delegated credentials: could not get data structure");
         return -1;
     }
 
+    if (data->deleg_credential_token) {
+        *buffer = data->deleg_credential_token;
+        *length = data->deleg_credential_token_len;
+        return 0;
+    }
+
     if (data->deleg_cred_set == 0) {
-        cgsi_err(soap, "export delegated credentials: delegated credentials not set");
+        cgsi_err(soap, "get delegated credentials: no delegated credentials available");
         return -1;
     }
 
@@ -1645,13 +1650,44 @@ int export_delegated_credentials(struct soap *soap, char *filename) {
                                data->deleg_credential_handle,
                                GSS_C_NO_OID,
                                0,
-                               &buffer);
+                               &buffer_desc);
 
     if (maj_stat != GSS_S_COMPLETE) {
-        cgsi_gssapi_err(soap,  "Error exporting  credentials", maj_stat, min_stat);
+        cgsi_gssapi_err(soap,  "Error exporting credentials", maj_stat, min_stat);
         return -1;
     }
 
+    data->deleg_credential_token = malloc(buffer_desc.length);
+    if (data->deleg_credential_token == NULL) {
+        (void) gss_release_buffer(&min_stat, &buffer_desc);
+        cgsi_err(soap, "get_delegated_credentials: could not allocate memory");
+        return -1;
+    }
+
+    memcpy(data->deleg_credential_token, buffer_desc.value, buffer_desc.length);
+    data->deleg_credential_token_len = buffer_desc.length;
+
+    (void) gss_release_buffer(&min_stat, &buffer_desc);
+
+    *buffer = data->deleg_credential_token;
+    *length = data->deleg_credential_token_len;
+    return 0;
+}
+
+int export_delegated_credentials(struct soap *soap, char *filename) {
+    const char *token;
+    size_t token_length;
+    int fd;
+    
+    if (soap == NULL) {
+        cgsi_err(soap, "invalid argument passed to export_delegated_credentials");
+        return -1;
+    }
+    
+    if (get_delegated_credentials(soap, (void **)&token, &token_length)<0) {
+        cgsi_err(soap, "export delegated credentials: could not get credential token");
+        return -1;
+    }
 
     fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600);
     if (fd < 0) {
@@ -1659,19 +1695,17 @@ int export_delegated_credentials(struct soap *soap, char *filename) {
         return -1;
     }
 
-    rc = write(fd, buffer.value, buffer.length); 
-    if (rc != buffer.length) {
-        char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1, "export delegated credentials: could not write to file (%s)",
+    if (write(fd, token, token_length) != token_length) {
+        char buf[BUFSIZE];
+        snprintf(buf, BUFSIZE, "export delegated credentials: could not write to file (%s)",
                  strerror(errno));
         cgsi_err(soap, buf);
         return -1;
     }
 
-    rc = close(fd);
-    if (rc < 0) {
-        char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1, "export delegated credentials: could not close file (%s)",
+    if (close(fd)<0) {
+        char buf[BUFSIZE];
+        snprintf(buf, BUFSIZE, "export delegated credentials: could not close file (%s)",
                  strerror(errno));
         cgsi_err(soap, buf);
         return -1;
@@ -1688,8 +1722,8 @@ int set_default_proxy_file(struct soap *soap, char *filename) {
     
     rc = setenv(PROXY_ENV_VAR, filename, 1);
     if (rc < 0) {
-        char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE-1, "set default proxy file: could not setenv (%s)",
+        char buf[BUFSIZE];
+        snprintf(buf, BUFSIZE, "set default proxy file: could not setenv (%s)",
                  strerror(errno));
         cgsi_err(soap, buf);
         return -1;
@@ -1962,4 +1996,39 @@ static int is_loopback(struct sockaddr *sa) {
   }
 
   return result;
+}
+
+static void free_conn_state(struct cgsi_plugin_data *data) {
+    OM_uint32         minor_status;
+    char **p;
+
+    (void) gss_delete_sec_context (&minor_status, &data->context_handle,GSS_C_NO_BUFFER);
+    (void) gss_release_cred (&minor_status, &data->credential_handle);
+    (void) gss_release_cred(&minor_status, &data->deleg_credential_handle);
+
+    data->context_established = 0;
+    data->socket_fd = -1;
+    data->client_name[0] = '\0';
+    data->server_name[0] = '\0';
+    data->username[0] = '\0';
+    data->nb_iter = 0;
+    data->deleg_cred_set = 0;
+    if (data->voname) {
+      free(data->voname);
+      data->voname = NULL;
+    }
+    if (data->fqan) {
+      for(p = data->fqan; *p != NULL; ++p) {
+        free(*p);
+      }
+      free(data->fqan);
+      data->fqan = NULL;
+    }
+    data->nbfqan = 0;
+    data->had_send_error = 0;
+    if (data->deleg_credential_token) {
+      free(data->deleg_credential_token);
+      data->deleg_credential_token = NULL;
+    }
+    data->deleg_credential_token_len = 0;
 }

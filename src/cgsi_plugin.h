@@ -128,6 +128,20 @@ int get_client_dn(struct soap *soap, char *dn, size_t dnlen);
 int get_client_username(struct soap *soap, char *username, size_t dnlen);
 
 /**
+ * Make the delegated credential available as a token in memory.
+ * The soap structure retains ownership of the memory. The user should
+ * not free the pointer returned by this function, nor use it after the soap
+ * object becomes invalid.
+ *
+ * @param soap The soap structure that is the target of the request
+ * @param buffer Pointer to a void pointer which will be set to reference the credential token.
+ * @param length Pointer to a length that will be set to the size of the credential token
+ *
+ * @return 0 if successful, -1 otherwise
+ */
+int get_delegated_credentials(struct soap *soap, void **buffer, size_t *length);
+
+/**
  * Export the delegated credentials (if available) to a file
  *
  * @param soap The soap structure for the request

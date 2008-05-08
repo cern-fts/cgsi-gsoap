@@ -57,4 +57,6 @@ struct cgsi_plugin_data {
     int disable_voms_check;
     int allow_only_self;
     int had_send_error;
+    void *deleg_credential_token;
+    size_t deleg_credential_token_len;
 };
