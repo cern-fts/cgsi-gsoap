@@ -133,12 +133,19 @@ VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
 include \$(SRCDIR)/Makefile
 EOF
 
+# ugly hack for gSOAP 2.7.9 vs. 2.7.10 binary incompatibility
+# which ended up as a package name change
+SPEC_TEMPLATE=${basedir}/project/glite-security-cgsi-gsoap.spec.template.etics
+if [ -r ${basedir}/project/glite-security-cgsi-gsoap.spec.template.${GSOAP_VERSION} ]; then
+    SPEC_TEMPLATE=${basedir}/project/glite-security-cgsi-gsoap.spec.template.${GSOAP_VERSION}
+fi
+
 sed -e "s/@VERSION@/${VERSION}/g" \
 	-e "s/@RELEASE@/${RELEASE}/g" \
     -e "s/@RELEASE.SUFFIX@/${RELEASE_SUFFIX}/g" \
 	-e "s/@GSOAP.VERSION@/${GSOAP_MAJOR_MINOR_VERSION}/g" \
 	-e "s/@GLOBUS.DBG.NOTHR.FLAVOUR/${GLOBUS_FLAVOUR}/g" \
 	-e "s/@GLOBUS.DBG.THR.FLAVOUR@/${GLOBUS_FLAVOUR_PTHR}/g" \
-	${basedir}/project/glite-security-cgsi-gsoap.spec.template.etics >glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
+	${SPEC_TEMPLATE} >glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
 cat ${basedir}/RELEASE-NOTES >>glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
 
