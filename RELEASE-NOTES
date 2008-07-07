@@ -1,4 +1,4 @@
-* Thu May 8 2008 David Smith <David.Smith@cern.ch> HEAD
+* Thu May 8 2008 David Smith <David.Smith@cern.ch> 1.3.1-1
 - Added new function, export_delegated_credentials(), to make
   a delegated credential token available in memory suitable for
   storage and later reuse by the user
