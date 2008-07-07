@@ -13,11 +13,18 @@ endif
 ## implicit rule flags ##
 SHELL = /bin/sh -e
 CC = gcc
+CPP = g++
 CFLAGS = -Wall -g -fPIC
 LDFLAGS =
 RANLIB = ranlib
 SHLIBLDFLAGS = -shared
 SHLIBREQLIBS = -lc 
+
+# gSOAP 2.7.10 has introduced a virtual destructor, which inserts
+# a pointer to the VMT at the beginning of the 'soap' structure,
+# making the C and C++ versions of the code binary incompatible,
+# so we need to build C++ flavour of the libraries as well:
+WITH_CPP_LIBS = yes
 
 ################################################################################
 ## project flags ##
@@ -83,13 +90,27 @@ endif
 .PHONY: all
 
 
-ifneq ($(USE_VOMS), $(EMPTY))
-all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so  vomsall
-else
-all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so 
+all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so
+
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+all: libcgsi_plugin$(GSOAP_VERSION)_cpp.a libcgsi_plugin$(GSOAP_VERSION)_cpp.so
 endif
 
-vomsall: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+ifneq ($(USE_VOMS), $(EMPTY))
+all: \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+all: \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a \
+	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so
+endif
+endif
+
 
 
 
@@ -97,12 +118,25 @@ vomsall: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a libcgsi_plugin_
 cgsi_plugin.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
 	$(CC) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ $<
 
+cgsi_plugin_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
+	$(CPP) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ $<
+
 libcgsi_plugin$(GSOAP_VERSION).a: cgsi_plugin.o
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
 libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
 	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+
+
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+libcgsi_plugin$(GSOAP_VERSION)_cpp.a: cgsi_plugin_cpp.o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin$(GSOAP_VERSION)_cpp.so: cgsi_plugin_cpp.o
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
@@ -125,6 +159,28 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a: cgsi_plugin_voms_$
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o
 	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
 
+
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CPP) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+
+cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
+	$(CC) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ $<
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o
+	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
+endif
 
 endif
 
@@ -152,12 +208,22 @@ BINFILES =
 LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
 SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
 
-ifneq ($(USE_VOMS), $(EMPTY))
-LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.a
+SHLIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.so
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
-SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so 
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so 
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so
+endif
 endif
 
 INCFILES =cgsi_plugin.h
@@ -172,85 +238,21 @@ installtargets = installinc installlib installbin installman installdoc installs
 endif
 
 .PHONY: uninstall install $(installtargets)
-install: $(installtargets)
-
-installinc: $(INCFILES)
-ifneq ($(INCFILES), $(EMPTY))
-	-mkdir -p $(PREFIX)/$(INCDIR)
-	install $(INSTALL_FLAGS) -m 644 $^ $(PREFIX)/$(INCDIR)
-endif
-installlib: $(LIBFILES)
-ifneq ($(LIBFILES), $(EMPTY))
-	-mkdir -p $(PREFIX)/$(LIBDIR)
-	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
-endif
-
-installshlib: libcgsi_plugin$(GSOAP_VERSION).so
-	-mkdir -p $(PREFIX)/$(LIBDIR)
-ifneq ($(VERSION), $(EMPTY))
-	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -sf $^.$(VERSION) $^)
-else
-	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
-endif
-
-installshlibvoms: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so
-	-mkdir -p $(PREFIX)/$(LIBDIR)
-ifneq ($(VERSION), $(EMPTY))
-	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -sf $^.$(VERSION) $^)
-else
-	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
-endif
-
-
-
-installshlibvomspthr: libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so 
-	-mkdir -p $(PREFIX)/$(LIBDIR)
-ifneq ($(VERSION), $(EMPTY))
-	-cp $^ $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	-chmod 755 $(PREFIX)/$(LIBDIR)/$^.$(VERSION)
-	(pushd $(PREFIX)/$(LIBDIR);  pwd ; ln -sf $^.$(VERSION) $^)
-else
-	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(LIBDIR)
-endif
-
-
-
-
-installbin: $(BINFILES)
-ifneq ($(BINFILES), $(EMPTY))
-	-mkdir -p $(PREFIX)/$(BINDIR)
-	install $(INSTALL_FLAGS) -m 755 $^ $(PREFIX)/$(BINDIR)
-endif
-
-man: doc
-html: doc
-
-installman: man
-	-mkdir -p $(PREFIX)/share
-	-cp -r $^ $(PREFIX)/share/
-
-installdoc: html
-	-mkdir -p $(PREFIX)/$(DOCDIR)
-	-cp -r $^ $(PREFIX)/$(DOCDIR)/
-
-uninstall:
-# minor hack - the subst in rmdir avoids trying to remove current dir '.'
-ifneq ($(INCFILES), $(EMPTY))
-	$(RM) $(foreach file, $(INCFILES), $(PREFIX)/$(INCDIR)/$(file))
-	-rmdir -p $(subst ./,,$(PREFIX)/$(INCDIR))
-endif
-ifneq ($(LIBFILES), $(EMPTY))
-	$(RM) $(foreach file, $(LIBFILES), $(PREFIX)/$(LIBDIR)/$(file))
-	-rmdir -p $(subst ./,,$(PREFIX)/$(LIBDIR))
-endif
-ifneq ($(BINFILES), $(EMPTY))
-	$(RM) $(foreach file, $(BINFILES), $(PREFIX)/$(BINDIR)/$(file))
-	-rmdir -p $(subst ./,,$(PREFIX)/$(BINDIR))
-endif
+install: 
+	install -d $(PREFIX)/$(INCDIR)
+	for i in $(INCFILES); do install $(INSTALL_FLAGS) -m 644 $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
+	install -d $(PREFIX)/$(LIBDIR)
+	for l in $(LIBFILES); do install $(INSTALL_FLAGS) -m 755 $$l $(PREFIX)/$(LIBDIR)/$$l; done
+	for l in $(SHLIBFILES); do \
+		install $(INSTALL_FLAGS) -m 755 $$l $(PREFIX)/$(LIBDIR)/$$l.$(VERSION); \
+		(cd $(PREFIX)/$(LIBDIR); ln -sf $$l.$(VERSION) $$l); \
+		done
+	install -d $(PREFIX)/$(BINDIR)
+	for b in $(BINFILES); do install $(INSTALL_FLAGS) -m 644 $$b $(PREFIX)/$(BINDIR); done
+	mkdir -p $(PREFIX)/share
+	cp -r man $(PREFIX)/share/
+	mkdir -p $(PREFIX)/$(DOCDIR)
+	cp -r html $(PREFIX)/$(DOCDIR)/
 
 
 ################################################################################

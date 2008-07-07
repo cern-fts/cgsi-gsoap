@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.36 2008/05/08 09:50:27 dhsmith Exp $
+ * $Id: cgsi_plugin.c,v 1.37 2008/07/07 07:36:39 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -263,7 +263,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
   
     /* Keeping the name in the plugin */
     major_status = gss_display_name(&minor_status, server, &name, (gss_OID *) NULL);
-    if (major_status != GSS_S_COMPLETE || strlen(name.value)>MAXNAMELEN-1) {
+    if (major_status != GSS_S_COMPLETE || strlen((const char *)name.value)>MAXNAMELEN-1) {
         if (major_status != GSS_S_COMPLETE)
           cgsi_gssapi_err(soap,  "Error displaying server name", major_status, minor_status);
         else
@@ -272,7 +272,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         goto error;
     }
 
-    strncpy(data->server_name, name.value, MAXNAMELEN);
+    strncpy(data->server_name, (const char*)name.value, MAXNAMELEN);
 
     {
         char buf[TBUFSIZE];
@@ -335,7 +335,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         goto error;
     }
 
-    strncpy(data->client_name, name.value, MAXNAMELEN);
+    strncpy(data->client_name, (const char*)name.value, MAXNAMELEN);
     (void) gss_release_buffer(&tmp_status, &name); 
 
     {
@@ -600,7 +600,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
   
     /* Keeping the name in the plugin */
     major_status = gss_display_name(&minor_status, client, &namebuf, (gss_OID *) NULL);
-    if (major_status != GSS_S_COMPLETE || strlen(namebuf.value)>MAXNAMELEN-1) {
+    if (major_status != GSS_S_COMPLETE || strlen((const char*)namebuf.value)>MAXNAMELEN-1) {
         if (major_status != GSS_S_COMPLETE)
           cgsi_gssapi_err(soap,  "Error displaying client name", major_status, minor_status);
         else
@@ -608,7 +608,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         goto error;
     }
 
-    strncpy(data->client_name, namebuf.value, MAXNAMELEN);
+    strncpy(data->client_name, (const char*)namebuf.value, MAXNAMELEN);
     (void)gss_release_buffer(&tmp_status, &namebuf);
        
     {
@@ -657,7 +657,8 @@ static int client_cgsi_plugin_open(struct soap *soap,
       struct sockaddr *sa;
       socklen_t sa_length;
       char host[NI_MAXHOST+5];
-      int i, rc;
+      unsigned int i; 
+      int rc;
 
       sa_length = (sizeof (struct sockaddr_in6) > sizeof (struct sockaddr_in)) ?
                    sizeof (struct sockaddr_in6) : sizeof (struct sockaddr_in);
@@ -709,7 +710,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
          resp=resp->ai_next;
        }
        if (sa) {
-         sa2 = malloc (sa_length);
+         sa2 = (struct sockaddr*)malloc (sa_length);
          if (sa2 == NULL) {
            cgsi_err (soap,"Could not allocate memory to copy a sockaddr");
            freeaddrinfo (res);
@@ -844,7 +845,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         }
                                            
         major_status = gss_display_name(&minor_status, tgt_name, &server_name, (gss_OID *) NULL);
-        if (major_status != GSS_S_COMPLETE || strlen(server_name.value)>MAXNAMELEN-1) {
+        if (major_status != GSS_S_COMPLETE || strlen((const char*)server_name.value)>MAXNAMELEN-1) {
 
            if (major_status != GSS_S_COMPLETE)
              cgsi_gssapi_err(soap,  "Error displaying name", major_status, minor_status);
@@ -857,7 +858,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
            goto error;
         }
 
-        strncpy(data->server_name, server_name.value, MAXNAMELEN);
+        strncpy(data->server_name, (const char*)server_name.value, MAXNAMELEN);
 
         {
           char buf[TBUFSIZE];
@@ -927,7 +928,7 @@ static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct s
        the connection parameters are filled.
     */
 
-    dst_data = dst->data;
+    dst_data = (struct cgsi_plugin_data *)dst->data;
 
     /* don't want to share these with the source */
     dst_data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
@@ -1145,10 +1146,7 @@ static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *p
 
 #define SSLHSIZE 5
 
-int cgsi_plugin_recv_token(arg, token, token_length)
-void *arg;
-void ** token;
-size_t * token_length;
+int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
 {
      int ret, rem;
      char *tok, *p;
@@ -1274,10 +1272,7 @@ size_t * token_length;
 }
 
 
-int cgsi_plugin_send_token(arg,token,token_length)
-    void *    arg;
-    void *    token;
-    size_t    token_length;
+int cgsi_plugin_send_token(void *arg, void *token, size_t token_length)
 {
     int ret;
     struct cgsi_plugin_data *data;
@@ -1296,11 +1291,11 @@ int cgsi_plugin_send_token(arg,token,token_length)
                   (unsigned int)token_length);
          trace(data, buf);
      }
-     cgsi_plugin_print_token(data, token, token_length);
+     cgsi_plugin_print_token(data, (char *)token, token_length);
      
      /* We send the whole token knowing it is a SSL token */
      
-     ret =  soap_fsend(soap, token, token_length);
+     ret =  soap_fsend(soap, (char *)token, token_length);
      if (ret < 0) {
          char buf[BUFSIZE];
          snprintf(buf, BUFSIZE,"Error sending token data: %s", strerror(errno));
@@ -1317,10 +1312,7 @@ int cgsi_plugin_send_token(arg,token,token_length)
      return 0;
 }
 
-void cgsi_plugin_print_token(data, token, length)
-    struct cgsi_plugin_data *data;
-    char *token;
-    int length;
+void cgsi_plugin_print_token(struct cgsi_plugin_data *data, char *token, int length)
 {
     int i;
 
@@ -1906,7 +1898,7 @@ int retrieve_voms_credentials(struct soap *soap) {
     nbfqan = i;
     
     if (nbfqan > 0) {
-      data->fqan = malloc(sizeof(char *) * (i+1));
+      data->fqan = (char **)malloc(sizeof(char *) * (i+1));
       if (data->fqan != NULL) {
         for (i=0; i<nbfqan; i++) {
           data->fqan[i] = strdup( volist[0]->fqan[i]);   
