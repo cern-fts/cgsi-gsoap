@@ -1,3 +1,10 @@
+* Mon Jul 7 2008 Akos Frohner <Akos.Frohner@cern.ch> 1.3.2-1
+- gSOAP 2.7.10 has introduced a virtual destructor, which inserts
+  a pointer to the VMT at the beginning of the 'soap' structure,
+  making the C and C++ versions of the code binary incompatible,
+  so we need to build C++ flavour of the libraries as well with 
+  _cpp suffix.
+
 * Thu May 8 2008 David Smith <David.Smith@cern.ch> 1.3.1-1
 - Added new function, export_delegated_credentials(), to make
   a delegated credential token available in memory suitable for
