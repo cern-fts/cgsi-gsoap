@@ -24,7 +24,7 @@ SHLIBREQLIBS = -lc
 # a pointer to the VMT at the beginning of the 'soap' structure,
 # making the C and C++ versions of the code binary incompatible,
 # so we need to build C++ flavour of the libraries as well:
-WITH_CPP_LIBS = yes
+#WITH_CPP_LIBS = yes
 
 ################################################################################
 ## project flags ##
@@ -238,7 +238,7 @@ installtargets = installinc installlib installbin installman installdoc installs
 endif
 
 .PHONY: uninstall install $(installtargets)
-install: 
+install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) $(BINFILES) doc
 	install -d $(PREFIX)/$(INCDIR)
 	for i in $(INCFILES); do install $(INSTALL_FLAGS) -m 644 $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
 	install -d $(PREFIX)/$(LIBDIR)

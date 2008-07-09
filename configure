@@ -22,9 +22,9 @@ if [ "$basedir" = "$PWD" ]; then
 	exit 2
 fi
 
-USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=...  "
+USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=... --with-cpp-libs"
 
-TEMP=$(getopt -o h --long help,with-version:,with-release:,with-globus-prefix:,with-globus-thr-flavor:,with-globus-nothr-flavor:,with-gsoap-location:,with-gsoap-version:,with-voms-location: -- "$@")
+TEMP=$(getopt -o h --long help,with-version:,with-release:,with-globus-prefix:,with-globus-thr-flavor:,with-globus-nothr-flavor:,with-gsoap-location:,with-gsoap-version:,with-voms-location:,with-cpp-libs -- "$@")
 eval set -- "$TEMP"
 
 echo "$@" >${basedir}/config.status
@@ -88,6 +88,9 @@ while true; do
             VOMS_LOCATION="$1"
             shift
             ;;
+        --with-cpp-libs)
+            shift
+            WITH_CPP_LIBS='yes'
         --)
             shift
             break
@@ -113,6 +116,7 @@ GLOBUS_FLAVOUR=${GLOBUS_FLAVOUR}
 GLOBUS_FLAVOUR_PTHR=${GLOBUS_FLAVOUR_PTHR}
 USE_VOMS=yes
 VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
+WITH_CPP_LIBS=${WITH_CPP_LIBS}
 
 include \$(SRCDIR)/Makefile
 EOF
@@ -129,6 +133,7 @@ GLOBUS_FLAVOUR=${GLOBUS_FLAVOUR}
 GLOBUS_FLAVOUR_PTHR=${GLOBUS_FLAVOUR_PTHR}
 USE_VOMS=yes
 VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
+WITH_CPP_LIBS=${WITH_CPP_LIBS}
 
 include \$(SRCDIR)/Makefile
 EOF
