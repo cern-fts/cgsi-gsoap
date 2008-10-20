@@ -18,6 +18,9 @@ centos.*release 3:centos3
 scientific linux.*release 4:sl4
 scientific linux.*cern.*release 4:slc4
 centos.*release 4:centos4
+scientific linux.*release 5:sl5
+scientific linux.*cern.*release 5:slc5
+centos.*release 5:centos5
 debian:debian
 EOF
 IFS="$IFS_SAVED"
