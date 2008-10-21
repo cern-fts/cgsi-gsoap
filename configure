@@ -91,6 +91,7 @@ while true; do
         --with-cpp-libs)
             shift
             WITH_CPP_LIBS='yes'
+            ;;
         --)
             shift
             break
