@@ -5,7 +5,7 @@
  * For license conditions see the license file or
  * http://eu-egee.org/license.html
  *
- * $Id: cgsi_plugin.c,v 1.37 2008/07/07 07:36:39 szamsu Exp $
+ * $Id: cgsi_plugin.c,v 1.38 2009/01/12 09:17:06 dhsmith Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -263,7 +263,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
   
     /* Keeping the name in the plugin */
     major_status = gss_display_name(&minor_status, server, &name, (gss_OID *) NULL);
-    if (major_status != GSS_S_COMPLETE || strlen((const char *)name.value)>MAXNAMELEN-1) {
+    if (major_status != GSS_S_COMPLETE || strlen((const char *)name.value)>CGSI_MAXNAMELEN-1) {
         if (major_status != GSS_S_COMPLETE)
           cgsi_gssapi_err(soap,  "Error displaying server name", major_status, minor_status);
         else
@@ -272,7 +272,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         goto error;
     }
 
-    strncpy(data->server_name, (const char*)name.value, MAXNAMELEN);
+    strncpy(data->server_name, (const char*)name.value, CGSI_MAXNAMELEN);
 
     {
         char buf[TBUFSIZE];
@@ -335,7 +335,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
         goto error;
     }
 
-    strncpy(data->client_name, (const char*)name.value, MAXNAMELEN);
+    strncpy(data->client_name, (const char*)name.value, CGSI_MAXNAMELEN);
     (void) gss_release_buffer(&tmp_status, &name); 
 
     {
@@ -455,7 +455,7 @@ static int server_cgsi_map_dn(struct soap *soap) {
     
     if (!globus_gss_assist_gridmap(data->client_name, &p)){
         /* We have a mapping */
-        strncpy(data->username, p, MAXNAMELEN);
+        strncpy(data->username, p, CGSI_MAXNAMELEN);
 
         {
             char buf[TBUFSIZE];
@@ -600,7 +600,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
   
     /* Keeping the name in the plugin */
     major_status = gss_display_name(&minor_status, client, &namebuf, (gss_OID *) NULL);
-    if (major_status != GSS_S_COMPLETE || strlen((const char*)namebuf.value)>MAXNAMELEN-1) {
+    if (major_status != GSS_S_COMPLETE || strlen((const char*)namebuf.value)>CGSI_MAXNAMELEN-1) {
         if (major_status != GSS_S_COMPLETE)
           cgsi_gssapi_err(soap,  "Error displaying client name", major_status, minor_status);
         else
@@ -608,7 +608,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         goto error;
     }
 
-    strncpy(data->client_name, (const char*)namebuf.value, MAXNAMELEN);
+    strncpy(data->client_name, (const char*)namebuf.value, CGSI_MAXNAMELEN);
     (void)gss_release_buffer(&tmp_status, &namebuf);
        
     {
@@ -845,7 +845,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         }
                                            
         major_status = gss_display_name(&minor_status, tgt_name, &server_name, (gss_OID *) NULL);
-        if (major_status != GSS_S_COMPLETE || strlen((const char*)server_name.value)>MAXNAMELEN-1) {
+        if (major_status != GSS_S_COMPLETE || strlen((const char*)server_name.value)>CGSI_MAXNAMELEN-1) {
 
            if (major_status != GSS_S_COMPLETE)
              cgsi_gssapi_err(soap,  "Error displaying name", major_status, minor_status);
@@ -858,7 +858,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
            goto error;
         }
 
-        strncpy(data->server_name, (const char*)server_name.value, MAXNAMELEN);
+        strncpy(data->server_name, (const char*)server_name.value, CGSI_MAXNAMELEN);
 
         {
           char buf[TBUFSIZE];
@@ -1576,14 +1576,14 @@ static int setup_trace(struct cgsi_plugin_data *data) {
     char *envar;
 
     data->trace_mode=0;
-    data->trace_file[0]= data->trace_file[MAXNAMELEN-1]= '\0';
+    data->trace_file[0]= data->trace_file[CGSI_MAXNAMELEN-1]= '\0';
 
     envar = getenv(CGSI_TRACE);
     if (envar != NULL) {
         data->trace_mode=1;
         envar = getenv(CGSI_TRACEFILE);
         if (envar != NULL) {
-            strncpy(data->trace_file, envar, MAXNAMELEN-1);
+            strncpy(data->trace_file, envar, CGSI_MAXNAMELEN-1);
         }
     } 
     return 0;

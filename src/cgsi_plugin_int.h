@@ -28,7 +28,7 @@
 #define SERVER_PLUGIN_ID "CGSI_PLUGIN_SERVER_1.0" /* plugin identification */
 #define CGSI_PLUGIN  "CGSI-gSOAP"
 
-#define MAXNAMELEN 512
+#define CGSI_MAXNAMELEN 512
 
 struct cgsi_plugin_data {
     int context_established;
@@ -39,14 +39,14 @@ struct cgsi_plugin_data {
     size_t (*frecv)(struct soap*, char*, size_t);
     int (*fopen)(struct soap*, const char*, const char*, int);
     int (*fclose)(struct soap*);
-    char client_name[MAXNAMELEN];
-    char server_name[MAXNAMELEN];
-    char username[MAXNAMELEN];    
+    char client_name[CGSI_MAXNAMELEN];
+    char server_name[CGSI_MAXNAMELEN];
+    char username[CGSI_MAXNAMELEN];    
     int nb_iter;
     int disable_hostname_check; 
     int context_flags;
     int trace_mode;
-    char trace_file[MAXNAMELEN];
+    char trace_file[CGSI_MAXNAMELEN];
     gss_cred_id_t deleg_credential_handle;
     int deleg_cred_set;
     /* Pointers to VOMS data */

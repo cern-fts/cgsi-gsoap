@@ -33,7 +33,7 @@ Group:  Application/File
 Provides: libcgsi_plugin_voms_gsoap_@GSOAP.VERSION@_@GLOBUS.DBG.THR.FLAVOUR@.so
 Provides: libcgsi_plugin_voms_gsoap_@GSOAP.VERSION@_@GLOBUS.DBG.NOTHR.FLAVOUR@.so
 Requires: vdt_globus_essentials
-Requires: glite-security-voms-api-c
+Requires: glite-security-voms-api-cpp
 %description voms
 CGSI allows writing gSOAP clients with GSI authentication.
 This package contains the VOMS enabled shared libraries for

@@ -1,5 +1,5 @@
 ##
-# $id: $
+# $Id: Makefile,v 1.22 2009/01/12 09:17:06 dhsmith Exp $
 ##
 
 ifeq ($(SRCDIR), $(EMPTY))
@@ -11,7 +11,7 @@ endif
 
 ################################################################################
 ## implicit rule flags ##
-SHELL = /bin/sh -e
+SHELL = /bin/sh
 CC = gcc
 CPP = g++
 CFLAGS = -Wall -g -fPIC
@@ -72,10 +72,10 @@ endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
 VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
-VOMS_LIBS=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsc
+VOMS_LIBS=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsapi_$(GLOBUS_FLAVOUR)
 
 VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
-VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsc_$(GLOBUS_FLAVOUR_PTHR)
+VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsapi_$(GLOBUS_FLAVOUR_PTHR)
 endif
 
 #CFLAGS += $(VOMS_FLAGS)
@@ -126,7 +126,7 @@ libcgsi_plugin$(GSOAP_VERSION).a: cgsi_plugin.o
 	$(RANLIB) $@
 
 libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+	$(LD) $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
 
 
 ifneq ($(WITH_CPP_LIBS), $(EMPTY))
@@ -135,7 +135,7 @@ libcgsi_plugin$(GSOAP_VERSION)_cpp.a: cgsi_plugin_cpp.o
 	$(RANLIB) $@
 
 libcgsi_plugin$(GSOAP_VERSION)_cpp.so: cgsi_plugin_cpp.o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
+	$(LD) $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS)
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
@@ -147,7 +147,7 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a: cgsi_plugin_voms_$(GLOB
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+	$(LD) $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
 
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
 	$(CC) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ $<
@@ -157,7 +157,7 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a: cgsi_plugin_voms_$
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR).o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
+	$(LD) $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
 
 
 ifneq ($(WITH_CPP_LIBS), $(EMPTY))
@@ -169,7 +169,7 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a: cgsi_plugin_voms_$(
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+	$(LD) $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
 
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h cgsi_plugin.c
 	$(CC) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ $<
@@ -179,7 +179,7 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a: cgsi_plugin_vo
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o
-	ld $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
+	$(LD) $(SHLIBLDFLAGS) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
 endif
 
 endif
@@ -193,7 +193,7 @@ doc: doxygenConfig
 
 ################################################################################
 
-# Usage example: make install PREFIX=/usr/local BINDIR=my_executables
+# Usage example: make install PREFIX=/usr/local BINFILES=my_executables
 
 # installation directories defaults are generic unix
 PPREFIX=/usr
@@ -240,15 +240,17 @@ endif
 .PHONY: uninstall install $(installtargets)
 install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) $(BINFILES) doc
 	install -d $(PREFIX)/$(INCDIR)
-	for i in $(INCFILES); do install $(INSTALL_FLAGS) -m 644 $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
+	for i in $(INCFILES); do cp $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
 	install -d $(PREFIX)/$(LIBDIR)
-	for l in $(LIBFILES); do install $(INSTALL_FLAGS) -m 755 $$l $(PREFIX)/$(LIBDIR)/$$l; done
+	for l in $(LIBFILES); do cp $$l $(PREFIX)/$(LIBDIR)/$$l; done
 	for l in $(SHLIBFILES); do \
-		install $(INSTALL_FLAGS) -m 755 $$l $(PREFIX)/$(LIBDIR)/$$l.$(VERSION); \
+		cp $$l $(PREFIX)/$(LIBDIR)/$$l.$(VERSION); \
 		(cd $(PREFIX)/$(LIBDIR); ln -sf $$l.$(VERSION) $$l); \
 		done
+	ifneq ($(BINFILES), $(EMPTY))
 	install -d $(PREFIX)/$(BINDIR)
-	for b in $(BINFILES); do install $(INSTALL_FLAGS) -m 644 $$b $(PREFIX)/$(BINDIR); done
+	for b in $(BINFILES); do cp $$b $(PREFIX)/$(BINDIR); done
+	endif
 	mkdir -p $(PREFIX)/share
 	cp -r man $(PREFIX)/share/
 	mkdir -p $(PREFIX)/$(DOCDIR)
