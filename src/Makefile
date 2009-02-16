@@ -1,5 +1,5 @@
 ##
-# $Id: Makefile,v 1.22 2009/01/12 09:17:06 dhsmith Exp $
+# $Id: Makefile,v 1.23 2009/02/16 22:39:29 szamsu Exp $
 ##
 
 ifeq ($(SRCDIR), $(EMPTY))
@@ -193,7 +193,7 @@ doc: doxygenConfig
 
 ################################################################################
 
-# Usage example: make install PREFIX=/usr/local BINFILES=my_executables
+# Usage example: make install PREFIX=/usr/local
 
 # installation directories defaults are generic unix
 PPREFIX=/usr
@@ -204,7 +204,6 @@ MANDIR =share
 DOCDIR =share/doc/CGSI$(GSOAP_VERSION)
 
 # insert space separated files to install (used for cleaning too) here
-BINFILES =
 LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
 SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
 
@@ -238,7 +237,7 @@ installtargets = installinc installlib installbin installman installdoc installs
 endif
 
 .PHONY: uninstall install $(installtargets)
-install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) $(BINFILES) doc
+install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) doc
 	install -d $(PREFIX)/$(INCDIR)
 	for i in $(INCFILES); do cp $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
 	install -d $(PREFIX)/$(LIBDIR)
@@ -247,10 +246,6 @@ install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) $(BINFILES) doc
 		cp $$l $(PREFIX)/$(LIBDIR)/$$l.$(VERSION); \
 		(cd $(PREFIX)/$(LIBDIR); ln -sf $$l.$(VERSION) $$l); \
 		done
-	ifneq ($(BINFILES), $(EMPTY))
-	install -d $(PREFIX)/$(BINDIR)
-	for b in $(BINFILES); do cp $$b $(PREFIX)/$(BINDIR); done
-	endif
 	mkdir -p $(PREFIX)/share
 	cp -r man $(PREFIX)/share/
 	mkdir -p $(PREFIX)/$(DOCDIR)
@@ -262,7 +257,7 @@ install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) $(BINFILES) doc
 .PHONY: clean
 clean:
 # files vars are specified in install
-	-$(RM) *.o $(LIBFILES) $(BINFILES) $(SHLIBFILES)
+	-$(RM) *.o $(LIBFILES) $(SHLIBFILES)
 
 
 ################################################################################
