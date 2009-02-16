@@ -1,3 +1,7 @@
+* Mon Jan 12 2009 David Smith <David.Smith@cern.ch> 1.3.3-1
+- Update version to 1.3.3, apply initial solaris build changes 
+  and change vomsc to vomsapi.
+
 * Mon Oct 20 2008 Akos Frohner <Akos.Frohner@cern.ch> 1.3.2-2
 - Fixes #42623: DM custom packager creates rpms with invalid name
 
