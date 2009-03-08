@@ -1,0 +1,6 @@
+PKG="CGSI-gSOAP27-dev"
+NAME="GSI plugin for gSOAP 2.7 (headers and archive libs)"
+ARCH="i386"
+VERSION="x.x.x"
+CATEGORY="application"
+BASEDIR="/opt/glite"

@@ -1,0 +1,6 @@
+PKG="CGSI-gSOAP27"
+NAME="GSI plugin for gSOAP 2.7 (shared libraries without VOMS support)"
+ARCH="i386"
+VERSION="x.x.x"
+CATEGORY="application"
+BASEDIR="/opt/glite"
