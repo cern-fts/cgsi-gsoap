@@ -1,9 +1,9 @@
 /*  
- * Copyright (c) Members of the EGEE Collaboration. 2004.
+ * Copyright (c) Members of the EGEE Collaboration. 2004-2009.
  * See http://public.eu-egee.org/partners/ for details on 
  * the copyright holders.
  * For license conditions see the license file or
- * http://eu-egee.org/license.html
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 /** cgsi_plugin.h - Header file for the GSI gSOAP plugin
@@ -194,7 +194,7 @@ int retrieve_voms_credentials(struct soap *soap);
  *
  * @param soap The soap structure for the request
  *
- * @return The client voname is malloced in the soap structure (DON"T free), 
+ * @return The client voname is malloced in the soap structure (DON'T free), 
  *         NULL otherwise
  */
 char *get_client_voname(struct soap *soap);
@@ -204,7 +204,9 @@ char *get_client_voname(struct soap *soap);
  *
  * @param soap The soap structure for the request
  *
- * @return The client roles are malloced in the soap structure (DON"T free), 
+ * @param nbfqans The number of returned Fully Qualified Attribute Names
+ *
+ * @return The client roles are malloced in the soap structure (DON'T free), 
  *         NULL otherwise
  */
 char ** get_client_roles(struct soap *soap, int* nbfqans);
