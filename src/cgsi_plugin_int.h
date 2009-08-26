@@ -1,9 +1,9 @@
 /*
- * Copyright (c) Members of the EGEE Collaboration. 2004.
+ * Copyright (c) Members of the EGEE Collaboration. 2004-2009.
  * See http://public.eu-egee.org/partners/ for details on 
  * the copyright holders.
  * For license conditions see the license file or
- * http://eu-egee.org/license.html
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 
 /** cgsi_plugin_int.h - Header file for the GSI gSOAP plugin

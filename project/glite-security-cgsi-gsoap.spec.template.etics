@@ -4,7 +4,7 @@ Version: @VERSION@
 Release: @RELEASE@@RELEASE.SUFFIX@
 Source0: CGSI_gSOAP_@GSOAP.VERSION@-%{version}-@RELEASE@.tar.gz
 Vendor: CERN/IT/GD
-License:Open Source EGEE License
+License: Apache2
 Group: Application/File
 BuildRoot: %{_builddir}/%{name}-%{version}
 Prefix: /usr

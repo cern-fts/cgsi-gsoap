@@ -2,9 +2,9 @@
 #
 # poor man's libtool
 #
-# (c) 2006. FROHNER Ákos <Akos.Frohner@cern.ch>
+# (c) 2006-2009. FROHNER Ákos <Akos.Frohner@cern.ch>
 #
-# License: GPL http://www.gnu.org/licenses/gpl.txt
+# License: http://www.apache.org/licenses/LICENSE-2.0
 #
 
 use strict;
