@@ -1,11 +1,11 @@
 /*
- * Copyright (c) Members of the EGEE Collaboration. 2004.
+ * Copyright (c) Members of the EGEE Collaboration. 2004-2009.
  * See http://public.eu-egee.org/partners/ for details on 
  * the copyright holders.
  * For license conditions see the license file or
- * http://eu-egee.org/license.html
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * $Id: cgsi_plugin.c,v 1.38 2009/01/12 09:17:06 dhsmith Exp $
+ * $Id: cgsi_plugin.c,v 1.39 2009/08/26 12:59:25 szamsu Exp $
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -27,7 +27,13 @@
 #if defined(USE_VOMS)
 #include "gssapi_openssl.h"
 #include "globus_gsi_credential.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "voms_apic.h"
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 #define BUFSIZE 1024
@@ -1315,6 +1321,8 @@ int cgsi_plugin_send_token(void *arg, void *token, size_t token_length)
 void cgsi_plugin_print_token(struct cgsi_plugin_data *data, char *token, int length)
 {
     int i;
+    unsigned char *p;
+    char buf[TBUFSIZE];
 
     /* can avoid printing all the token if the trace routine
      * is disabled */
@@ -1323,8 +1331,7 @@ void cgsi_plugin_print_token(struct cgsi_plugin_data *data, char *token, int len
     }
 
     /* printing the characters as unsigned hex digits */
-    unsigned char *p = (unsigned char *)token;
-    char buf[TBUFSIZE];
+    p = (unsigned char *)token;
     
     for (i=0; i < length; i++, p++) {
         snprintf(buf, TBUFSIZE,"%02x ", *p);
