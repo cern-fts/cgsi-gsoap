@@ -1,7 +1,0 @@
-CGSI allows writing gSOAP clients with GSI authentication.
-This package contains the shared libraries for the client
-side.CGSI allows writing gSOAP clients with GSI authentication.
-This package contains the header and static library for
-development.CGSI allows writing gSOAP clients with GSI authentication.
-This package contains the VOMS enabled shared libraries for
-the servers side.
