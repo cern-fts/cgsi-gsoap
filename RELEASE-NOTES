@@ -1,3 +1,7 @@
+* Tue Aug 3 2010 Jean-Philippe Baud <Jean-Philippe.Baud@cern.ch> 1.3.4
+- add code to get user_ca
+- fix typo in Makefile (GLOBUS_FLAVOUR default)
+
 * Wed Aug 19 2009 Akos Frohner <Akos.Frohner> 1.3.3-2
 - updating build dependency
 
