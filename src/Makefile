@@ -1,5 +1,5 @@
 ##
-# $Id: Makefile,v 1.24 2009/08/26 15:12:08 szamsu Exp $
+# $Id$
 ##
 
 ifeq ($(SRCDIR), $(EMPTY))
@@ -34,7 +34,7 @@ GLOBUS_LOCATION=/opt/globus
 endif
 
 ifeq ($(GLOBUS_FLAVOUR), $(EMPTY))
-GLOBUS_FLAVOUR = gcc32dbgthr
+GLOBUS_FLAVOUR = gcc32dbg
 endif
 
 GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR)pthr
