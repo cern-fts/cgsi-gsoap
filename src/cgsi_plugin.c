@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * $Id: cgsi_plugin.c,v 1.39 2009/08/26 12:59:25 szamsu Exp $
+ * $Id$
  */
 
 /** cgsi_plugin.c - GSI plugin for gSOAP
@@ -33,9 +33,9 @@
 #include <stdio.h>
 #include "cgsi_plugin_int.h" 
 #include <openssl/err.h>
-#if defined(USE_VOMS)
 #include "gssapi_openssl.h"
 #include "globus_gsi_credential.h"
+#if defined(USE_VOMS)
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -377,8 +377,8 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
 
     /* by default check VOMS credentials, and fail if invalid */
     if (! data->disable_voms_check) {
-        if (retrieve_voms_credentials(soap)) {
-            cgsi_err(soap, "Error retrieveing the VOMS credentials");
+        if (retrieve_userca_and_voms_creds(soap)) {
+            cgsi_err(soap, "Error retrieveing the userca/VOMS credentials");
             goto error;
         }
     }
@@ -1807,25 +1807,67 @@ static void cgsi_plugin_globus_modules(int activate) {
     }
 }
 
+static int _get_user_ca (X509 *px509_cred, STACK_OF(X509) *px509_chain, char *user_ca)
+{
+  X509 *cert;
+  globus_gsi_cert_utils_cert_type_t cert_type;
+  int i;
 
+  cert = px509_cred;
+  if (globus_gsi_cert_utils_get_cert_type(cert, &cert_type) != GLOBUS_SUCCESS)
+    return (-1);
+  if (cert_type == GLOBUS_GSI_CERT_UTILS_TYPE_EEC ||
+   cert_type == GLOBUS_GSI_CERT_UTILS_TYPE_CA) {
+    X509_NAME_oneline(X509_get_issuer_name(cert), user_ca, 255);
+    return (0);
+  }
+  for (i = 0; i < sk_X509_num(px509_chain); i++) {
+    cert = sk_X509_value (px509_chain, i);
+    if (globus_gsi_cert_utils_get_cert_type(cert, &cert_type) != GLOBUS_SUCCESS)
+      return (-1);
+    if (cert_type == GLOBUS_GSI_CERT_UTILS_TYPE_EEC ||
+     cert_type == GLOBUS_GSI_CERT_UTILS_TYPE_CA) {
+      X509_NAME_oneline(X509_get_issuer_name(cert), user_ca, 255);
+      return (0);
+    }
+  }
+  return (-1);
+}
  
+/* Returns the CA */
+char *get_client_ca(struct soap *soap) {
+  struct cgsi_plugin_data *data;  
+
+  if (soap == NULL) return NULL;
+  data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
+  if (data == NULL) {
+    cgsi_err(soap, "get_client_ca: could not get data structure");
+    return NULL;
+  }
+
+  if (*data->user_ca == '\0') {
+    return NULL;
+  }
+
+  return data->user_ca;
+}
+
 /*****************************************************************
  *                                                               *
  *               VOMS FUNCTIONS                                  *
  *                                                               *
  *****************************************************************/
 
-int retrieve_voms_credentials(struct soap *soap) {
+int retrieve_userca_and_voms_creds(struct soap *soap) {
 
   int ret = 0;
-#if defined(USE_VOMS)
-
-  int error= 0;
   X509 *px509_cred= NULL;
   STACK_OF(X509) *px509_chain = NULL;
+#if defined(USE_VOMS)
+  int error= 0;
   struct vomsdata *vd= NULL;
   struct voms **volist = NULL;
-  /*  struct voms vo; */
+#endif
   gss_ctx_id_desc * context;
   gss_cred_id_t cred;  
   /* Internally a gss_cred_id_t type is a pointer to a gss_cred_id_desc */
@@ -1880,9 +1922,18 @@ int retrieve_voms_credentials(struct soap *soap) {
     goto leave;
   }
   
+  if (_get_user_ca (px509_cred, px509_chain, data->user_ca) < 0)
+    goto leave;
+
   /* No need for the globus module anymore, the rest are calls to VOMS */
   (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
   
+#if defined(USE_VOMS)
+
+  if (data->disable_voms_check) {
+    ret = 0;
+    goto leave;
+  }
   if ((vd = VOMS_Init (NULL, NULL)) == NULL) {
     goto leave;
   }
@@ -1892,6 +1943,7 @@ int retrieve_voms_credentials(struct soap *soap) {
     char buffer[BUFSIZE];
     VOMS_ErrorMessage(vd, error, buffer, BUFSIZE);
     cgsi_err(soap, buffer);
+    VOMS_Destroy (vd);  
     goto leave;
   }
   
@@ -1924,14 +1976,15 @@ int retrieve_voms_credentials(struct soap *soap) {
       }
     } /* if (nbfqan > 0) */
   }
+  VOMS_Destroy (vd);  
+
+#endif
   
   ret = 0;
 
- leave:  
-  if (vd) VOMS_Destroy (vd);  
+leave:  
   if (px509_cred) X509_free (px509_cred);
   if (px509_chain) sk_X509_pop_free(px509_chain,X509_free);
-#endif  
 
   return ret;
 }

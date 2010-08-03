@@ -51,6 +51,7 @@ struct cgsi_plugin_data {
     char client_name[CGSI_MAXNAMELEN];
     char server_name[CGSI_MAXNAMELEN];
     char username[CGSI_MAXNAMELEN];    
+    char user_ca[CGSI_MAXNAMELEN];    
     int nb_iter;
     int disable_hostname_check; 
     int context_flags;

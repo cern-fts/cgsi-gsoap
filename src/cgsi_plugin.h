@@ -52,7 +52,7 @@ extern "C" {
 /** Disable DN->userid mapping via gridmap-file. */
 #define CGSI_OPT_DISABLE_MAPPING    0x40
 /** Disable connect time VOMS parsing for better error handling 
- *  via an explicit call to retrieve_voms_credentials() */
+ *  via an explicit call to retrieve_userca_and_voms_creds() */
 #define CGSI_OPT_DISABLE_VOMS_CHECK 0x80
 /** Allow client and server to only connect together when
  *  they have the same identity */
@@ -196,7 +196,17 @@ void clear_default_proxy_file(int unlink_file);
  * @return 0 if successful, -1 otherwise
  *           SOAP Fault structure contains the detailed description.
  */
-int retrieve_voms_credentials(struct soap *soap);
+int retrieve_userca_and_voms_creds(struct soap *soap);
+
+/**
+ * Returns the client CA
+ *
+ * @param soap The soap structure for the request
+ *
+ * @return The client CA is allocated in the soap structure (DON'T free), 
+ *         NULL otherwise
+ */
+char *get_client_ca(struct soap *soap);
 
 /**
  * Returns the client VO name if it was provided in the certificate
