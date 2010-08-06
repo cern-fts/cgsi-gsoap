@@ -1989,6 +1989,10 @@ leave:
   return ret;
 }
 
+int retrieve_voms_credentials(struct soap *soap) {
+  return retrieve_userca_and_voms_creds(soap);
+}
+
 /* Returns the VO name, if it could be retrieved via VOMS */
 char *get_client_voname(struct soap *soap) {
   struct cgsi_plugin_data *data;  
