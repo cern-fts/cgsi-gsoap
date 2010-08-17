@@ -157,7 +157,7 @@ sed -e "s/@VERSION@/${VERSION}/g" \
 	-e "s/@RELEASE@/${RELEASE}/g" \
     -e "s/@RELEASE.SUFFIX@/${RELEASE_SUFFIX}/g" \
 	-e "s/@GSOAP.VERSION@/${GSOAP_MAJOR_MINOR_VERSION}/g" \
-	-e "s/@GLOBUS.DBG.NOTHR.FLAVOUR/${GLOBUS_FLAVOUR}/g" \
+	-e "s/@GLOBUS.DBG.NOTHR.FLAVOUR@/${GLOBUS_FLAVOUR}/g" \
 	-e "s/@GLOBUS.DBG.THR.FLAVOUR@/${GLOBUS_FLAVOUR_PTHR}/g" \
 	${SPEC_TEMPLATE} >glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
 cat ${basedir}/RELEASE-NOTES >>glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
