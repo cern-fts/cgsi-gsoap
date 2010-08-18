@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) Members of the EGEE Collaboration. 2006-2009.
+# Copyright (c) Members of the EGEE Collaboration. 2006-2010.
 # See http://public.eu-egee.org/partners/ for details on
 # the copyright holders.
 # For license conditions see the license file or
@@ -8,19 +8,10 @@
 #
 # Authors:
 #      Akos Frohner <Akos.Frohner@cern.ch>
+#      Jean-Philippe Baud <Jean-Philippe.Baud@cern.ch>
 #
-# Poor man's adapter to work around ETICS newline and backslash handling problems.
 
-basedir=$(cd $(dirname $0); echo $PWD)
-
-if [ "$basedir" = "$PWD" ]; then
-	echo "Please use a differnt build directory than the toplevel source!"
-	echo "For example:"
-	echo "  mkdir -p build"
-	echo "  cd build"
-	echo "  ../configure $@"
-	exit 2
-fi
+basedir=`dirname $0`
 
 USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=... --with-cpp-libs --with-libdir=..."
 
@@ -111,8 +102,7 @@ done
 
 GSOAP_MAJOR_MINOR_VERSION=$(echo ${GSOAP_VERSION} | cut -d . -f1,2)
 
-mkdir -p src
-cat >src/Makefile <<EOF
+cat >Makefile <<EOF
 SRCDIR=${basedir}/src
 VERSION=${VERSION}
 
@@ -128,37 +118,3 @@ LIBDIR=${LIBDIR}
 
 include \$(SRCDIR)/Makefile
 EOF
-
-mkdir -p test
-cat >test/Makefile <<EOF
-SRCDIR=${basedir}/test
-VERSION=${VERSION}
-
-GSOAP_LOCATION=${GSOAP_LOCATION:-/usr/local}
-GSOAP_VERSION=_gsoap_${GSOAP_MAJOR_MINOR_VERSION}
-GLOBUS_LOCATION=${GLOBUS_LOCATION:-/opt/globus}
-GLOBUS_FLAVOUR=${GLOBUS_FLAVOUR}
-GLOBUS_FLAVOUR_PTHR=${GLOBUS_FLAVOUR_PTHR}
-USE_VOMS=yes
-VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
-WITH_CPP_LIBS=${WITH_CPP_LIBS}
-
-include \$(SRCDIR)/Makefile
-EOF
-
-# ugly hack for gSOAP 2.7.9 vs. 2.7.10 binary incompatibility
-# which ended up as a package name change
-SPEC_TEMPLATE=${basedir}/project/glite-security-cgsi-gsoap.spec.template.etics
-if [ -r ${basedir}/project/glite-security-cgsi-gsoap.spec.template.${GSOAP_VERSION} ]; then
-    SPEC_TEMPLATE=${basedir}/project/glite-security-cgsi-gsoap.spec.template.${GSOAP_VERSION}
-fi
-
-sed -e "s/@VERSION@/${VERSION}/g" \
-	-e "s/@RELEASE@/${RELEASE}/g" \
-    -e "s/@RELEASE.SUFFIX@/${RELEASE_SUFFIX}/g" \
-	-e "s/@GSOAP.VERSION@/${GSOAP_MAJOR_MINOR_VERSION}/g" \
-	-e "s/@GLOBUS.DBG.NOTHR.FLAVOUR@/${GLOBUS_FLAVOUR}/g" \
-	-e "s/@GLOBUS.DBG.THR.FLAVOUR@/${GLOBUS_FLAVOUR_PTHR}/g" \
-	${SPEC_TEMPLATE} >glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
-cat ${basedir}/RELEASE-NOTES >>glite-security-cgsi-gsoap-${GSOAP_MAJOR_MINOR_VERSION}.spec
-
