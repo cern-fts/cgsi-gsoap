@@ -237,7 +237,7 @@ installtargets = installinc installlib installbin installman installdoc installs
 endif
 
 .PHONY: uninstall install $(installtargets)
-install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) doc
+install: $(INCFILES) $(LIBFILES) $(SHLIBFILES)
 	install -d $(PREFIX)/$(INCDIR)
 	for i in $(INCFILES); do cp $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
 	install -d $(PREFIX)/$(LIBDIR)
@@ -247,6 +247,7 @@ install: $(INCFILES) $(LIBFILES) $(SHLIBFILES) doc
 		(cd $(PREFIX)/$(LIBDIR); ln -sf $$l.$(VERSION) $$l); \
 		(cd $(PREFIX)/$(LIBDIR); ln -sf $$l.$(VERSION) $$l.$(VMAJOR)); \
 		done
+install.man: doc
 	mkdir -p $(PREFIX)/share
 	cp -r man $(PREFIX)/share/
 	mkdir -p $(PREFIX)/$(DOCDIR)
