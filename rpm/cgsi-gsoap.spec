@@ -21,7 +21,7 @@ side.
 %package -n CGSI_gSOAP_2.7-dev
 Summary: GSI plugin for gSOAP -- development files
 Group: grid/lcg
-BuildRequires: glite-security-voms-api
+Requires: glite-security-voms-api-cpp
 AutoReqProv: no
 %description -n CGSI_gSOAP_2.7-dev
 CGSI allows writing gSOAP clients with GSI authentication.
@@ -31,7 +31,6 @@ development.
 %package -n CGSI_gSOAP_2.7-voms
 Summary: GSI plugin for gSOAP -- VOMSified libraries
 Group: grid/lcg
-BuildRequires: glite-security-voms-api
 Requires: glite-security-voms-api-cpp
 AutoReqProv: no
 %description -n CGSI_gSOAP_2.7-voms
