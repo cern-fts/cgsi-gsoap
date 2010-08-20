@@ -32,7 +32,6 @@ else
 fi
 GSOAP_VERSION=2.7.6b
 source ${basedir}/VERSION
-RELEASE_SUFFIX='.'$(${basedir}/get-platform-os)
 
 while true; do
     case "$1" in
