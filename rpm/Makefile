@@ -21,11 +21,16 @@ endif
 
 VPACKAGE=CGSI_gSOAP_2.7-$(VERSION)
 VPACKAGE_TAR=$(VPACKAGE).tar.gz
+BUILD_CGSI=build-rpm/BUILD/$(VPACKAGE)
 
 all: rpm
 	mkdir -p ../RPMS
 	cp build-*/RPMS/*/*.rpm ../RPMS/
 	cp build-*/SRPMS/*.rpm ../RPMS/
+
+install: $(BUILD_CGSI)
+	if [ ! -d "$(prefix)" ]; then mkdir -p "$(prefix)"; fi
+	cd $(BUILD_CGSI); $(MAKE) PREFIX=$(prefix) install install.man
 
 rpm: build-rpm 
 	cd build-rpm; rpmbuild --define "_topdir $(PWD)/build-rpm" -ba SPECS/cgsi-gsoap.spec
