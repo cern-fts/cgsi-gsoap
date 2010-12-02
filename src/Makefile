@@ -39,6 +39,32 @@ endif
 
 GLOBUS_FLAVOUR_PTHR=$(GLOBUS_FLAVOUR)pthr
 
+ifeq ($(GSOAP_LOCATION), $(EMPTY))
+GSOAP_LOCATION=/usr/local
+endif
+GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
+
+ifeq ($(GLOBUS_LOCATION), /usr)
+GLOBUS_INCLUDE = -I/usr/include/globus -I/usr/$(LIBDIR)/globus/include
+GLOBUS_LIBS = -lglobus_gssapi_gsi -lglobus_gss_assist
+
+GSOAP_VERSION =
+
+LIBFILES =libcgsi_plugin.a 
+SHLIBFILES =libcgsi_plugin.so
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES +=libcgsi_plugin_cpp.a
+SHLIBFILES +=libcgsi_plugin_cpp.so
+endif
+ifneq ($(USE_VOMS), $(EMPTY))
+LIBFILES +=libcgsi_plugin_voms.a
+SHLIBFILES +=libcgsi_plugin_voms.so
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES +=libcgsi_plugin_voms_cpp.a
+SHLIBFILES +=libcgsi_plugin_voms_cpp.so
+endif
+endif
+else
 GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
 GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
 	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
@@ -47,13 +73,30 @@ GLOBUS_INCLUDE_PTHR = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR_PTHR)
 GLOBUS_LIBS_PTHR = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR) \
         -lglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR)
 
-ifeq ($(GSOAP_LOCATION), $(EMPTY))
-GSOAP_LOCATION=/usr/local
-endif
-GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
-
 ifeq ($(GSOAP_VERSION), $(EMPTY))
 GSOAP_VERSION=_gsoap_2.7
+endif
+
+LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
+SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
+
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.a
+SHLIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.so
+endif
+
+ifneq ($(USE_VOMS), $(EMPTY))
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so 
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a
+LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so 
+SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so
+endif
+endif
 endif
 
 # major version number for shared library names
@@ -72,11 +115,16 @@ LIBDIR=lib
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
+ifeq ($(VOMS_LOCATION), /usr)
+VOMS_FLAGS = -DUSE_VOMS -I/usr/include/voms
+VOMS_LIBS = -lvomsapi
+else
 VOMS_FLAGS = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
 VOMS_LIBS=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsapi_$(GLOBUS_FLAVOUR)
 
 VOMS_FLAGS_PTHR = -DUSE_VOMS -I$(VOMS_LOCATION)/include/glite/security/voms
 VOMS_LIBS_PTHR=-L$(VOMS_LOCATION)/$(LIBDIR) -lvomsapi_$(GLOBUS_FLAVOUR_PTHR)
+endif
 endif
 
 #CFLAGS += $(VOMS_FLAGS)
@@ -90,30 +138,7 @@ endif
 ## compilation targets ##
 .PHONY: all
 
-
-all: libcgsi_plugin$(GSOAP_VERSION).a libcgsi_plugin$(GSOAP_VERSION).so
-
-ifneq ($(WITH_CPP_LIBS), $(EMPTY))
-all: libcgsi_plugin$(GSOAP_VERSION)_cpp.a libcgsi_plugin$(GSOAP_VERSION)_cpp.so
-endif
-
-ifneq ($(USE_VOMS), $(EMPTY))
-all: \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
-ifneq ($(WITH_CPP_LIBS), $(EMPTY))
-all: \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a \
-	libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so
-endif
-endif
-
-
-
+all: $(LIBFILES) $(SHLIBFILES)
 
 # dependencies
 cgsi_plugin.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
@@ -140,6 +165,16 @@ libcgsi_plugin$(GSOAP_VERSION)_cpp.so: cgsi_plugin_cpp.o
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
+cgsi_plugin_voms.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
+	$(CC) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
+
+libcgsi_plugin_voms$(GSOAP_VERSION).a: cgsi_plugin_voms.o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin_voms$(GSOAP_VERSION).so: cgsi_plugin_voms.o
+	$(CC) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR).o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
 	$(CC) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
 
@@ -161,6 +196,16 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so: cgsi_plugin_voms_
 	$(CC) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS_PTHR)
 
 ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+cgsi_plugin_voms_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
+	$(CPP) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_cpp.a: cgsi_plugin_voms_cpp.o
+	$(AR) $(ARFLAGS) $@ $?
+	$(RANLIB) $@
+
+libcgsi_plugin_voms$(GSOAP_VERSION)_cpp.so: cgsi_plugin_voms_cpp.o
+	$(CPP) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
 	$(CPP) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
 
@@ -202,28 +247,6 @@ INCDIR =include
 BINDIR =bin
 MANDIR =share
 DOCDIR =share/doc/CGSI$(GSOAP_VERSION)
-
-# insert space separated files to install (used for cleaning too) here
-LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
-SHLIBFILES =libcgsi_plugin$(GSOAP_VERSION).so
-
-ifneq ($(WITH_CPP_LIBS), $(EMPTY))
-LIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.a
-SHLIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.so
-endif
-
-ifneq ($(USE_VOMS), $(EMPTY))
-LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a
-LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).a
-SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).so 
-SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so
-ifneq ($(WITH_CPP_LIBS), $(EMPTY))
-LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a
-LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a
-SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so 
-SHLIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so
-endif
-endif
 
 INCFILES =cgsi_plugin.h
 
