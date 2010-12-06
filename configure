@@ -13,9 +13,9 @@
 
 basedir=`dirname $0`
 
-USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=... --with-cpp-libs --with-libdir=..."
+USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=... --with-cpp-libs --with-libdir=... --with-emi"
 
-TEMP=$(getopt -o h --long help,with-version:,with-release:,with-globus-prefix:,with-globus-thr-flavor:,with-globus-nothr-flavor:,with-gsoap-location:,with-gsoap-version:,with-voms-location:,with-cpp-libs,with-libdir: -- "$@")
+TEMP=$(getopt -o h --long help,with-version:,with-release:,with-globus-prefix:,with-globus-thr-flavor:,with-globus-nothr-flavor:,with-gsoap-location:,with-gsoap-version:,with-voms-location:,with-cpp-libs,with-libdir:,with-emi -- "$@")
 eval set -- "$TEMP"
 
 echo "$@" >${basedir}/config.status
@@ -88,6 +88,10 @@ while true; do
             LIBDIR="$1"
             shift
             ;;
+        --with-emi)
+            shift
+            WITH_EMI='yes'
+            ;;
         --)
             shift
             break
@@ -105,15 +109,16 @@ cat >Makefile <<EOF
 SRCDIR=${basedir}/src
 VERSION=${VERSION}
 
-GSOAP_LOCATION=${GSOAP_LOCATION:-/usr/local}
+GSOAP_LOCATION=${GSOAP_LOCATION}
 GSOAP_VERSION=_gsoap_${GSOAP_MAJOR_MINOR_VERSION}
-GLOBUS_LOCATION=${GLOBUS_LOCATION:-/opt/globus}
+GLOBUS_LOCATION=${GLOBUS_LOCATION}
 GLOBUS_FLAVOUR=${GLOBUS_FLAVOUR}
 GLOBUS_FLAVOUR_PTHR=${GLOBUS_FLAVOUR_PTHR}
 USE_VOMS=yes
-VOMS_LOCATION=${VOMS_LOCATION:-/opt/glite}
+VOMS_LOCATION=${VOMS_LOCATION}
 WITH_CPP_LIBS=${WITH_CPP_LIBS}
 LIBDIR=${LIBDIR}
+WITH_EMI=${WITH_EMI}
 
 include \$(SRCDIR)/Makefile
 EOF
