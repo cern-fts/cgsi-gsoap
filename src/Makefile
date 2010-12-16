@@ -52,35 +52,6 @@ endif
 endif
 GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
 
-ifneq ($(WITH_EMI), $(EMPTY))
-GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/globus -I$(GLOBUS_LOCATION)/$(LIBDIR)/globus/include
-GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/$(LIBDIR) -lglobus_gssapi_gsi -lglobus_gss_assist
-
-GSOAP_VERSION =
-
-LIBFILES =libcgsi_plugin.a 
-SHLIBFILES =libcgsi_plugin.so
-ifneq ($(WITH_CPP_LIBS), $(EMPTY))
-LIBFILES +=libcgsi_plugin_cpp.a
-SHLIBFILES +=libcgsi_plugin_cpp.so
-endif
-ifneq ($(USE_VOMS), $(EMPTY))
-LIBFILES +=libcgsi_plugin_voms.a
-SHLIBFILES +=libcgsi_plugin_voms.so
-ifneq ($(WITH_CPP_LIBS), $(EMPTY))
-LIBFILES +=libcgsi_plugin_voms_cpp.a
-SHLIBFILES +=libcgsi_plugin_voms_cpp.so
-endif
-endif
-else
-GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
-GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
-	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
-
-GLOBUS_INCLUDE_PTHR = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR_PTHR)
-GLOBUS_LIBS_PTHR = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR) \
-        -lglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR)
-
 ifeq ($(GSOAP_VERSION), $(EMPTY))
 GSOAP_VERSION=_gsoap_2.7
 endif
@@ -92,6 +63,27 @@ ifneq ($(WITH_CPP_LIBS), $(EMPTY))
 LIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.a
 SHLIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.so
 endif
+
+ifneq ($(WITH_EMI), $(EMPTY))
+GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/globus -I$(GLOBUS_LOCATION)/$(LIBDIR)/globus/include
+GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/$(LIBDIR) -lglobus_gssapi_gsi -lglobus_gss_assist
+
+ifneq ($(USE_VOMS), $(EMPTY))
+LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).a
+SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).so
+ifneq ($(WITH_CPP_LIBS), $(EMPTY))
+LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_cpp.a
+SHLIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION)_cpp.so
+endif
+endif
+else
+GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR)
+GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR) \
+	-lglobus_gss_assist_$(GLOBUS_FLAVOUR)
+
+GLOBUS_INCLUDE_PTHR = -I$(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOUR_PTHR)
+GLOBUS_LIBS_PTHR = -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi_$(GLOBUS_FLAVOUR_PTHR) \
+        -lglobus_gss_assist_$(GLOBUS_FLAVOUR_PTHR)
 
 ifneq ($(USE_VOMS), $(EMPTY))
 LIBFILES += libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR).a

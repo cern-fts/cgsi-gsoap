@@ -18,12 +18,13 @@ CGSI allows writing gSOAP clients with GSI authentication.
 This package contains the shared libraries for the client
 side.
 
-%package -n CGSI_gSOAP_2.7-dev
+%package -n CGSI_gSOAP_2.7-devel
 Summary: GSI plugin for gSOAP -- development files
 Group: grid/lcg
 Requires: glite-security-voms-api-cpp
 AutoReqProv: no
-%description -n CGSI_gSOAP_2.7-dev
+Obsoletes: CGSI_gSOAP_2.7-dev
+%description -n CGSI_gSOAP_2.7-devel
 CGSI allows writing gSOAP clients with GSI authentication.
 This package contains the header and static library for
 development.
@@ -61,7 +62,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{prefix}/%{_lib}/libcgsi_plugin_gsoap_2.7*.so
 %{prefix}/%{_lib}/libcgsi_plugin_gsoap_2.7*.so.*
 
-%files -n CGSI_gSOAP_2.7-dev
+%files -n CGSI_gSOAP_2.7-devel
 %defattr(644,root,root)
 %{prefix}/include/cgsi_plugin.h
 %{prefix}/%{_lib}/libcgsi_plugin*.a
