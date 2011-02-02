@@ -15,9 +15,6 @@ basedir=`dirname $0`
 
 USAGE="configure --with-version=...  --with-release=... --with-globus-prefix=...  --with-globus-thr-flavor=...  --with-globus-nothr-flavor=...  --with-gsoap-location=...  --with-gsoap-version=...  --with-voms-location=... --with-cpp-libs --with-libdir=... --with-emi"
 
-TEMP=$(getopt -o h --long help,with-version:,with-release:,with-globus-prefix:,with-globus-thr-flavor:,with-globus-nothr-flavor:,with-gsoap-location:,with-gsoap-version:,with-voms-location:,with-cpp-libs,with-libdir:,with-emi -- "$@")
-eval set -- "$TEMP"
-
 echo "$@" >${basedir}/config.status
 
 # some sensible defaults in RedHat style
@@ -33,71 +30,108 @@ fi
 GSOAP_VERSION=2.7.6b
 source ${basedir}/VERSION
 
-while true; do
+while test $# -ne 0; do
     case "$1" in
         -h|--help)
             echo $USAGE
             exit
             ;;
-        --with-version)
-            shift
-            VERSION="$1"
-            shift
-            ;;  
-        --with-release)
-            shift
-            RELEASE="$1"
-            shift
-            ;;  
-        --with-globus-prefix)
-            shift
-            GLOBUS_LOCATION="$1"
+        --with-version*)
+            if [ '--with-version' = "$1" ]; then
+                VERSION="$1"
+                shift
+            else
+                VERSION=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;;  
-        --with-globus-thr-flavor)
-            shift
-            GLOBUS_FLAVOUR_PTHR="$1"
+        --with-release*)
+            if [ '--with-release' = "$1" ]; then
+                RELEASE="$1"
+                shift
+            else
+                RELEASE=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;;  
-        --with-globus-nothr-flavor)
+        --with-globus-prefix*)
+            if [ '--with-globus-prefix' = "$1" ]; then
+                GLOBUS_LOCATION="$1"
+                shift
+            else
+                GLOBUS_LOCATION=`echo $1 | cut -d= -f 2`
+            fi
             shift
-            GLOBUS_FLAVOUR="$1"
+            ;;  
+        --with-globus-thr-flavor*)
+            if [ '--with-globus-thr-flavor' = "$1" ]; then
+                GLOBUS_FLAVOUR_PTHR="$1"
+                shift
+            else
+                GLOBUS_FLAVOUR_PTHR=`echo $1 | cut -d= -f 2`
+            fi
+            shift
+            ;;  
+        --with-globus-nothr-flavor*)
+            if [ '--with-globus-nothr-flavor' = "$1" ]; then
+                GLOBUS_FLAVOUR="$1"
+                shift
+            else
+                GLOBUS_FLAVOUR=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;; 
-        --with-gsoap-location)
-            shift
-            GSOAP_LOCATION="$1"
+        --with-gsoap-location*)
+            if [ '--with-gsoap-location' = "$1" ]; then
+                GSOAP_LOCATION="$1"
+                shift
+            else
+                GSOAP_LOCATION=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;;
-        --with-gsoap-version)
-            shift
-            GSOAP_VERSION="$1"
+        --with-gsoap-version*)
+            if [ '--with-gsoap-version' = "$1" ]; then
+                GSOAP_VERSION="$1"
+                shift
+            else
+                GSOAP_VERSION=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;;  
-        --with-voms-location)
-            shift
-            VOMS_LOCATION="$1"
+        --with-voms-location*)
+            if [ '--with-voms-location' = "$1" ]; then
+                VOMS_LOCATION="$1"
+                shift
+            else
+                VOMS_LOCATION=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;;
         --with-cpp-libs)
             shift
             WITH_CPP_LIBS='yes'
             ;;
-        --with-libdir)
-            shift
-            LIBDIR="$1"
+        --with-libdir*)
+            if [ '--with-libdir' = "$1" ]; then
+                LIBDIR="$1"
+                shift
+            else
+                LIBDIR=`echo $1 | cut -d= -f 2`
+            fi
             shift
             ;;
         --with-emi)
             shift
             WITH_EMI='yes'
             ;;
-        --)
+        --*)
+            echo "Unknown option '$1'"
             shift
             break
             ;;
         *)
-            echo "Unknown option '$1'"
+            echo "Unknown parameter '$1'"
             exit 2
             ;;
     esac
