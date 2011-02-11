@@ -1813,6 +1813,8 @@ static int _get_user_ca (X509 *px509_cred, STACK_OF(X509) *px509_chain, char *us
   globus_gsi_cert_utils_cert_type_t cert_type;
   int i;
 
+  if (! px509_cred || ! px509_chain)
+    return (-1);
   cert = px509_cred;
   if (globus_gsi_cert_utils_get_cert_type(cert, &cert_type) != GLOBUS_SUCCESS)
     return (-1);
