@@ -19,6 +19,9 @@ ifndef RELEASE_SUFFIX
 RELEASE_SUFFIX=.$(shell ../get-platform-os)
 endif
 
+REQUIRES.GLOBUS =$(shell if (echo "$(EXTRA_CONFIGURE_OPTIONS)" | egrep -e "--with-emi" > /dev/null 2>&1); then echo "globus-gss-assist" ; else echo "vdt_globus_essentials"; fi;)
+REQUIRES.VOMS =$(shell if (echo "$(EXTRA_CONFIGURE_OPTIONS)" | egrep -e "--with-emi" > /dev/null 2>&1); then echo "voms" ; else echo "glite-security-voms-api-cpp"; fi;)
+
 VPACKAGE=CGSI_gSOAP_2.7-$(VERSION)
 VPACKAGE_TAR=$(VPACKAGE).tar.gz
 BUILD_CGSI=build-rpm/BUILD/$(VPACKAGE)
@@ -46,6 +49,8 @@ build-rpm: $(VPACKAGE_TAR)
 	sed -e 's/@VERSION@/$(VERSION)/g;' \
 	    -e 's/@RELEASE@/$(RELEASE)/g; ' \
 	    -e 's/@RELEASE.SUFFIX@/$(RELEASE_SUFFIX)/g;' \
+	    -e 's/@REQUIRES.GLOBUS@/$(REQUIRES.GLOBUS)/g;' \
+	    -e 's/@REQUIRES.VOMS@/$(REQUIRES.VOMS)/g;' \
 		cgsi-gsoap.spec >build-rpm/SPECS/cgsi-gsoap.spec
 	cat ../RELEASE-NOTES >>build-rpm/SPECS/cgsi-gsoap.spec
 

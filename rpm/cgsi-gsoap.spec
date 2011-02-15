@@ -7,7 +7,7 @@ Group: grid/lcg
 BuildRoot: %{_builddir}/%{name}-%{version}-root
 License: Apache-2.0
 Prefix: /usr
-Requires: vdt_globus_essentials
+Requires: @REQUIRES.GLOBUS@
 
 %define __spec_install_post %{nil}
 %define debug_package %{nil}
@@ -21,7 +21,7 @@ side.
 %package -n CGSI_gSOAP_2.7-devel
 Summary: GSI plugin for gSOAP -- development files
 Group: grid/lcg
-Requires: glite-security-voms-api-cpp
+Requires: @REQUIRES.VOMS@
 AutoReqProv: no
 Obsoletes: CGSI_gSOAP_2.7-dev
 %description -n CGSI_gSOAP_2.7-devel
@@ -32,7 +32,7 @@ development.
 %package -n CGSI_gSOAP_2.7-voms
 Summary: GSI plugin for gSOAP -- VOMSified libraries
 Group: grid/lcg
-Requires: glite-security-voms-api-cpp
+Requires: @REQUIRES.VOMS@
 AutoReqProv: no
 %description -n CGSI_gSOAP_2.7-voms
 CGSI allows writing gSOAP clients with GSI authentication.
