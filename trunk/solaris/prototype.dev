@@ -1,0 +1,13 @@
+i pkginfo=pkginfo.dev
+i depend=depend.dev
+d none include 0755 root bin
+! default 0644 root bin
+f none include/cgsi_plugin.h
+d none lib 0755 root bin
+f none lib/libcgsi_plugin_gsoap_2.7.a
+f none lib/libcgsi_plugin_voms_gsoap_2.7_gcc32dbg.a
+f none lib/libcgsi_plugin_voms_gsoap_2.7_gcc32dbgpthr.a
+d none share 0755 root bin
+d none share/man 0755 root bin
+d none share/man/man3 0755 root bin
+f none share/man/man3/cgsi_plugin.h.3

@@ -1,0 +1,316 @@
+#!/bin/bash
+#
+# Copyright (c) Members of the EGEE Collaboration. 2004-2009.
+# See http://public.eu-egee.org/partners/ for details on 
+# the copyright holders.
+# For license conditions see the license file or
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Authors: 
+#      Akos Frohner <Akos.Frohner@cern.ch>
+#
+# Unit test framework for test written in shell.
+#
+# Environment variables:
+#   TEST_MODULE     the name of the module/component, 
+#                   for example 'org.glite.data.hydra-cli'
+#
+#   TEST_REQUIRES   the name of the binaries to be used,
+#                   for example 'grep glite-eds-encrypt'
+#
+#   TEST_VERBOSE    set to 'yes' to print many messages
+#
+#   TEST_FAILONERROR    set to 'exit' to stop exit in case of error
+#
+#   TEST_XML_REPORT set to 'yes' to produce an XML report
+#                   See shunit.dtd for the XML schema.
+#
+# Usage:
+#
+#   test_success 'expected text in output' program with parameters
+#       
+#       test_success redirects both stdout and stderr into a temporary
+#       file and egreps for the specified text. The exit code of
+#       the command is also analysed.
+#       The test is successful, if the return code is 0 and the 
+#       expected text was found in the output.
+#
+#   test_failure 'expected text in output' program with parameters
+#
+#       test_failure works like test_success, just the return 
+#       code has to be something else than 0 to declare the 
+#       test successful.
+#
+#   test_success_diff 'expected text in output' program with parameters
+#
+#       test_success_diff works like test_success, however it
+#       compares the expected result to the output using 'diff',
+#       so they shall match exactly to declare the test successful.
+#   
+#   test_summary
+#
+#       Prints the number of successful and erroneous tests and
+#       exits with the number of errors found as exit code.
+#
+# Assumptions:
+#   
+#   Test certificates has been already generated and staged by the
+#   org.glite.security.test-utils module.
+#
+#   There is a 'services.xml' file in the current directory:
+#
+#     <services>
+#         <service name="test">
+#             <parameters>
+#                 <endpoint>https://localhost:8443/glite-data-hydra-service/services/Hydra</endpoint>
+#                 <type>org.glite.Metadata</type>
+#                 <version>1.0.0</version>
+#                 <volist><vo>org.example.single</vo></volist>
+#             </parameters>
+#         </service>
+#     </services>
+
+if [ -z "$TEST_MODULE" ]; then
+    echo "Error: this is a framework, which shall be used by real tests!" >&2
+    exit -1
+fi
+
+# should it print intermediate results
+TEST_VERBOSE=${TEST_VERBOSE:-'no'}
+
+# special case for autoconf based modules
+if [ $(cd .. && basename $PWD) = "$TEST_MODULE" -a -d '../build' ]; then
+    dot_paths=$(find $(dirname $0)/../build -name .libs -printf '%p:') 
+    export PATH=${dot_paths}$PATH
+    export LD_LIBRARY_PATH=${dot_paths}$LD_LIBRARY_PATH
+fi
+
+# using the stage area as GLITE_LOCATION
+if [ -z "$GLITE_LOCATION" ]; then
+    for ws in . .. ../.. ../../.. ../../../..; do
+        if [ -d "$ws/stage" ]; then
+            export GLITE_LOCATION=$(cd $ws/stage; echo $PWD)
+            break
+        fi
+    done
+    if [ -z "$GLITE_LOCATION" ]; then
+        echo "Error: could not find the 'stage' directory!" >&2
+        exit -1
+    fi
+fi
+
+export PATH=$PATH:$GLITE_LOCATION/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GLITE_LOCATION/lib
+
+if [ 'yes' = "$TEST_VERBOSE" ]; then
+    echo "#Info: the test is using the following pathes:"
+    echo "  export PATH=$PATH"
+    echo "  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+fi
+
+tempbase=$PWD/$(basename $0)-$$
+trap "rm -rf $tempbase.*" EXIT
+
+# change it to 'exit' to fail the test
+TEST_FAILONERROR=${TEST_FAILONERROR:-return}
+
+# test counts
+TEST_ALL=0
+TEST_BAD=0
+TEST_GOOD=0
+
+if [ -n "$TEST_XML_REPORT" ]; then
+    TEST_XML_OUTPUT=$tempbase.xml
+    cat >$TEST_XML_OUTPUT <<EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE shunit [
+    <!ELEMENT testsuite (environment,testcase*,testsummary)>
+    <!ATTLIST testsuite name CDATA #REQUIRED>
+    <!ELEMENT environment (#PCDATA)>
+    <!ELEMENT testcase (command,expected,result)>
+    <!ATTLIST testcase return CDATA #REQUIRED>
+    <!ELEMENT command (#PCDATA)>
+    <!ELEMENT expected (#PCDATA)>
+    <!ELEMENT result (#PCDATA)>
+    <!ELEMENT testsummary EMPTY>
+    <!ATTLIST testsummary
+                all     CDATA   #REQUIRED
+                good    CDATA   #REQUIRED
+                bad     CDATA   #REQUIRED>
+]>
+<testsuite name="$(basename $0)">
+EOF
+fi
+
+function test_report_good {
+    TEST_GOOD=$(($TEST_GOOD + 1))
+    echo "OK"
+
+    if [ -n "$TEST_XML_REPORT" ]; then
+        ret=$1
+        shift
+        echo "<testcase good=\"true\" return=\"$ret\">" >>$TEST_XML_OUTPUT
+        echo "  <command><![CDATA[$@]]></command>" >>$TEST_XML_OUTPUT
+        echo -n "  <expected><![CDATA[" >>$TEST_XML_OUTPUT
+        cat $tempbase.result >>$TEST_XML_OUTPUT
+        echo "]]></expected>" >>$TEST_XML_OUTPUT
+        echo -n "  <output><![CDATA[" >>$TEST_XML_OUTPUT
+        cat $tempbase.stdout >>$TEST_XML_OUTPUT
+        echo "]]></output>" >>$TEST_XML_OUTPUT
+        echo "</testcase>" >>$TEST_XML_OUTPUT
+    fi
+}
+
+function test_report_bad {
+    TEST_BAD=$(($TEST_BAD + 1))
+    echo "NOT OK"
+
+    if [ -n "$TEST_XML_REPORT" ]; then
+        ret=$1
+        shift
+        echo "<testcase good=\"false\" return=\"$ret\">" >>$TEST_XML_OUTPUT
+        echo "  <command><![CDATA[$@]]></command>" >>$TEST_XML_OUTPUT
+        echo -n "  <expected><![CDATA[" >>$TEST_XML_OUTPUT
+        cat $tempbase.result >>$TEST_XML_OUTPUT
+        echo "]]></expected>" >>$TEST_XML_OUTPUT
+        echo -n "  <output><![CDATA[" >>$TEST_XML_OUTPUT
+        cat $tempbase.stdout >>$TEST_XML_OUTPUT
+        echo "]]></output>" >>$TEST_XML_OUTPUT
+        echo "</testcase>" >>$TEST_XML_OUTPUT
+    fi
+}
+
+function test_success {
+    result="$1"
+    echo "$1" >$tempbase.result
+    shift
+    TEST_ALL=$(($TEST_ALL + 1))
+    echo ""
+    echo "Command: $@"
+    echo "Expected result: $result"
+    "$@" >$tempbase.stdout 2>&1 
+    ret=$?
+    [ 'yes' = "$TEST_VERBOSE" ] && sed -e 's/^/Output: /' $tempbase.stdout
+    # expected to succeed
+    if [ $ret -ne 0 ]; then
+        test_report_bad $ret "$@"
+        $TEST_FAILONERROR 1
+    fi
+    egrep -q "$result" $tempbase.stdout
+    if [ $? -ne 0 ]; then
+        test_report_bad $ret "$@"
+        $TEST_FAILONERROR 2
+    fi 
+    test_report_good $ret "$@"
+    return 0
+}
+
+function test_success_diff {
+    echo "$1" >$tempbase.result
+    shift
+    TEST_ALL=$(($TEST_ALL + 1))
+    echo ""
+    echo "Command: $@"
+    [ 'yes' = "$TEST_VERBOSE" ] && sed -e 's/^/Expected: /' $tempbase.result
+    "$@" >$tempbase.stdout 2>&1 
+    ret=$?
+    [ 'yes' = "$TEST_VERBOSE" ] && sed -e 's/^/Output: /' $tempbase.stdout
+    # expected to succeed
+    if [ $ret -ne 0 ]; then
+        test_report_bad $ret "$@"
+        $TEST_FAILONERROR 1
+    fi
+    diff $tempbase.result $tempbase.stdout >$tempbase.diff
+    ret=$?
+    [ 'yes' = "$TEST_VERBOSE" -o $ret -ne 0 ] && sed -e 's/^</DiffExpected: /; s/^>/DiffOutput: /' $tempbase.diff
+    if [ $ret -ne 0 ]; then
+        test_report_bad $ret "$@"
+        $TEST_FAILONERROR 2
+    fi 
+    test_report_good $ret "$@"
+    return 0
+}
+
+function test_failure {
+    result="$1"
+    echo "$1" >$tempbase.result
+    shift
+    TEST_ALL=$(($TEST_ALL + 1))
+    echo ""
+    echo "Command: $@"
+    echo "Expected result: $result"
+    "$@" >$tempbase.stdout 2>&1 
+    ret=$?
+    [ 'yes' = "$TEST_VERBOSE" ] && sed -e 's/^/Output: /' $tempbase.stdout
+    # it is expected to fail
+    if [ $ret -eq 0 ]; then
+        test_report_bad $ret "$@"
+        $TEST_FAILONERROR 1
+    fi
+    egrep -q "$result" $tempbase.stdout
+    if [ $? -ne 0 ]; then
+        test_report_bad $ret "$@"
+        $TEST_FAILONERROR 2
+    fi 
+    test_report_good $ret "$@"
+    return 0
+}
+
+function test_summary {
+    echo ""
+    echo "There were $TEST_ALL test for '$TEST_MODULE': Success: $TEST_GOOD, Errors: $TEST_BAD"
+    echo $(($TEST_GOOD * 100 / $TEST_ALL))"% success rate"
+
+    if [ -n "$TEST_XML_REPORT" ]; then
+        echo "<testsummary all=\"$TEST_ALL\" good=\"$TEST_GOOD\" error=\"$TEST_BAD\"/>" >>$TEST_XML_OUTPUT
+        echo "</testsuite>" >>$TEST_XML_OUTPUT
+        mv $TEST_XML_OUTPUT $(date +%Y%m%dT%H%M%S)-$(basename $0 .sh).xml
+    fi
+
+    exit $TEST_BAD
+}
+
+# check for required binaries
+for prog in $TEST_REQUIRES egrep
+do
+    if [ ! -x "$(which $prog)" ]; then
+        echo "Error: '$prog' not found!" >&2
+        exit -1
+    fi
+done
+
+TEST_CERT_DIR=$GLITE_LOCATION/share/test/certificates
+if [ ! -d "$TEST_CERT_DIR" ]; then
+    echo "Error: '$TEST_CERT_DIR' was not found!" >&2
+    exit -1
+fi
+
+export X509_CERT_DIR=$TEST_CERT_DIR/grid-security/certificates
+export X509_VOMS_DIR=$TEST_CERT_DIR/grid-security/vomsdir
+export X509_USER_PROXY=$TEST_CERT_DIR/home/voms-acme.pem
+
+if [ 'yes' = "$TEST_VERBOSE" ]; then
+    echo "#Info: the test is using the following credentials:"
+    echo "  export X509_USER_PROXY=$X509_USER_PROXY"
+    echo "  export X509_CERT_DIR=$X509_CERT_DIR"
+    echo "  export X509_VOMS_DIR=$X509_VOMS_DIR"
+    echo ""
+fi
+
+export GLITE_SD_VO='org.example.single'
+export GLITE_SD_PLUGIN='file'
+export GLITE_SD_SERVICES_XML=$(dirname $0)/services.xml
+
+if [ 'yes' = "$TEST_VERBOSE" ]; then
+    echo "#Info: the test is using the following service-discovery settings:"
+    echo "  export GLITE_SD_VO='org.example.single'"
+    echo "  export GLITE_SD_PLUGIN='file'"
+    echo "  export GLITE_SD_SERVICES_XML=$(dirname $0)/services.xml"
+fi
+
+if [ -n "$TEST_XML_REPORT" ]; then
+    echo -n "<environment><![CDATA[" >>$TEST_XML_OUTPUT
+    env | sort >>$TEST_XML_OUTPUT
+    echo "]]></environment>" >>$TEST_XML_OUTPUT
+fi
+

@@ -1,0 +1,9 @@
+i pkginfo=pkginfo.voms
+i depend=depend.voms
+!plugin=libcgsi_plugin_voms_gsoap_2.7_gcc32dbg.so.$VERSION
+!pluginthr=libcgsi_plugin_voms_gsoap_2.7_gcc32dbgpthr.so.$VERSION
+d none lib 0755 root bin
+s none lib/libcgsi_plugin_voms_gsoap_2.7_gcc32dbg.so=$plugin
+f none lib/$plugin 0755 root bin
+s none lib/libcgsi_plugin_voms_gsoap_2.7_gcc32dbgpthr.so=$pluginthr
+f none lib/$pluginthr 0755 root bin

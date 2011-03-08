@@ -1,0 +1,79 @@
+Summary: GSI plugin for gSOAP
+Name: CGSI_gSOAP_@GSOAP.VERSION@
+Version: @VERSION@
+Release: @RELEASE@@RELEASE.SUFFIX@
+Source0: CGSI_gSOAP_@GSOAP.VERSION@-%{version}-@RELEASE@.tar.gz
+Vendor: CERN/IT/GD
+License: Apache2
+Group: Application/File
+BuildRoot: %{_builddir}/%{name}-%{version}
+Prefix: /usr
+Provides: libcgsi_plugin_gsoap_@GSOAP.VERSION@.so
+Requires: vdt_globus_essentials
+%define __spec_install_post %{nil}
+%define debug_package %{nil}
+%description
+CGSI allows writing gSOAP clients with GSI authentication.
+This package contains the shared libraries for the client
+side.
+
+%package dev
+Summary: GSI plugin for gSOAP -- development files
+Group:  Application/File
+Requires: vdt_globus_sdk
+Requires: glite-security-voms-api
+%description dev
+CGSI allows writing gSOAP clients with GSI authentication.
+This package contains the header and static library for 
+development.
+
+%package voms
+Summary: GSI plugin for gSOAP -- VOMSified libraries
+Group:  Application/File
+Provides: libcgsi_plugin_voms_gsoap_@GSOAP.VERSION@_@GLOBUS.DBG.THR.FLAVOUR@.so
+Provides: libcgsi_plugin_voms_gsoap_@GSOAP.VERSION@_@GLOBUS.DBG.NOTHR.FLAVOUR@.so
+Requires: vdt_globus_essentials
+Requires: glite-security-voms-api-cpp
+%description voms
+CGSI allows writing gSOAP clients with GSI authentication.
+This package contains the VOMS enabled shared libraries for
+the servers side.
+
+%prep
+%setup -c
+
+%build
+
+%install
+
+%clean
+
+%files
+%defattr(-,root,root)
+%{prefix}/%{_lib}/libcgsi_plugin_gsoap_*.so
+%{prefix}/%{_lib}/libcgsi_plugin_gsoap_*.so.*
+
+%files dev
+%defattr(-,root,root)
+%{prefix}/include/cgsi_plugin.h
+%{prefix}/%{_lib}/libcgsi_plugin*.a
+%doc %{prefix}/share/doc
+%doc %{prefix}/share/man
+
+%files voms
+%defattr(-,root,root)
+%{prefix}/%{_lib}/libcgsi_plugin_voms_gsoap_*.so
+%{prefix}/%{_lib}/libcgsi_plugin_voms_gsoap_*.so.*
+
+%post
+if [ $(id -u) -eq 0 ]; then
+    ldconfig
+fi
+
+%post voms
+if [ $(id -u) -eq 0 ]; then
+    ldconfig
+fi
+
+%changelog
+

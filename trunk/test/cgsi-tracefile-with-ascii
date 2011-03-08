@@ -1,0 +1,11 @@
+#!/usr/bin/perl -pw
+
+if (/^(?:[[:xdigit:]]{2} ){1,16}$/) {
+	my $ascii = ' ';
+	foreach $digits (split(/\s+/)) {
+		$hd = hex($digits);
+		$ascii .= ((31 < $hd and $hd < 127) ? chr($hd) : '.');
+	}
+	$ascii = ' ' x ((17 - length($ascii))*3) . $ascii;
+	s/$/$ascii/;
+}
