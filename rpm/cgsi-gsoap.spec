@@ -22,7 +22,7 @@ side.
 Summary: GSI plugin for gSOAP -- development files
 Group: grid/lcg
 Requires: @REQUIRES.VOMS@
-AutoReqProv: no
+AutoReqProv: yes
 Obsoletes: CGSI_gSOAP_2.7-dev
 %description -n CGSI_gSOAP_2.7-devel
 CGSI allows writing gSOAP clients with GSI authentication.
@@ -33,7 +33,7 @@ development.
 Summary: GSI plugin for gSOAP -- VOMSified libraries
 Group: grid/lcg
 Requires: @REQUIRES.VOMS@
-AutoReqProv: no
+AutoReqProv: yes
 %description -n CGSI_gSOAP_2.7-voms
 CGSI allows writing gSOAP clients with GSI authentication.
 This package contains the VOMS enabled shared libraries for

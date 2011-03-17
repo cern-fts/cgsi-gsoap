@@ -1,6 +1,0 @@
-i pkginfo=pkginfo.nonvoms
-i depend=depend.nonvoms
-!plugin=libcgsi_plugin_gsoap_2.7.so.$VERSION
-d none lib 0755 root bin
-s none lib/libcgsi_plugin_gsoap_2.7.so=$plugin
-f none lib/$plugin 0755 root bin
