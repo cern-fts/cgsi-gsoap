@@ -5,13 +5,12 @@ PACKAGE=CGSI-gSOAP-$(VERSION)
 
 all: src-rpm
 
-mock: src-rpm
-	mock --rebuild '$(PACKAGE)*.src.rpm'
 rpm: pre-rpmbuild
 	rpmbuild -ba --define "_topdir $(PWD)/build-rpm" build-rpm/SPECS/CGSI-gSOAP.spec
 
 src-rpm: pre-rpmbuild
 	rpmbuild -bs --nodeps --define "_topdir $(PWD)/build-rpm" build-rpm/SPECS/CGSI-gSOAP.spec
+# and then to use mock: mock --rebuild $(PACKAGE).src.rpm
 
 pre-rpmbuild: src
 	mkdir -p build-rpm/{BUILD,RPMS,SRPMS,SOURCES,SPECS}
