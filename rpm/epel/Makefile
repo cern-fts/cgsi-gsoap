@@ -6,12 +6,7 @@ PACKAGE=CGSI-gSOAP-$(VERSION)
 all: rpm
 
 rpm: src
-	mkdir -p build-rpm
-	mkdir -p build-rpm/BUILD
-	mkdir -p build-rpm/RPMS
-	mkdir -p build-rpm/SRPMS
-	mkdir -p build-rpm/SOURCES
-	mkdir -p build-rpm/SPECS
+	mkdir -p build-rpm/{BUILD,RPMS,SRPMS,SOURCES,SPECS}
 	cp ../../$(PACKAGE).tar.gz build-rpm/SOURCES
 	cp *.spec build-rpm/SPECS
 	rpmbuild -bs --nodeps --define "_topdir $(PWD)/build-rpm" build-rpm/SPECS/CGSI-gSOAP.spec
