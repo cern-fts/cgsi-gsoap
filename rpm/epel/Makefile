@@ -14,7 +14,7 @@ rpm: src
 	mkdir -p build-rpm/SPECS
 	cp ../../$(PACKAGE).tar.gz build-rpm/SOURCES
 	cp *.spec build-rpm/SPECS
-	rpmbuild -ba --define "_topdir $(PWD)/build-rpm" build-rpm/SPECS/CGSI-gSOAP.spec
+	rpmbuild -bs --nodeps --define "_topdir $(PWD)/build-rpm" build-rpm/SPECS/CGSI-gSOAP.spec
 
 src: 	
 	cd ../..; \
