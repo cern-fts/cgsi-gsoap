@@ -232,49 +232,6 @@ char *get_client_voname(struct soap *soap);
 char ** get_client_roles(struct soap *soap, int* nbfqans);
 
 
-/**
- * Adjust CGSI-plugin's behaviour by setting one or more flags.  If a
- * flag is not present in args then that flag is unaffected by this
- * operation.  If a flag is currently set then attempting to set it
- * will have no effect.
- *
- * @param soap The soap structure from gSOAP
- *
- * @param is_server 0 if client, 1 if server
- *
- * @param flags Bitwise OR of the flags to be set.
- *
- * @return 0 on success, -1 on error.
- */
-int cgsi_plugin_set_flags(struct soap *soap, int is_server, int flags);
-
-/**
- * Adjust CGSI-plugin's behaviour by clearing one or more flags. If a
- * flag is not present in args then it is unaffected by this
- * operation.  If a flag is currently cleared then attempting to clear
- * it will have no effect.
- *
- * @param soap The soap structure from gSOAP
- *
- * @param is_server 0 if client, 1 if server
- *
- * @param flags Bitwise OR of the flags to be cleared.
- *
- * @return 0 on success, -1 on error.
- */
-int cgsi_plugin_clr_flags(struct soap *soap, int is_server, int flags);
-
-/**
- * Discover the current set of flags that are in effect.
- *
- * @param soap The soap structure from gSOAP
- *
- * @param is_server 0 if client, 1 if server
- *
- * @return the set of flags or -1 on error
- */
-int cgsi_plugin_get_flags(struct soap *soap, int is_server);
-
 #ifdef __cplusplus
 }
 #endif
