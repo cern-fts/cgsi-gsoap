@@ -51,9 +51,6 @@ extern "C" {
 static char *client_plugin_id = CLIENT_PLUGIN_ID;
 static char *server_plugin_id = SERVER_PLUGIN_ID;
 
-int (*soap_fsend)(struct soap*, const char*, size_t); 
-size_t (*soap_frecv)(struct soap*, char*, size_t); 
-
 static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *data);
 static int server_cgsi_plugin_send(struct soap *soap, const char *buf, size_t len);
 static size_t server_cgsi_plugin_recv(struct soap *soap, char *buf, size_t len);
@@ -83,9 +80,16 @@ static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg, int isclient);
 static struct cgsi_plugin_data* get_plugin(struct soap *soap);
 static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, char *tracestr);
+static int trace_str(struct cgsi_plugin_data *data, const char *msg, size_t len);
 static void cgsi_plugin_globus_modules(int activate);
 static int is_loopback(struct sockaddr *);
 static void free_conn_state(struct cgsi_plugin_data *data);
+
+static gss_buffer_t buffer_create(gss_buffer_t buf, size_t offset);
+static gss_buffer_t buffer_free(gss_buffer_t buf);
+static gss_buffer_t buffer_consume_upto(gss_buffer_t buf, size_t offset);
+static gss_buffer_t buffer_copy_from(gss_buffer_t dest, gss_buffer_t src, size_t offset);
+
 
 /******************************************************************************/
 /* Plugin constructor            */
@@ -133,6 +137,150 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
     return SOAP_OK;
 }
 
+
+
+/**
+ * Allow manipulation of plugin's behaviour.  This method allows
+ * adjusting of cgsi-plugin's behaviour by setting flags present in
+ * args.  Flags that are missing in args are not altered.  If a flag
+ * is already set then this method will not affect it.
+ */
+int cgsi_plugin_set_flags(struct soap *soap, int is_server, int flags)
+{
+    const char *id;
+    struct cgsi_plugin_data *data;
+
+    id = is_server ? server_plugin_id : client_plugin_id;
+
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, id);
+    
+    if (data == NULL) {
+        cgsi_err(soap, "Cannot find cgsi-plugin data structure; is plugin registered?");
+	return -1;
+    }
+
+    if (flags & CGSI_OPT_DELEG_FLAG) {
+      data->context_flags |= GSS_C_DELEG_FLAG;
+    }
+
+    if (flags & CGSI_OPT_SSL_COMPATIBLE) {
+      data->context_flags |= GSS_C_GLOBUS_SSL_COMPATIBLE;
+    }
+  
+    if (flags & CGSI_OPT_DISABLE_NAME_CHECK) {
+      data->disable_hostname_check = 1;
+    }
+  
+    if (flags & CGSI_OPT_DISABLE_MAPPING) {
+      data->disable_mapping = 1;
+    }
+  
+    if (flags & CGSI_OPT_DISABLE_VOMS_CHECK) {
+      data->disable_voms_check = 1;
+    }
+
+    if (flags & CGSI_OPT_ALLOW_ONLY_SELF) {
+      data->allow_only_self = 1;
+    }
+
+    return 0;
+}
+
+
+
+/**
+ * Allow manipulation of plugin's behaviour.  This method allows
+ * adjusting of cgsi-plugin's behaviour by clearing flags present in
+ * args.  Flags that are missing in args are not altered.  If a flag
+ * is already cleared then this method will not affect it.
+ */
+int cgsi_plugin_clr_flags(struct soap *soap, int is_server, int flags)
+{
+    const char *id;
+    struct cgsi_plugin_data *data;
+
+    id = is_server ? server_plugin_id : client_plugin_id;
+
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, id);
+    
+    if (data == NULL) {
+        cgsi_err(soap, "Cannot find cgsi-plugin data structure; is plugin registered?");
+	return -1;
+    }
+
+    if (flags & CGSI_OPT_DELEG_FLAG) {
+      data->context_flags &= ~GSS_C_DELEG_FLAG;
+    }
+
+    if (flags & CGSI_OPT_SSL_COMPATIBLE) {
+      data->context_flags &= ~GSS_C_GLOBUS_SSL_COMPATIBLE;
+    }
+  
+    if (flags & CGSI_OPT_DISABLE_NAME_CHECK) {
+      data->disable_hostname_check = 0;
+    }
+  
+    if (flags & CGSI_OPT_DISABLE_MAPPING) {
+      data->disable_mapping = 0;
+    }
+  
+    if (flags & CGSI_OPT_DISABLE_VOMS_CHECK) {
+      data->disable_voms_check = 0;
+    }
+
+    if (flags & CGSI_OPT_ALLOW_ONLY_SELF) {
+      data->allow_only_self = 0;
+    }
+
+    return 0;
+}
+
+/**
+ * Provide a summary of the currently active flags.
+ */
+int cgsi_plugin_get_flags(struct soap *soap, int is_server)
+{
+    const char *id;
+    struct cgsi_plugin_data *data;
+    int flags = 0;
+
+    id = is_server ? server_plugin_id : client_plugin_id;
+
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, id);
+    
+    if (data == NULL) {
+        cgsi_err(soap, "Cannot find cgsi-plugin data structure; is plugin registered?");
+	return -1;
+    }
+
+    if(data->context_flags |= GSS_C_DELEG_FLAG) {
+      flags |= CGSI_OPT_DELEG_FLAG;
+    }
+
+    if(data->context_flags |= GSS_C_GLOBUS_SSL_COMPATIBLE) {
+      flags |= CGSI_OPT_SSL_COMPATIBLE;
+    }
+
+    if(data->disable_hostname_check == 1) {
+      flags |= CGSI_OPT_DISABLE_NAME_CHECK;
+    }
+  
+    if(data->disable_mapping == 1) {
+      flags |= CGSI_OPT_DISABLE_MAPPING;
+    }
+  
+    if(data->disable_voms_check == 1) {
+      flags |= CGSI_OPT_DISABLE_VOMS_CHECK;
+    }
+
+    if(data->allow_only_self == 1) {
+      flags |= CGSI_OPT_ALLOW_ONLY_SELF;
+    }
+
+    return flags;
+}
+
+
 /**
  * Initializes the plugin data object
  */
@@ -142,8 +290,6 @@ static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     
     /* Setting up the functions */
     data->fclose = soap->fclose;
-    soap_fsend = soap->fsend;
-    soap_frecv = soap->frecv;
     data->fsend = soap->fsend;
     data->frecv = soap->frecv;
 
@@ -541,8 +687,6 @@ static int client_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     /* Setting up the functions */
     data->fopen = soap->fopen;
     data->fclose = soap->fclose;
-    soap_fsend = soap->fsend;
-    soap_frecv = soap->frecv;
     data->fsend = soap->fsend;
     data->frecv = soap->frecv;
 
@@ -1097,6 +1241,24 @@ static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *p
     
     struct cgsi_plugin_data *data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, plugin_id);
 
+    if(data->buffered_in != NULL) {
+      tmplen = len < data->buffered_in->length ? len : data->buffered_in->length;
+
+      memcpy(buf, data->buffered_in->value, tmplen);
+
+      if(tmplen == data->buffered_in->length) {
+          data->buffered_in = buffer_free(data->buffered_in);
+      } else {
+	  data->buffered_in = buffer_consume_upto(data->buffered_in, tmplen);
+      }
+      
+      trace(data, "<Buffered input>------------------\n");
+      trace_str(data, buf, tmplen);
+      trace(data, "\n----------------------------------\n");
+
+      return (size_t) tmplen;
+    }
+
 
     token_status = cgsi_plugin_recv_token((void *)soap,
                                           &input_token->value,
@@ -1137,22 +1299,19 @@ static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *p
         return 0;
     }
 
-    if (output_token->length + 1 > len) {
-        cgsi_err(soap, "Message too long for buffer");
-        gss_release_buffer(&minor_status1,
-                           output_token);
-        return 0;
-    }
+    tmplen = len < output_token->length ? len : output_token->length;
 
-    memcpy(buf, output_token->value, output_token->length);
-    tmplen = output_token->length;
-    buf[tmplen] = '\0';
+    memcpy(buf, output_token->value, tmplen);
+
+    if( tmplen < output_token->length) {
+        data->buffered_in = buffer_create(output_token, tmplen);
+    }
     
     gss_release_buffer(&minor_status1,
                        output_token);
    
     trace(data, "<Receiving SOAP Packet>-------------\n");
-    trace(data, buf);
+    trace_str(data, buf, tmplen);
     trace(data, "\n----------------------------------\n");
     
     return (size_t) tmplen;
@@ -1185,7 +1344,7 @@ int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
        errno = 0;
        soap->error = 0;
        soap->errnum = 0;
-       ret = soap_frecv(soap, p, rem);
+       ret = data->frecv(soap, p, rem);
        if (ret <= 0) { /* BEWARE soap_recv returns 0 when an error occurs ! */
          char buf[BUFSIZE];
 
@@ -1253,7 +1412,7 @@ int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
        errno = 0;
        soap->error = 0;
        soap->errnum = 0;
-       ret =  soap_frecv(soap, p, rem);
+       ret =  data->frecv(soap, p, rem);
        if (ret <= 0) {
          char buf[BUFSIZE];
 
@@ -1310,7 +1469,7 @@ int cgsi_plugin_send_token(void *arg, void *token, size_t token_length)
      
      /* We send the whole token knowing it is a SSL token */
      
-     ret =  soap_fsend(soap, (char *)token, token_length);
+     ret =  data->fsend(soap, (char *)token, token_length);
      if (ret < 0) {
          char buf[BUFSIZE];
          snprintf(buf, BUFSIZE,"Error sending token data: %s", strerror(errno));
@@ -1606,20 +1765,29 @@ static int setup_trace(struct cgsi_plugin_data *data) {
 }
 
 
-static int trace(struct cgsi_plugin_data *data, char *tracestr) {
+static int trace(struct cgsi_plugin_data *data, char *tracestr)
+{
+    if (!data->trace_mode) {
+        return 0;
+    }
 
+    return trace_str(data, tracestr, strlen(tracestr));
+}
+
+static int trace_str(struct cgsi_plugin_data *data, const char *msg, size_t len)
+{
     if (!data->trace_mode) {
         return 0;
     }
 
     /* If no trace file defined, write to stderr */
     if (data->trace_file[0]=='\0') {
-        fprintf(stderr, tracestr);
+        fprintf(stderr, "%.*s", len, msg);
     } else {
         int fd;
         fd = open(data->trace_file, O_CREAT|O_WRONLY|O_APPEND, 0644);
         if (fd <0) return -1;
-        write(fd, tracestr, strlen(tracestr));
+        write(fd, msg, len);
         close(fd);
     }
     return 0;
@@ -2098,4 +2266,59 @@ static void free_conn_state(struct cgsi_plugin_data *data) {
       data->deleg_credential_token = NULL;
     }
     data->deleg_credential_token_len = 0;
+    data->buffered_in = buffer_free(data->buffered_in);
+}
+
+
+gss_buffer_t buffer_create(gss_buffer_t buf, size_t offset)
+{
+    gss_buffer_t new_buf;
+
+    new_buf = (gss_buffer_t) malloc(sizeof(gss_buffer_desc));
+
+    return buffer_copy_from(new_buf, buf, offset);
+}
+
+
+gss_buffer_t buffer_free(gss_buffer_t buf)
+{
+    if(buf != NULL) {
+        free(buf->value);
+	free(buf);
+    }
+    return NULL;
+}
+
+gss_buffer_t buffer_consume_upto(gss_buffer_t buf, size_t offset)
+{
+    void *old_data;
+
+    old_data = buf->value;
+
+    buffer_copy_from(buf, buf, offset);
+
+    free(old_data);
+
+    return buf;
+}
+
+gss_buffer_t buffer_copy_from(gss_buffer_t dest, gss_buffer_t src, size_t offset)
+{
+    size_t new_len;
+    void *new_data;
+
+    if(offset > src->length) {
+        // This is probably triggered by a bug somewhere.
+        offset = src->length;
+    }
+
+    new_len = src->length - offset;
+    new_data = malloc(new_len);
+
+    memcpy(new_data, src->value + offset, new_len);
+
+    dest->value = new_data;
+    dest->length = new_len;
+
+    return dest;
 }
