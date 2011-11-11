@@ -2315,7 +2315,7 @@ gss_buffer_t buffer_copy_from(gss_buffer_t dest, gss_buffer_t src, size_t offset
     new_len = src->length - offset;
     new_data = malloc(new_len);
 
-    memcpy(new_data, src->value + offset, new_len);
+    memcpy(new_data, ((char *)src->value) + offset, new_len);
 
     dest->value = new_data;
     dest->length = new_len;
