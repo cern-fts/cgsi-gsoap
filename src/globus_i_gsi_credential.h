@@ -1,7 +1,6 @@
 #ifndef GLOBUS_DONT_DOCUMENT_INTERNAL
 /**
- * Copyright (c) Members of the EGEE Collaboration. 2004.
- * See http://www.eu-egee.org/partners/ for details on the copyright holders.
+ * Copyright 1999-2006 University of Chicago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
