@@ -18,6 +18,11 @@ BuildRequires:	gsoap-devel%{?_isa}
 BuildRequires:	voms-devel%{?_isa}
 BuildRequires:	doxygen
 
+Provides:       CGSI_gSOAP_2.7-voms = %{version}-%{release}
+Obsoletes:      CGSI_gSOAP_2.7-voms <= 1.3.4-2
+Provides:       CGSI_gSOAP_2.7 = %{version}-%{release}
+Obsoletes:      CGSI_gSOAP_2.7 <= 1.3.4-2
+
 %description
 This is a GSI plugin for gSOAP. It uses the globus GSI libraries to implement
 GSI secure authentication and encryption on top of gSOAP.
