@@ -1,6 +1,6 @@
 Name:		CGSI-gSOAP
 Version:	1.3.5
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	GSI plugin for gSOAP
 
 Group:		System Environment/Libraries
@@ -95,7 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_mandir}/man*/*
 
 %changelog
-* Mon Apr 02 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 1.3.5-1
+* Mon Apr 02 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 1.3.5-2
 - Up for new upstream release
 
 * Thu Sep 01 2011 Mattias Ellert <mattias.ellert@fysast.uu.se> - 1.3.4.2-2
