@@ -1,3 +1,8 @@
+2012-04-17 15:08  molnarzs
+
+	* RELEASE-NOTES, rpm/epel/CGSI-gSOAP.spec: [ticket:305]: Release
+	  notes updated for cgsi-gsoap_R_1_3_5_2
+
 2012-04-03 09:30  rocha
 
 	* rpm/epel, rpm/epel/CGSI-gSOAP.spec: Merging epel packaging with

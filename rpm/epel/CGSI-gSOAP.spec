@@ -95,7 +95,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_mandir}/man*/*
 
 %changelog
-* Mon Apr 02 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 1.3.5-2
+* Mon Apr 18 2012 Zsolt Molnar <zsolt.molnar@cern.ch> - 1.3.5-2
+- First official EMI 2 release, with EPEL changes finelized.
+
+* Mon Apr 02 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 1.3.5-1
 - Up for new upstream release
 
 * Thu Sep 01 2011 Mattias Ellert <mattias.ellert@fysast.uu.se> - 1.3.4.2-2
