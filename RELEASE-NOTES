@@ -1,933 +1,139 @@
-2012-04-17 15:08  molnarzs
-
-	* RELEASE-NOTES, rpm/epel/CGSI-gSOAP.spec: [ticket:305]: Release
-	  notes updated for cgsi-gsoap_R_1_3_5_2
-
-2012-04-03 09:30  rocha
-
-	* rpm/epel, rpm/epel/CGSI-gSOAP.spec: Merging epel packaging with
-	  trunk.
-
-2011-12-21 13:43  molnarzs
-
-	* ., RELEASE-NOTES, VERSION: [ticket:262]: Integrating changes from
-	  integration branch glite-data-cgsi-gsoap_R_1_3_5_1 to trunk.
-
-2011-11-23 13:43  molnarzs
-
-	* src/globus_gsi_gss_constants.h, src/globus_i_gsi_credential.h,
-	  src/gssapi_openssl.h: [ticket:233]: EMI copyright message
-	  replaced with the Globus one
-
-2011-11-11 10:17  molnarzs
-
-	* ., src/cgsi_plugin.c: [ticket:176] - Fixing compilation error
-	  (http://bit.ly/t10l1F)
-
-2011-11-11 10:16  molnarzs
-
-	* ., src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h:
-	  Ricardo's rollback rolled back.
-
-2011-11-11 08:31  rocha
-
-	* ., src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h:
-	  Reverting commit 4426 (external patch, does not build).
-
-2011-11-07 16:09  molnarzs
-
-	* ., src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h:
-	  [ticket:176]: Paul's changes merged.
-
-2011-03-08 10:07  baud
-
-	* RELEASE-NOTES: 1.3.4-2 retag
-
-2011-03-08 10:03  baud
-
-	* rpm/cgsi-gsoap.spec: set AutoReqProv = yes (strong requirement
-	  from EMI project)
-
-2011-03-07 10:04  baud
-
-	* RELEASE-NOTES, VERSION: 1.3.4-2 tag
-
-2011-02-15 08:26  baud
-
-	* rpm/Makefile, rpm/cgsi-gsoap.spec: set runtime dependencies for
-	  globus and voms (they are not the same in gLite
-	  and EMI)
-
-2011-02-11 09:18  baud
-
-	* src/cgsi_plugin.c: srmv1 and srmv2.2 segfaults while security
-	  scan (bug #77984)
-
-2011-02-02 14:58  baud
-
-	* configure: make it work under Solaris (extended getopt is not
-	  supported)
-
-2010-12-16 09:21  baud
-
-	* rpm/cgsi-gsoap.spec, src/Makefile: new attempt to build for gLite
-	  and EMI
-
-2010-12-06 12:10  baud
-
-	* configure, src/Makefile: second try to make possible to build for
-	  gLite and EMI
-
-2010-12-02 15:47  baud
-
-	* src/Makefile: try to make possible to build for gLite and EMI
-
-2010-08-23 11:21  baud
-
-	* VERSION: release cgsi-gsoap_R_1_3_4_1
-
-2010-08-23 11:20  baud
-
-	* RELEASE-NOTES: updated release notes for the 1.3.4-1 release
-
-2010-08-22 06:48  baud
-
-	* solaris/Makefile: initial version
-
-2010-08-20 14:24  baud
-
-	* configure: does not define RELEASE_SUFFIX as not used and breaks
-	  build on other platforms
-
-2010-08-20 12:49  baud
-
-	* rpm/Makefile: add install target for Etics
-
-2010-08-19 09:22  baud
-
-	* rpm/cgsi-gsoap.spec: suppress "BuildRequires:
-	  glite-security-voms-api" because of the way Etics works
-
-2010-08-18 14:29  baud
-
-	* configure: edit the spec file instead of taking a template from
-	  project sub-directory
-
-2010-08-18 14:28  baud
-
-	* src/Makefile: add install.man target
-
-2010-08-18 14:27  baud
-
-	* rpm, rpm/Makefile, rpm/cgsi-gsoap.spec: create rpm sub-directory
-	  and spec file to help building from head
-
-2010-08-17 06:04  baud
-
-	* configure: fix typo in Provides
-
-2010-08-06 12:24  baud
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h: re-introduce
-	  retrieve_voms_credentials() for backward compatibility
-
-2010-08-03 15:28  baud
-
-	* RELEASE-NOTES: updated release notes for the 1.3.4 release
-
-2010-08-03 15:20  baud
-
-	* VERSION, src/cgsi_plugin.c, src/cgsi_plugin.h,
-	  src/cgsi_plugin_int.h: add code to get user_ca
-
-2010-08-03 15:18  baud
-
-	* src/Makefile: fix typo in GLOBUS_FLAVOUR
-
-2010-06-03 10:57  baud
-
-	* project/glite-security-cgsi-gsoap.spec.template.2.7.10,
-	  project/glite-security-cgsi-gsoap.spec.template.etics: try to fix
-	  packaging problem on SL5
-
-2010-04-07 07:41  tmanev
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h,
-	  src/globus_gsi_gss_constants.h, src/globus_i_gsi_credential.h,
-	  src/gssapi_openssl.h, test/cgsi-gsoap-client.c,
-	  test/cgsi-gsoap-server.c, test/test-client-server.sh: EGEE
-	  copyright header fix.
-
-2009-09-08 12:57  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini: using the
-	  --with-libdir option of 'configure'
-
-2009-08-26 15:12  szamsu
-
-	* configure, src/Makefile: Added properly versioned shared library
-	  names.
-	  Changed license to Apache2.
-	  'configure' has a --with-libdir option to set platform specific
-	  names.
-
-2009-08-26 12:59  szamsu
-
-	* src/cgsi_plugin.c: License changed to Apache2 and protecting
-	  voms_apic.h, if compiled with C++
-
-2009-08-26 12:57  szamsu
-
-	* src/cgsi_plugin.h: typo fixes and license changed to Apache2
-
-2009-08-26 12:56  szamsu
-
-	* LICENSE, project/e-m_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/glite-security-cgsi-gsoap.spec.template.etics,
-	  src/cgsi_plugin_int.h, src/doxygenConfig.footer.html,
-	  test/cgsi-gsoap-client.c, test/cgsi-gsoap-server.c, test/libtool,
-	  test/shunit, test/test-client-server.sh: License changed to
-	  Apache2
-
-2009-08-26 12:55  szamsu
-
-	* DESCRIPTION: *** empty log message ***
-
-2009-08-19 12:24  szamsu
-
-	* VERSION: release candidate: glite-security-cgsi-gsoap_R_1_3_3_2
-
-2009-08-19 12:22  szamsu
-
-	* RELEASE-NOTES: release candidate:
-	  glite-security-cgsi-gsoap-2-7_R_1_3_3_1
-
-2009-08-19 12:20  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.ini: Fixing
-	  bug#53535.
-
-2009-08-19 12:16  szamsu
-
-	* VERSION, build.xml, project/build.number,
-	  project/build.properties, project/configure.properties.xml,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap.ini,
-	  project/glite-security-cgsi-gsoap.spec.template,
-	  project/properties.xml, project/version.properties: Removing
-	  gLite/ant build layer and gSOAP 2.6 compatibility.
-
-2009-03-08 23:21  szamsu
-
-	* solaris, solaris/depend.dev, solaris/depend.nonvoms,
-	  solaris/depend.voms, solaris/pkginfo.dev,
-	  solaris/pkginfo.nonvoms, solaris/pkginfo.voms,
-	  solaris/prototype.dev, solaris/prototype.nonvoms,
-	  solaris/prototype.voms: Solaris packaging
-
-2009-02-16 22:39  szamsu
-
-	* src/Makefile: Dropping BINFILES, as it is empty.
-
-2009-02-16 22:11  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini: fixing for ETICS
-	  v.1.4.x clients
-
-2009-02-16 22:03  szamsu
-
-	* RELEASE-NOTES: updated release notes for the 1.3.3-1 release
-
-2009-01-12 09:17  dhsmith
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/glite-security-cgsi-gsoap.spec.template,
-	  project/glite-security-cgsi-gsoap.spec.template.2.7.10,
-	  project/glite-security-cgsi-gsoap.spec.template.etics,
-	  project/version.properties, src/Makefile, src/cgsi_plugin.c,
-	  src/cgsi_plugin_int.h, test/Makefile: Update version to 1.3.3,
-	  apply initial solaris build changes and change vomsc to vomsapi
-
-2008-10-21 08:17  szamsu
-
-	* configure: typo
-
-2008-10-20 14:28  szamsu
-
-	* RELEASE-NOTES, project/version.properties: release candidate:
-	  glite-security-cgsi-gsoap_R_1_3_2_2
-
-2008-10-20 14:26  szamsu
-
-	* get-platform-os: Fixes #42623: DM custom packager creates rpms
-	  with invalid name
-
-2008-07-09 11:12  szamsu
-
-	* configure, project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini, src/Makefile: One
-	  has to ask for the C++ libs with the --with-cpp-libs option of
-	  'configure'.
-	  Also fixed the dependencies of the 'install' target.
-
-2008-07-07 07:41  szamsu
-
-	* RELEASE-NOTES, project/version.properties: release candidate:
-	  glite-security-cgsi-gsoap_R_1_3_2_1
-
-2008-07-07 07:36  szamsu
-
-	* src/Makefile, src/cgsi_plugin.c: Explicit type casts to make the
-	  C++ compiler happy.
-
-2008-07-07 06:24  szamsu
-
-	* RELEASE-NOTES,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/version.properties: release candidate:
-	  glite-security-cgsi-gsoap_R_1_3_1_1
-
-2008-06-04 08:51  szamsu
-
-	* configure, for-2.7.patch,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/glite-security-cgsi-gsoap.spec.template.2.7.10,
-	  project/version.properties: gSOAP 2.7.10 needs some tweaking in
-	  the RPM spec file as well.
-
-2008-06-04 08:29  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap-2.7.10.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap.ini: Added module and
-	  configuration for gSOAP 2.7.10.
-
-2008-05-08 09:50  dhsmith
-
-	* RELEASE-NOTES, src/cgsi_plugin.c, src/cgsi_plugin.h,
-	  src/cgsi_plugin_int.h: Changes for export of delegated cred
-	  token, fd/connection leak and error message changes
-
-2007-10-12 08:03  szamsu
-
-	* configure, get-platform-os,
-	  project/glite-security-cgsi-gsoap.spec.template.etics: added OS
-	  name in the RPM release
-
-2007-10-10 10:06  szamsu
-
-	* test/Makefile: fixing VOMS lib64 in test as well
-
-2007-10-10 09:09  szamsu
-
-	* RELEASE-NOTES, project/version.properties, src/Makefile: release
-	  candidate: gl_1_2_1_rc2
-
-2007-10-02 08:42  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini: removing ETICS
-	  runtime dependencies, as that information is not used anyway
-
-2007-09-27 08:03  szamsu
-
-	* RELEASE-NOTES, project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/version.properties: release candidate: gl_1_2_1_rc1
-
-2007-09-21 22:05  szamsu
-
-	* test/cgsi-tracefile-with-ascii: CGSI_TRACEFILE analyzer tool
-
-2007-09-12 15:58  szamsu
-
-	* src/cgsi_plugin.c: Adding CGSI_gSOAP error messages to the Globus
-	  errors.
-
-2007-09-10 15:31  szamsu
-
-	* test/Makefile, test/test-client-server.sh: updated to use
-	  glite-test-certs
-
-2007-08-30 12:17  szamsu
-
-	* RELEASE-NOTES: lib64
-
-2007-08-30 12:04  szamsu
-
-	* project/Makefile.etics,
-	  project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini: now, even HEAD
-	  builds with ETICS!
-
-2007-08-30 11:57  szamsu
-
-	* project/glite-security-cgsi-gsoap.spec.template.etics: lib64
-	  modification
-
-2007-08-30 11:44  szamsu
-
-	* src/Makefile: lib64 for x86_64 platforms
-
-2007-08-30 11:42  szamsu
-
-	* src/Makefile: default gSOAP version is 2.7
-
-2007-08-30 11:41  szamsu
-
-	* test/Makefile, test/libtool: GT4 .la files are more complex --
-	  updated libtool emulation
-
-2007-08-30 09:28  szamsu
-
-	* configure, project/e-c_org.glite.security.cgsi-gsoap-2.7.ini:
-	  trying to make HEAD ETICS work
-
-2007-08-29 12:03  szamsu
-
-	* RELEASE-NOTES, project/version.properties: bumped up the version
-	  number
-
-2007-07-31 11:24  dhsmith
-
-	* RELEASE-NOTES, src/cgsi_plugin.c, src/cgsi_plugin.h,
-	  src/cgsi_plugin_int.h, test/cgsi-gsoap-client.c,
-	  test/cgsi-gsoap-server.c, test/test-client-server.sh: Fix to
-	  allow delegation with vdt 1.6, plus some other changes. See
-	  RELEASE notes.
-
-2007-07-23 09:29  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/glite-security-cgsi-gsoap.spec.template.etics: package
-	  names are with underscore, not dash
-
-2007-03-19 08:12  szamsu
-
-	* for-2.7.patch: difference between 2.6 and 2.7 in gLite/ant
-
-2007-03-15 16:26  szamsu
-
-	* project/glite-security-cgsi-gsoap.spec.template,
-	  project/properties.xml: back to 2.6.2 as default
-
-2007-03-15 12:26  szamsu
-
-	* project/e-c_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-c_org.glite.security.cgsi-gsoap.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap-2.7.ini,
-	  project/e-m_org.glite.security.cgsi-gsoap.ini,
-	  project/etics-configuration-template-2.6.ini,
-	  project/etics-configuration-template.ini: Two ETICS modules are
-	  associated with the single CVS module:
-	  - cgsi-gsoap-2.7 uses gSOAP 2.7.x
-	  - cgsi-gsoap uses gSOAP 2.6.2
-	  ETICS module and configuration templates are added.
-
-2007-03-06 17:31  szamsu
-
-	* project/etics-configuration-template-2.6.ini,
-	  project/etics-configuration-template.ini: added globus, removed
-	  test-utils as dependency
-
-2007-03-06 15:05  szamsu
-
-	* project/build.properties: 2.7 is the default from now on
-
-2007-02-01 10:01  szamsu
-
-	* src/cgsi_plugin.c: -Wall cleanup: char to unsinged char
-	  conversion
-
-2007-01-26 23:43  szamsu
-
-	* project/etics-configuration-template-2.6.ini: fine tuning the
-	  config name
-
-2007-01-26 10:32  szamsu
-
-	* project/etics-configuration-template-2.6.ini,
-	  project/etics-configuration-template.ini: going for dual build
-
-2007-01-25 09:50  szamsu
-
-	* project/Makefile.etics, project/etics-configuration-template.ini,
-	  project/glite-security-cgsi-gsoap.spec.template.etics: trying to
-	  make an RPM using ETICS package.userspec
-
-2007-01-22 23:52  szamsu
-
-	* project/Makefile.etics, project/etics-configuration-template.ini:
-	  almost working
-
-2007-01-22 22:45  szamsu
-
-	* project/Makefile.etics, project/etics-configuration-template.ini:
-	  trying to remove the ant layer
-
-2007-01-19 17:05  szamsu
-
-	* RELEASE-NOTES, project/etics-configuration-template.ini,
-	  project/version.properties: release candidate: gl_1_1_17_rc2
-
-2007-01-19 17:03  szamsu
-
-	* src/cgsi_plugin.c: Avoiding memory leak, when
-	  retrieve_voms_credentials() called multiple times.
-
-2007-01-11 23:25  szamsu
-
-	* RELEASE-NOTES, project/version.properties: release candidate:
-	  gl_1_1_17_rc1
-
-2007-01-11 23:22  szamsu
-
-	* src/cgsi_plugin.c, test/test-client-server.sh: Having no VOMS
-	  extension in a certificate is not an error.
-
-2007-01-09 12:01  szamsu
-
-	* build.xml: re-build shall work
-
-2007-01-09 10:41  szamsu
-
-	* RELEASE-NOTES, build.xml,
-	  project/glite-security-cgsi-gsoap.spec.template: RELEASE-NOTES in
-	  proper RPM changelog format. Also added to the RPM.
-
-2007-01-08 14:14  szamsu
-
-	* project/version.properties: build changes
-
-2007-01-08 14:13  szamsu
-
-	* build.xml, project/build.properties,
-	  project/glite-security-cgsi-gsoap.spec.template,
-	  project/properties.xml: Preparations for parallel gSOAP 2.6 and
-	  2.7 builds.
-
-2006-12-18 10:11  szamsu
-
-	* project/glite-security-cgsi-gsoap.spec.template: Ben is not the
-	  maintainer any more
-
-2006-12-15 14:57  szamsu
-
-	* project/etics-configuration-template.ini: eticsification
-
-2006-11-16 14:10  szamsu
-
-	* RELEASE-NOTES: release candidate: gl_1_1_16_rc2
-
-2006-11-16 14:06  szamsu
-
-	* test/test-client-server.sh: added stress test
-
-2006-11-16 11:12  szamsu
-
-	* RELEASE-NOTES: forgot to change the option name in the
-	  RELEASE-NOTES
-
-2006-10-17 12:36  szamsu
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h,
-	  test/cgsi-gsoap-server.c: Changed option name from
-	  CGSI_OPT_DISABLE_CONNECT_VOMS to CGSI_OPT_DISABLE_VOMS_CHECK
-
-2006-10-03 15:38  szamsu
-
-	* build.xml: disabling the unittest for the dist target, as there
-	  might be temporary problems with certificates
-
-2006-10-02 12:09  szamsu
-
-	* setenv23.sh: not used any more
-
-2006-09-27 10:09  szamsu
-
-	* test/Makefile: gSOAP 2.7.6b forward compatibility.
-
-2006-09-24 23:39  szamsu
-
-	* src/cgsi_plugin.c: To avoid having garbage printed into the trace
-	  file we sacrify one byte
-	  of the receiving buffer, and put a string closing \0 there.
-
-2006-09-13 22:34  szamsu
-
-	* RELEASE-NOTES, src/cgsi_plugin.c, src/cgsi_plugin.h,
-	  src/cgsi_plugin_int.h, test/cgsi-gsoap-client.c,
-	  test/cgsi-gsoap-server.c, test/test-client-server.sh: Added
-	  CGSI_OPT_DISABLE_CONNECT_VOMS option to disable VOMS parsing at
-	  connection time. One can do it later via
-	  retrieve_voms_credentials()
-
-2006-09-07 16:14  szamsu
-
-	* test/Makefile: Setting Globus libraries explicitly for test
-	  binaries.
-
-2006-08-31 13:31  szamsu
-
-	* build.xml, project/version.properties: Making testing part of the
-	  build process.
-
-2006-08-30 15:40  szamsu
-
-	* project/version.properties: release candidate: gl_1_1_16_rc1
-
-2006-08-30 15:39  szamsu
-
-	* DESCRIPTION, RELEASE-NOTES, project/version.properties: release
-	  candidate: gl_1_1_16_rc5
-
-2006-08-30 15:39  szamsu
-
-	* gsoap-2.6.2-to-2.7.6b.patch: rolled into the code
-
-2006-08-30 15:35  szamsu
-
-	* src/cgsi_plugin.c: gSOAP 2.7.x compatibility fix.
-
-2006-08-30 14:00  szamsu
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h, test/cgsi-gsoap-server.c,
-	  test/test-client-server.sh: VOMS parsing is no longer implicit,
-	  but one has to call retrieve_voms_credentials() to make it
-	  happen. It returns -1 in case of error and fills the SOAP Fault
-	  sturture with the details.
-
-2006-08-30 13:43  szamsu
-
-	* test/Makefile: make sensitive to library changes
-
-2006-08-30 12:28  szamsu
-
-	* src/cgsi_plugin.c: Whitespace changes.
-
-2006-08-29 16:03  szamsu
-
-	* test/shunit, test/test-client-server.sh: client-server test suite
-	  -- requires glite-security-test-utils to be staged!
-
-2006-08-29 16:02  szamsu
-
-	* test/Makefile: test server is linked with the VOMSified library
-
-2006-08-29 16:02  szamsu
-
-	* test/cgsi-gsoap-client.c: short timeouts for quick tests
-
-2006-08-29 16:01  szamsu
-
-	* test/cgsi-gsoap-server.c: Output goes to stdout, so order is
-	  kept. Implemented getAttributes() to return all authorization
-	  attributes.
-
-2006-08-29 15:59  szamsu
-
-	* test/cgsi-gsoap-test.wsdl: no need for exception
-
-2006-08-29 15:59  szamsu
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h: -
-	  New server side option: CGSI_OPT_DISABLE_MAPPING, to disable
-	  gridmap-file
-	  lookup of the DN (for example server does its own authorization).
-	  - VOMS AC verification failure aborts the connection, but the
-	  details are
-	  reported in the gSOAP error structures.
-
-2006-08-28 16:07  szamsu
-
-	* test/cgsi-gsoap-server.c: Satisfying -Wall
-
-2006-08-28 16:03  szamsu
-
-	* build.xml, test, test/Makefile, test/cgsi-gsoap-client.c,
-	  test/cgsi-gsoap-server.c, test/cgsi-gsoap-test.wsdl,
-	  test/typemap.dat: Simple client and server for automated testing.
-	  Re-organized the build, putting src and test into subdirectories
-	  a'la automake.
-
-2006-08-28 16:01  szamsu
-
-	* src/Makefile: convenience targets for simple builds: html and man
-
-2006-08-22 16:14  szamsu
-
-	* gsoap-2.6.2-to-2.7.6b.patch: still to be reviewed
-
-2006-04-30 09:59  dimeglio
-
-	* ., .cvsignore: First version of this file
-
-2006-03-01 15:56  szamsu
-
-	* TODO: *** empty log message ***
-
-2006-02-17 10:50  szamsu
-
-	* TODO: todo
-
-2006-02-15 17:13  szamsu
-
-	* RELEASE-NOTES, build.xml,
-	  project/glite-security-cgsi-gsoap.spec.template, src/Makefile,
-	  src/doxygenConfig, src/doxygenConfig.footer.html: interface doc
-	  in HTML and man formats
-
-2006-02-15 15:38  szamsu
-
-	* project/glite-security-cgsi-gsoap.spec.template: -dev shall
-	  depend on the globus SDK
-
-2006-02-15 15:19  szamsu
-
-	* project/glite-security-cgsi-gsoap.spec.template: split VOMS
-	  related stuff into separate RPM; added proper requires tags
-
-2006-02-15 15:17  szamsu
-
-	* RELEASE-NOTES, project/version.properties: -voms RPM
-
-2006-02-15 13:46  szamsu
-
-	* build.xml, project/glite-security-cgsi-gsoap.spec.template: added
-	  the vomsified .so symbols to the provides list
-
-2006-02-14 15:22  szamsu
-
-	* project/glite-security-cgsi-gsoap.spec.template,
-	  project/version.properties: simplified RPM provides list to tell
-	  the truth in a 64 bit build as well
-
-2006-02-13 14:32  szamsu
-
-	* build.xml, project/configure.properties.xml,
-	  project/version.properties: use 2.6, instead of 2.6.2 in library
-	  names
-
-2006-02-13 13:58  szamsu
-
-	* project/configure.properties.xml, project/version.properties: dbg
-	  flavour is preferred
-
-2006-02-13 13:57  szamsu
-
-	* build.xml: SLC3 comes only with ant 1.6.1, so scaling back the
-	  fix
-
-2006-02-13 13:29  szamsu
-
-	* build.xml: turned my private itch into a Savannah bug
-
-2006-02-13 11:53  szamsu
-
-	* RELEASE-NOTES: segfault fix description
-
-2006-02-13 11:52  szamsu
-
-	* build.xml, project/glite-security-cgsi-gsoap.spec.template: THIS
-	  IS DIRTY: had to replace the rpm.init target to be able to build
-	  with /usr prefix
-
-2006-02-13 11:44  szamsu
-
-	* build.xml, project/configure.properties.xml,
-	  project/glite-security-cgsi-gsoap.spec.template, src/Makefile:
-	  RPM is created, but only with the /opt/glite prefix
-
-2006-02-13 11:17  szamsu
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h:
-	  bolierplate changes according to the licence
-
-2006-02-13 11:14  szamsu
-
-	* src/cgsi_plugin.c: struct allocation problem fix by David Smith
-
-2006-02-13 11:12  szamsu
-
-	* project/configure.properties.xml, src/Makefile: build also the
-	  VOMSified libraries
-
-2006-02-11 22:47  szamsu
-
-	* DESCRIPTION, RELEASE-NOTES, build.xml, project,
-	  project/build.number, project/build.properties,
-	  project/configure.properties.xml,
-	  project/glite-security-cgsi-gsoap.spec.template,
-	  project/properties.xml, project/version.properties, src/Makefile:
-	  basic project files and build changes
-
-2006-02-11 22:45  szamsu
-
-	* LICENSE: Changing license to the EGEE one, in agreement with Ben
-
-2006-01-23 17:18  bcouturi
-
-	* src/Makefile: Fixed install with version
-
-2006-01-23 17:11  bcouturi
-
-	* RELEASE-NOTES: Added 1.1.14
-
-2006-01-23 17:07  bcouturi
-
-	* src/Makefile: Fixed install
-
-2006-01-23 16:55  bcouturi
-
-	* src/Makefile: Fixed typo
-
-2006-01-23 16:53  bcouturi
-
-	* src/Makefile: Fixed makefile to produced library with different f
-	  globus flavours
-
-2006-01-23 12:17  bcouturi
-
-	* src/cgsi_plugin.c: Incorporated patch from David Smith that fixes
-	  a memory leak with VOMS
-
-2006-01-23 11:22  bcouturi
-
-	* setenv23.sh: Added helper script
-
-2006-01-09 10:06  bcouturi
-
-	* src/cgsi_plugin.c: Added check that plugin != NULL and fixed
-	  return of cgsi_plugin_get_voms_creds_from_ctx
-
-2006-01-06 16:06  bcouturi
-
-	* RELEASE-NOTES, src/cgsi_plugin.c: Fixed memory leak in case of
-	  error
-
-2005-12-07 08:38  bcouturi
-
-	* src/cgsi_plugin.c: Added integrity flag
-
-2005-11-30 18:46  bcouturi
-
-	* src/Makefile: Fixed default version value for gsoap
-
-2005-11-28 09:19  bcouturi
-
-	* src/cgsi_plugin.c: Fix memory leak in free of X509 stack chain
-
-2005-11-17 08:48  bcouturi
-
-	* src/Makefile: Fixed install and clean rules
-
-2005-11-17 08:18  bcouturi
-
-	* RELEASE-NOTES: Added 1.1.11
-
-2005-11-17 08:15  bcouturi
-
-	* src/Makefile, src/cgsi_plugin.c, src/cgsi_plugin.h,
-	  src/cgsi_plugin_int.h, src/globus_gsi_gss_constants.h,
-	  src/globus_i_gsi_credential.h, src/gssapi_openssl.h: Merged VOMS
-	  branch back into main
-
-2005-10-13 18:04  bcouturi
-
-	* src/cgsi_plugin.c: When exporting credentials, the file should be
-	  overwritten, not appended...
-
-2005-07-12 15:20  bcouturi
-
-	* LICENSE, RELEASE-NOTES, src/cgsi_plugin.c, src/cgsi_plugin.h:
-	  Added license
-
-2005-05-30 15:58  bcouturi
-
-	* src/Makefile: Changed default local to /usr
-
-2005-01-25 08:18  bcouturi
-
-	* src/cgsi_plugin.c: Included David Smith's activation/deactivation
-	  patch to allow running the plugin in a multithreaded server
-
-2004-11-12 15:25  bcouturi
-
-	* RELEASE-NOTES, src/cgsi_plugin.c: Added README and fixed
-	  cgsi_plugin_copy
-
-2004-11-10 13:41  bcouturi
-
-	* src/Makefile, src/cgsi_plugin.c: Fixed some warnings on IA 64
-
-2004-10-14 08:59  bcouturi
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h: Added extern "C" so that
-	  module can be called from C++ code. Also
-	  moved the fault detail content to the SOAP Faultstring field.
-
-2004-07-08 15:50  bcouturi
-
-	* src/cgsi_plugin.c: Do not send packet when clearing the context !
-
-2004-06-23 13:37  bcouturi
-
-	* src/cgsi_plugin.c: The wrong buffer was released, causing a
-	  memory leak.
-
-2004-06-17 15:37  bcouturi
-
-	* src/Makefile, src/cgsi_plugin.c, src/cgsi_plugin.h: Added fixes
-	  from Jens-Jensen and Akos Frohner
-
-2004-05-05 06:55  bcouturi
-
-	* src/cgsi_plugin.c: Added module activation code.
-
-2003-12-10 16:47  bcouturi
-
-	* src/cgsi_plugin.c: iFixed array length problem after running
-	  client through insure
-
-2003-12-09 14:30  bcouturi
-
-	* src/cgsi_plugin.c: Fixed SEGV ocurring when the
-	  cgsi_plugin_delete is called
-
-2003-11-14 14:41  bcouturi
-
-	* src/doxygenConfig: Configuration to generate doxygen
-	  documentation for CGSI_gSOAP.
-
-2003-11-10 17:26  bcouturi
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h: Added the soap_cgsi_init
-	  helper function.
-
-2003-11-05 14:07  bcouturi
-
-	* src/cgsi_plugin.c, src/cgsi_plugin.h, src/cgsi_plugin_int.h:
-	  Added DELEGATION functionality
-
-2003-10-31 09:31  bcouturi
-
-	* src, src/Makefile, src/cgsi_plugin.c, src/cgsi_plugin.h,
-	  src/cgsi_plugin_int.h: Replaced files at right level
-
-2003-10-31 09:31  
-
-	* .: Standard project directories initialized by cvs2svn.
+* Wed Dec 21 2011 Zsolt Molnar <Zsolt.Molnar@cern.ch> 1.3.5-1
+- Dealing with bugs in CGSI-Gsoap: https://svnweb.cern.ch/trac/lcgutil/ticket/176
+- cgsi-gsoap - license violation: https://svnweb.cern.ch/trac/lcgutil/ticket/233
+- cgsi-gsoap compilation failure with default debian compiler flags: https://svnweb.cern.ch/trac/lcgutil/ticket/237
+- General EPEL packaging for all the lcg-utils components: General EPEL packaging for all the lcg-utils components
+
+* Mon Mar 8 2011 Jean-Philippe Baud <Jean-Philippe.Baud@cern.ch> 1.3.4-2
+- set AutoReqProv = yes (strong requirement from EMI project)
+- add support for EMI build
+- Fixes #77984: srmv1 and srmv2.2 segfaults while security scan
+
+* Mon Aug 23 2010 Jean-Philippe Baud <Jean-Philippe.Baud@cern.ch> 1.3.4-1
+- create rpm sub-directory and spec file to help building from head
+- add Makefile to build solaris packages
+
+* Tue Aug 3 2010 Jean-Philippe Baud <Jean-Philippe.Baud@cern.ch> 1.3.4
+- add code to get user_ca
+- fix typo in Makefile (GLOBUS_FLAVOUR default)
+
+* Wed Aug 19 2009 Akos Frohner <Akos.Frohner> 1.3.3-2
+- updating build dependency
+
+* Mon Jan 12 2009 David Smith <David.Smith@cern.ch> 1.3.3-1
+- Update version to 1.3.3, apply initial solaris build changes 
+  and change vomsc to vomsapi.
+
+* Mon Oct 20 2008 Akos Frohner <Akos.Frohner@cern.ch> 1.3.2-2
+- Fixes #42623: DM custom packager creates rpms with invalid name
+
+* Mon Jul 7 2008 Akos Frohner <Akos.Frohner@cern.ch> 1.3.2-1
+- gSOAP 2.7.10 has introduced a virtual destructor, which inserts
+  a pointer to the VMT at the beginning of the 'soap' structure,
+  making the C and C++ versions of the code binary incompatible,
+  so we need to build C++ flavour of the libraries as well with 
+  _cpp suffix.
+
+* Thu May 8 2008 David Smith <David.Smith@cern.ch> 1.3.1-1
+- Added new function, export_delegated_credentials(), to make
+  a delegated credential token available in memory suitable for
+  storage and later reuse by the user
+- Removed some spurious trailing newlines from error messages
+- Fixed descriptor and connection leak on the client side
+  when the authenitcation negociation to a server fails
+- Enhanced some error messages to cover more of the error message
+  recommendations in bug #35320
+
+* Wed Oct 10 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.1-2
+- VOMS libs are in 'lib64' on x86_64 starting with VOMS v1.7.23
+
+* Fri Sep 21 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.1-1
+- Adding the CGSI_gSOAP error messages to the returned SOAP errors.
+- updated to use glite-test-certs, instead of glite-security-test-utils
+
+* Thu Aug 30 2007 Akos Frohner <Akos.Frohner@cern.ch> 1.2.0-1
+- using lib64 on x86_64 platform for the libraries
+
+* Tue Jul 31 2007 David Smith <David.Smith@cern.ch> 
+- improve relase of resources on error during gss_init_sec_context()
+  or gss_accept_sec_context() loops and on send error in
+  cgsi_plugin_send().
+- Send errors are now noted and the plugin will not attempt to
+  wrap and send any further data with the context.
+- change peer identitiy check in client_cgsi_plugin_open()
+  from an explicit check after the security context is established
+  to an internal check handled by gss_init_sec_context()
+- Change of behavior of CGSI_OPT_DISABLE_NAME_CHECK. Without
+  the option set a client checks the server presents an
+  identnity compatible with the hostname specified to
+  client_cgsi_plugin_open(). (Which was the previous behavior).
+  Without CGSI_OPT_DISABLE_NAME_CHECK the client does a reverse
+  lookup of the server's name and uses that in the identity check.
+- Added new option CGSI_OPT_ALLOW_ONLY_SELF which affects both
+  client and servers and causes them to only connect/accept
+  connections with peers which have the same credentials. This
+  overrides CGSI_OPT_DISABLE_NAME_CHECK.
+- Read/write attempts without a security context having first
+  been established fail but no longer reset the error. It is
+  assumed that the reason for the context establish failure has
+  already been recorded, resetting the error leads to a poor
+  diagnostic message.
+- Small optimisation in cgsi_plugin_print_token().
+
+* Fri Jan 19 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.17-2
+
+- avoiding memory leak, if retrieve_voms_credentials() called multiple times
+
+* Fri Jan 12 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.17-1
+
+- having no VOMS extension (i.e. grid-proxy-init) is not an error
+
+* Tue Jan  9 2007 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.16-3
+
+- enabling gSOAP 2.6.x and 2.7.x gLite builds from the same source
+- maintainer has been changed to CERN/IT/GD
+
+* Thu Aug 31 2006 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.16
+
+- VOMS parsing is no longer implicit, if CGSI_OPT_DISABLE_VOMS_CHECK
+  option is used on the server side: one has to call retrieve_voms_credentials() 
+  to make it happen. It returns -1 in case of error and fills the SOAP Fault 
+  sturture with  the details. This fixes:
+  #19355: CGSI-gSOAP shall refuse requests with invalid VOMS AC
+- New server side option: CGSI_OPT_DISABLE_MAPPING, to disable gridmap-file
+  lookup of the DN (for example server does its own authorization).
+- Simple client-server test suite, for regression testing.
+- gSOAP 2.7.x compatibility fix.
+- Fixed when CGSI_TRACE was printing garbage.
+
+* Mon Feb 13 2006 Akos FROHNER <Akos.Frohner@cern.ch> 1.1.15
+
+- moved to the gLite build system
+- moved the VOMS dependant libraries into a -voms RPM
+- changed structure init to calloc that the memory is zeroad
+  it fixes a segfault, if the non-voms library is used
+- added interface documentation in HTML and man formats
+
+* Thu Feb  9 2006 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.14
+- Create libs for flavours gcc32dbg and gcc32dbgpthr in case of VOMS support
+
+* Mon Jan  9 2006 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.13
+- Fixed problems with VOMS code
+
+* Mon Jan  9 2006 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.12
+- Fixed memory leak in case of error in the VOMS code
+
+* Thu Nov 17 2005 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.11
+- VOMS Integration: Added new library libcgsi_plugin_voms....
+
+* Tue Jul 12 2005 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.10
+- Added license
+
+* Fri Jul  8 2005 Ben COUTURIER <Ben.Couturier@cern.ch> 1.1.9
+- Moved the plugin to /usr
+- Included David Smith's activation/deactivation patch to allow 
+  running the plugin in a multithreaded server
+- Fixed bug in cgsi_plugin_copy (before that it was not duplicating the cgsi_plugin_data)
+- Protected calls to cgsi_plugin_data->fopen and fclose
+- Send error message in faultstring rather rather than in fault detail 
 

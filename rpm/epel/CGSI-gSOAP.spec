@@ -1,6 +1,6 @@
 Name:		CGSI-gSOAP
 Version:	1.3.5
-Release:	2%{?dist}
+Release:	1%{?dist}
 Summary:	GSI plugin for gSOAP
 
 Group:		System Environment/Libraries
@@ -95,9 +95,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_mandir}/man*/*
 
 %changelog
-* Mon Apr 18 2012 Zsolt Molnar <zsolt.molnar@cern.ch> - 1.3.5-2
-- First official EMI 2 release, with EPEL changes finelized.
-
 * Mon Apr 02 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 1.3.5-1
 - Up for new upstream release
 
