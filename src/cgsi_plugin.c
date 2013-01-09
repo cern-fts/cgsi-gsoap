@@ -39,7 +39,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "voms_apic.h"
+#include <voms/voms_apic.h>
 #ifdef __cplusplus
 }
 #endif
