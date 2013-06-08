@@ -1876,6 +1876,8 @@ int export_delegated_credentials(struct soap *soap, char *filename) {
         snprintf(buf, BUFSIZE, "export delegated credentials: could not write to file (%s)",
                  strerror(errno));
         cgsi_err(soap, buf);
+	if(fd >= 0)
+		close(fd);
         return -1;
     }
 
