@@ -48,8 +48,8 @@ extern "C" {
 #define BUFSIZE 1024
 #define TBUFSIZE 256
 
-static char *client_plugin_id = CLIENT_PLUGIN_ID;
-static char *server_plugin_id = SERVER_PLUGIN_ID;
+static const char *client_plugin_id = CLIENT_PLUGIN_ID;
+static const char *server_plugin_id = SERVER_PLUGIN_ID;
 
 static int server_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *data);
 static int server_cgsi_plugin_send(struct soap *soap, const char *buf, size_t len);
@@ -66,21 +66,21 @@ static int client_cgsi_plugin_close(struct soap *soap);
 
 static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct soap_plugin *src);
 static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p);
-static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, char *plugin_id);
-static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *plugin_id);
-static int cgsi_plugin_close(struct soap *soap, char *plugin_id);
+static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, const char *plugin_id);
+static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, const char *plugin_id);
+static int cgsi_plugin_close(struct soap *soap, const char *plugin_id);
  
 int cgsi_plugin_send_token(void *arg, void *token, size_t token_length);
 int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length);
 void cgsi_plugin_print_token(struct cgsi_plugin_data *data, char *token, int length);
-static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
-static void cgsi_err(struct soap *soap, char *msg);
-static int cgsi_display_status_1(char *m, OM_uint32 code, int type, char *buf, int buflen);
+static void cgsi_gssapi_err(struct soap *soap, const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat);
+static void cgsi_err(struct soap *soap, const char *msg);
+static int cgsi_display_status_1(const char *m, OM_uint32 code, int type, char *buf, int buflen);
 static int cgsi_parse_opts(struct cgsi_plugin_data *p, void *arg, int isclient);
 static struct cgsi_plugin_data* get_plugin(struct soap *soap);
 static int setup_trace(struct cgsi_plugin_data *data);
-static int trace(struct cgsi_plugin_data *data, char *tracestr);
-static int trace_str(struct cgsi_plugin_data *data, const char *msg, size_t len);
+static int trace(struct cgsi_plugin_data *data, const char *tracestr);
+static int trace_str(struct cgsi_plugin_data *data, const char *msg, int len);
 static void cgsi_plugin_globus_modules(int activate);
 static int is_loopback(struct sockaddr *);
 static void free_conn_state(struct cgsi_plugin_data *data);
@@ -1124,7 +1124,7 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p){
 }
 
 
-static int cgsi_plugin_close(struct soap *soap, char *plugin_id) {
+static int cgsi_plugin_close(struct soap *soap, const char *plugin_id) {
 
     OM_uint32 major_status;
     OM_uint32 minor_status;
@@ -1164,7 +1164,7 @@ static int cgsi_plugin_close(struct soap *soap, char *plugin_id) {
 }
 
 
-static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, char *plugin_id) {
+static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, const char *plugin_id) {
 
     OM_uint32 major_status;
     OM_uint32 minor_status;
@@ -1227,7 +1227,7 @@ static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, char
     return SOAP_OK;
 }
 
-static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, char *plugin_id) {
+static size_t cgsi_plugin_recv(struct soap *soap, char *buf, size_t len, const char *plugin_id) {
 
     OM_uint32 major_status;
     OM_uint32 minor_status, minor_status1;
@@ -1515,7 +1515,7 @@ void cgsi_plugin_print_token(struct cgsi_plugin_data *data, char *token, int len
 /**
  * Function to display the GSS-API errors
  */
-static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM_uint32 min_stat) {
+static void cgsi_gssapi_err(struct soap *soap, const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat) {
 
     int ret;
     char buffer[BUFSIZE],hostname[NI_MAXHOST];
@@ -1559,7 +1559,7 @@ static void cgsi_gssapi_err(struct soap *soap, char *msg, OM_uint32 maj_stat, OM
 /**
   * Displays the GSS-API error messages in the error buffer
  */
-static int cgsi_display_status_1(char *m, OM_uint32 code, int type, char *buf, int buflen) {
+static int cgsi_display_status_1(const char *m, OM_uint32 code, int type, char *buf, int buflen) {
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;
      OM_uint32 msg_ctx;
@@ -1603,7 +1603,7 @@ static int cgsi_display_status_1(char *m, OM_uint32 code, int type, char *buf, i
      return count;
 }
 
-static void cgsi_err(struct soap *soap, char *msg) {
+static void cgsi_err(struct soap *soap, const char *msg) {
 
     struct cgsi_plugin_data *data;
     int isclient = 1;
@@ -1765,7 +1765,7 @@ static int setup_trace(struct cgsi_plugin_data *data) {
 }
 
 
-static int trace(struct cgsi_plugin_data *data, char *tracestr)
+static int trace(struct cgsi_plugin_data *data, const char *tracestr)
 {
     if (!data->trace_mode) {
         return 0;
@@ -1774,7 +1774,7 @@ static int trace(struct cgsi_plugin_data *data, char *tracestr)
     return trace_str(data, tracestr, strlen(tracestr));
 }
 
-static int trace_str(struct cgsi_plugin_data *data, const char *msg, size_t len)
+static int trace_str(struct cgsi_plugin_data *data, const char *msg, int len)
 {
     if (!data->trace_mode) {
         return 0;
@@ -1871,7 +1871,7 @@ int export_delegated_credentials(struct soap *soap, char *filename) {
         return -1;
     }
 
-    if (write(fd, token, token_length) != token_length) {
+    if (write(fd, token, token_length) != (ssize_t)token_length) {
         char buf[BUFSIZE];
         snprintf(buf, BUFSIZE, "export delegated credentials: could not write to file (%s)",
                  strerror(errno));
