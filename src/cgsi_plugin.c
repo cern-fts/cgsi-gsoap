@@ -253,11 +253,11 @@ int cgsi_plugin_get_flags(struct soap *soap, int is_server)
 	return -1;
     }
 
-    if(data->context_flags |= GSS_C_DELEG_FLAG) {
+    if(data->context_flags & GSS_C_DELEG_FLAG) {
       flags |= CGSI_OPT_DELEG_FLAG;
     }
 
-    if(data->context_flags |= GSS_C_GLOBUS_SSL_COMPATIBLE) {
+    if(data->context_flags & GSS_C_GLOBUS_SSL_COMPATIBLE) {
       flags |= CGSI_OPT_SSL_COMPATIBLE;
     }
 
@@ -434,6 +434,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
     }
 
     strncpy(data->server_name, (const char*)name.value, CGSI_MAXNAMELEN);
+    data->server_name[CGSI_MAXNAMELEN - 1] = '\0';
 
     {
         char buf[TBUFSIZE];
@@ -497,6 +498,7 @@ static int server_cgsi_plugin_accept(struct soap *soap) {
     }
 
     strncpy(data->client_name, (const char*)name.value, CGSI_MAXNAMELEN);
+    data->client_name[CGSI_MAXNAMELEN - 1] = '\0';
     (void) gss_release_buffer(&tmp_status, &name); 
 
     {
@@ -617,6 +619,7 @@ static int server_cgsi_map_dn(struct soap *soap) {
     if (!globus_gss_assist_gridmap(data->client_name, &p)){
         /* We have a mapping */
         strncpy(data->username, p, CGSI_MAXNAMELEN);
+        data->username[CGSI_MAXNAMELEN - 1] = '\0';
 
         {
             char buf[TBUFSIZE];
@@ -768,6 +771,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
     }
 
     strncpy(data->client_name, (const char*)namebuf.value, CGSI_MAXNAMELEN);
+    data->client_name[CGSI_MAXNAMELEN - 1] = '\0';
     (void)gss_release_buffer(&tmp_status, &namebuf);
        
     {
@@ -1018,6 +1022,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         }
 
         strncpy(data->server_name, (const char*)server_name.value, CGSI_MAXNAMELEN);
+        data->server_name[CGSI_MAXNAMELEN - 1] = '\0';
 
         {
           char buf[TBUFSIZE];
