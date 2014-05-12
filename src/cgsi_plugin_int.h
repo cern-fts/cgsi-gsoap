@@ -60,6 +60,9 @@ struct cgsi_plugin_data {
     gss_cred_id_t deleg_credential_handle;
     int deleg_cred_set;
     gss_buffer_t buffered_in;
+    /* API-defined credentials */
+    char* x509_cert;
+    char* x509_key;
     /* Pointers to VOMS data */
     char *voname;
     char **fqan;

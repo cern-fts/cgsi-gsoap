@@ -134,6 +134,7 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
           return SOAP_EOM; /* return error */
         }
     }
+
     return SOAP_OK;
 }
 
@@ -205,7 +206,7 @@ int cgsi_plugin_clr_flags(struct soap *soap, int is_server, int flags)
     
     if (data == NULL) {
         cgsi_err(soap, "Cannot find cgsi-plugin data structure; is plugin registered?");
-	return -1;
+        return -1;
     }
 
     if (flags & CGSI_OPT_DELEG_FLAG) {
@@ -250,7 +251,7 @@ int cgsi_plugin_get_flags(struct soap *soap, int is_server)
     
     if (data == NULL) {
         cgsi_err(soap, "Cannot find cgsi-plugin data structure; is plugin registered?");
-	return -1;
+        return -1;
     }
 
     if(data->context_flags & GSS_C_DELEG_FLAG) {
@@ -278,6 +279,39 @@ int cgsi_plugin_get_flags(struct soap *soap, int is_server)
     }
 
     return flags;
+}
+
+/**
+ * Set credentials without using environment variables
+ */
+int cgsi_plugin_set_credentials(struct soap *soap, int is_server,
+        const char* x509_cert, const char* x509_key)
+{
+    const char *id;
+    struct cgsi_plugin_data *data;
+    int flags = 0;
+
+    id = is_server ? server_plugin_id : client_plugin_id;
+
+    data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, id);
+    if (data == NULL) {
+        cgsi_err(soap, "Cannot find cgsi-plugin data structure; is plugin registered?");
+        return -1;
+    }
+
+    free(data->x509_cert); data->x509_cert = NULL;
+    free(data->x509_key); data->x509_key = NULL;
+
+    if (x509_cert && (data->x509_cert = strdup(x509_cert)) == NULL) {
+        cgsi_err(soap, "Out of memory");
+        return -1;
+    }
+    if (x509_key && (data->x509_key = strdup(x509_key)) == NULL) {
+        cgsi_err(soap, "Out of memory");
+        return -1;
+    }
+
+    return 0;
 }
 
 
@@ -679,6 +713,7 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg) {
           return SOAP_EOM; /* return error */
         }     
     }
+
     return SOAP_OK;
 }
 
@@ -706,6 +741,88 @@ static int client_cgsi_plugin_init(struct soap *soap, struct cgsi_plugin_data *d
     return SOAP_OK;
 }
 
+static int client_cgsi_plugin_import_cred(struct soap *soap,
+        struct cgsi_plugin_data *data)
+{
+    char err_buffer[1024];
+    OM_uint32 major_status, minor_status;
+    struct stat st;
+    gss_buffer_desc buffer;
+    int ret = -1;
+    size_t cert_size = 0;
+    size_t key_size = 0;
+    FILE* fd = NULL;
+
+    buffer.value = NULL;
+    buffer.length = 0;
+
+    /* Stat cert and key to find out how much memory we need to hold the credentials */
+    if (stat(data->x509_cert, &st) != 0) {
+        strerror_r(errno, err_buffer, sizeof(err_buffer));
+        cgsi_err(soap, err_buffer);
+        goto import_end;
+    }
+    cert_size = st.st_size;
+
+    if (data->x509_key) {
+        if (stat(data->x509_key, &st) == 0) {
+            strerror_r(errno, err_buffer, sizeof(err_buffer));
+            cgsi_err(soap, err_buffer);
+            goto import_end;
+        }
+        key_size = st.st_size;
+    }
+
+    /* Allocate and read */
+    buffer.length = cert_size + key_size;
+    buffer.value = calloc(buffer.length, sizeof(char));
+    if (buffer.value == NULL) {
+        cgsi_err(soap, "Out of memory");
+        goto import_end;
+    }
+
+    fd = fopen(data->x509_cert, "r");
+    if (!fd) {
+        strerror_r(errno, err_buffer, sizeof(err_buffer));
+        cgsi_err(soap, err_buffer);
+        goto import_end;
+    }
+    fread(buffer.value, cert_size, 1, fd);
+    fclose(fd);
+
+    if (data->x509_key && strcmp(data->x509_key, data->x509_cert) != 0) {
+        fd = fopen(data->x509_key, "r");
+        if (!fd) {
+            strerror_r(errno, err_buffer, sizeof(err_buffer));
+            cgsi_err(soap, err_buffer);
+            goto import_end;
+        }
+        fread((char*)buffer.value + cert_size, key_size, 1, fd);
+        fclose(fd);
+    }
+
+    /* Import into gss */
+    major_status = gss_import_cred(&minor_status,
+                                   &data->credential_handle,
+                                   GSS_C_NO_OID,
+                                   0, // 0 = Pass credentials; 1 = Pass path as X509_USER_PROXY=...
+                                   &buffer,
+                                   0,
+                                   NULL);
+    if (major_status != GSS_S_COMPLETE) {
+        cgsi_gssapi_err(soap,
+                        "Could NOT import client credentials",
+                        major_status,
+                        minor_status);
+    }
+    else {
+        ret = 0;
+    }
+
+import_end:
+    free(buffer.value);
+    return ret;
+}
 
 static int client_cgsi_plugin_open(struct soap *soap,
                      const char *endpoint,
@@ -730,22 +847,30 @@ static int client_cgsi_plugin_open(struct soap *soap,
     free_conn_state(data);
     
     /* Getting the credenttials */
-    major_status = gss_acquire_cred(&minor_status,
-                                    GSS_C_NO_NAME,
-                                    0,
-                                    GSS_C_NULL_OID_SET,
-                                    GSS_C_INITIATE,
-                                    &data->credential_handle,
-                                    NULL,
-                                    NULL);
+    if (data->x509_cert) {
+        trace(data, "Using gss_import_cred to load credentials");
+        // client_cgsi_plugin_import_cred should set the error itself
+        if (client_cgsi_plugin_import_cred(soap, data) != 0)
+            goto error;
+    }
+    else {
+        trace(data, "Using gss_acquire_cred to load credentials");
+        major_status = gss_acquire_cred(&minor_status,
+                                        GSS_C_NO_NAME,
+                                        0,
+                                        GSS_C_NULL_OID_SET,
+                                        GSS_C_INITIATE,
+                                        &data->credential_handle,
+                                        NULL,
+                                        NULL);
     
-    
-    if (major_status != GSS_S_COMPLETE) {
-        cgsi_gssapi_err(soap, 
-                        "Could NOT load client credentials",
-                        major_status,
-                        minor_status);
-        goto error;
+        if (major_status != GSS_S_COMPLETE) {
+            cgsi_gssapi_err(soap,
+                            "Could NOT load client credentials",
+                            major_status,
+                            minor_status);
+            goto error;
+        }
     }
     
     /* Now keeping the credentials name in the data structure */

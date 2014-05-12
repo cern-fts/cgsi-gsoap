@@ -275,6 +275,18 @@ int cgsi_plugin_clr_flags(struct soap *soap, int is_server, int flags);
  */
 int cgsi_plugin_get_flags(struct soap *soap, int is_server);
 
+/**
+ * Set credentials without using environment variables
+ *
+ * @param soap The soap structure for the request
+ * @param is_server 0 if client, 1 if server
+ * @param x509_cert The certificate. If it is a proxy, you only need to specify this one
+ * @param x509_key  The key. Will be ignored if x509_cert is NULL!
+ *
+ * @return 0 on success, -1 on error.
+ */
+int cgsi_plugin_set_credentials(struct soap *soap, int is_server, const char* x509_cert, const char* x509_key);
+
 #ifdef __cplusplus
 }
 #endif
