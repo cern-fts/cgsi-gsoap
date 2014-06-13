@@ -16,7 +16,7 @@
  *
  * @file globus_gsi_gssapi_constants.h
  * @author Sam Lang, Sam Meder
- * 
+ *
  * $RCSfile: globus_gsi_gss_constants.h,v $
  * $Revision: 1.2 $
  * $Date: 2005/11/17 08:15:19 $
@@ -37,7 +37,7 @@ extern char *                globus_l_gsi_gssapi_error_strings[];
  * @ingroup globus_gsi_gssapi_constants
  */
 typedef enum
-{    
+{
     GLOBUS_GSI_GSSAPI_ERROR_HANDSHAKE = 0,
     GLOBUS_GSI_GSSAPI_ERROR_NO_GLOBUSID = 1,
     GLOBUS_GSI_GSSAPI_ERROR_PROCESS_CERT = 2,
@@ -56,7 +56,7 @@ typedef enum
     GLOBUS_GSI_GSSAPI_ERROR_WRITE_BIO = 15,
     GLOBUS_GSI_GSSAPI_ERROR_WITH_GSS_CONTEXT = 16,
     GLOBUS_GSI_GSSAPI_ERROR_UNEXPECTED_FORMAT = 17,
-    GLOBUS_GSI_GSSAPI_ERROR_WITH_GSI_PROXY = 18,    
+    GLOBUS_GSI_GSSAPI_ERROR_WITH_GSI_PROXY = 18,
     GLOBUS_GSI_GSSAPI_ERROR_WITH_CALLBACK_DATA = 19,
     GLOBUS_GSI_GSSAPI_ERROR_BAD_DATE = 20,
     GLOBUS_GSI_GSSAPI_ERROR_BAD_MECH = 21,
@@ -91,7 +91,8 @@ typedef enum
  * @ingroup globus_gsi_gssapi_constants
  */
 /* @{ */
-typedef enum {
+typedef enum
+{
     GSS_IMPEXP_OPAQUE_FORM = 0,
     GSS_IMPEXP_MECH_SPECIFIC = 1
 } gss_impexp_cred_type_t;
@@ -102,7 +103,8 @@ typedef enum {
  * @ingroup globus_gsi_gssapi_constants
  */
 /* @{ */
-typedef enum {
+typedef enum
+{
     GSS_CON_ST_HANDSHAKE = 0,
     GSS_CON_ST_FLAGS,
     GSS_CON_ST_REQ,

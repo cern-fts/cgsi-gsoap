@@ -39,7 +39,8 @@
 
 #define CGSI_MAXNAMELEN 512
 
-struct cgsi_plugin_data {
+struct cgsi_plugin_data
+{
     int context_established;
     gss_cred_id_t credential_handle;
     gss_ctx_id_t  context_handle;
@@ -50,10 +51,10 @@ struct cgsi_plugin_data {
     int (*fclose)(struct soap*);
     char client_name[CGSI_MAXNAMELEN];
     char server_name[CGSI_MAXNAMELEN];
-    char username[CGSI_MAXNAMELEN];    
-    char user_ca[CGSI_MAXNAMELEN];    
+    char username[CGSI_MAXNAMELEN];
+    char user_ca[CGSI_MAXNAMELEN];
     int nb_iter;
-    int disable_hostname_check; 
+    int disable_hostname_check;
     int context_flags;
     int trace_mode;
     char trace_file[CGSI_MAXNAMELEN];

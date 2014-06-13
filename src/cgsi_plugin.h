@@ -1,4 +1,4 @@
-/*  
+/*
  * Copyright (c) Members of the EGEE Collaboration. 2004.
  * See http://www.eu-egee.org/partners/ for details on the copyright holders.
  *
@@ -48,10 +48,10 @@ extern "C" {
 /** Disable comparing the server's host name with its certificate's CN. */
 #define CGSI_OPT_DISABLE_NAME_CHECK 0x10
 /** Keep alive the HTTP connection. */
-#define CGSI_OPT_KEEP_ALIVE         0x20  
+#define CGSI_OPT_KEEP_ALIVE         0x20
 /** Disable DN->userid mapping via gridmap-file. */
 #define CGSI_OPT_DISABLE_MAPPING    0x40
-/** Disable connect time VOMS parsing for better error handling 
+/** Disable connect time VOMS parsing for better error handling
  *  via an explicit call to retrieve_voms_creds() */
 #define CGSI_OPT_DISABLE_VOMS_CHECK 0x80
 /** Allow client and server to only connect together when
@@ -204,7 +204,7 @@ int retrieve_userca_and_voms_creds(struct soap *soap);
  *
  * @param soap The soap structure for the request
  *
- * @return The client CA is allocated in the soap structure (DON'T free), 
+ * @return The client CA is allocated in the soap structure (DON'T free),
  *         NULL otherwise
  */
 char *get_client_ca(struct soap *soap);
@@ -214,7 +214,7 @@ char *get_client_ca(struct soap *soap);
  *
  * @param soap The soap structure for the request
  *
- * @return The client voname is malloced in the soap structure (DON'T free), 
+ * @return The client voname is malloced in the soap structure (DON'T free),
  *         NULL otherwise
  */
 char *get_client_voname(struct soap *soap);
@@ -226,7 +226,7 @@ char *get_client_voname(struct soap *soap);
  *
  * @param nbfqans The number of returned Fully Qualified Attribute Names
  *
- * @return The client roles are malloced in the soap structure (DON'T free), 
+ * @return The client roles are malloced in the soap structure (DON'T free),
  *         NULL otherwise
  */
 char ** get_client_roles(struct soap *soap, int* nbfqans);

@@ -16,7 +16,7 @@
  *
  * @file gssapi_openssl.h
  * @author Sam Lang, Sam Meder
- * 
+ *
  * $RCSfile: gssapi_openssl.h,v $
  * $Revision: 1.2 $
  * $Date: 2005/11/17 08:15:20 $
@@ -68,13 +68,13 @@
  *  byte  type[1]          = SSL3_RT_GSSAPI_OPENSSL
  *  byte  version_major[1] = 0x03
  *  byte  version_minor[1] = 0
- *  byte  mic_length[2]    = 2 byte length of following mic 
- * 
+ *  byte  mic_length[2]    = 2 byte length of following mic
+ *
  *  byte  mic_seq[8]           = 8 byte sequence number
- *  byte  mic_data_length[4]   = 4 byte length of data 
+ *  byte  mic_data_length[4]   = 4 byte length of data
  *  byte  hash[*]          = the hash of variable length
  *
- *  byte  data[*]          = the data being wrapped. 
+ *  byte  data[*]          = the data being wrapped.
  */
 
 #define SSL3_RT_GSSAPI_OPENSSL                   26
@@ -111,7 +111,7 @@
        char *                           _char_array_ = CHAR_ARRAY; \
        *(_char_array_++) = (unsigned char) (((SHORT) >> 8) & 0xff); \
        *(_char_array_++) = (unsigned char) ((SHORT) & 0xff); \
-   } 
+   }
 
 /* Compare OIDs */
 
@@ -121,7 +121,8 @@
          ((o1)->length == (o2)->length) && \
          (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0)))
 
-typedef struct gss_name_desc_struct {
+typedef struct gss_name_desc_struct
+{
     /* gss_buffer_desc  name_buffer ; */
     gss_OID                             name_oid;
     X509_NAME *                         x509n;
@@ -129,14 +130,16 @@ typedef struct gss_name_desc_struct {
     ASN1_BIT_STRING *                   group_types;
 } gss_name_desc;
 
-typedef struct gss_cred_id_desc_struct {
+typedef struct gss_cred_id_desc_struct
+{
     globus_gsi_cred_handle_t            cred_handle;
     gss_name_desc *                     globusid;
     gss_cred_usage_t                    cred_usage;
     SSL_CTX *                           ssl_context;
 } gss_cred_id_desc;
 
-typedef struct gss_ctx_id_desc_struct{
+typedef struct gss_ctx_id_desc_struct
+{
     globus_mutex_t                      mutex;
     globus_gsi_callback_data_t          callback_data;
     gss_cred_id_desc *                  peer_cred_handle;
@@ -147,7 +150,7 @@ typedef struct gss_ctx_id_desc_struct{
     OM_uint32                           req_flags;
     OM_uint32                           ctx_flags;
     int                                 cred_obtained;
-    SSL *                               gss_ssl; 
+    SSL *                               gss_ssl;
     BIO *                               gss_rbio;
     BIO *                               gss_wbio;
     BIO *                               gss_sslbio;
