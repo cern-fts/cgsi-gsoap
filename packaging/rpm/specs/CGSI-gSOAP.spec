@@ -95,6 +95,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_mandir}/man*/*
 
 %changelog
+* Wed Jun 25 2014 Alejandro Alvarez <aalvarez@cern.ch> - 1.3.6-1
+- Up for new upstream release
+
 * Mon Apr 02 2012 Ricardo Rocha <ricardo.rocha@cern.ch> - 1.3.5-1
 - Up for new upstream release
 

@@ -1,3 +1,8 @@
+* Wed Jun 25 2014 Alejandro Alvarez <alejandro.alvarez@cern.ch> 1.3.6
+- Disabled weak ciphers
+- [LCGUTIL-55] - API to set/get at runtime the different possible credentials
+- [LCGUTIL-384] - Remove compilation warnings on cgsi-gsoap
+
 * Wed Dec 21 2011 Zsolt Molnar <Zsolt.Molnar@cern.ch> 1.3.5-1
 - Dealing with bugs in CGSI-Gsoap: https://svnweb.cern.ch/trac/lcgutil/ticket/176
 - cgsi-gsoap - license violation: https://svnweb.cern.ch/trac/lcgutil/ticket/233
