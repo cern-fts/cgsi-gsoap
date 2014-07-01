@@ -35,6 +35,7 @@
 #include <openssl/err.h>
 #include "gssapi_openssl.h"
 #include "globus_gsi_credential.h"
+
 #if defined(USE_VOMS)
 #ifdef __cplusplus
 extern "C" {
@@ -90,6 +91,12 @@ static gss_buffer_t buffer_free(gss_buffer_t buf);
 static gss_buffer_t buffer_consume_upto(gss_buffer_t buf, size_t offset);
 static gss_buffer_t buffer_copy_from(gss_buffer_t dest, gss_buffer_t src, size_t offset);
 
+
+__attribute__((constructor))
+static void globus_setup(void)
+{
+    cgsi_plugin_globus_modules(1);
+}
 
 /******************************************************************************/
 /* Plugin constructor            */
