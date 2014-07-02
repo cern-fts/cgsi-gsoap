@@ -857,6 +857,7 @@ static int client_cgsi_plugin_import_cred(struct soap *soap,
     size_t cert_size = 0;
     size_t key_size = 0;
     FILE* fd = NULL;
+    int key_is_cert = 0;
 
     buffer.value = NULL;
     buffer.length = 0;
@@ -871,8 +872,11 @@ static int client_cgsi_plugin_import_cred(struct soap *soap,
     cert_size = st.st_size;
 
     if (data->x509_key)
+        key_is_cert = strcmp(data->x509_cert, data->x509_key) == 0;
+
+    if (data->x509_key && !key_is_cert)
         {
-            if (stat(data->x509_key, &st) == 0)
+            if (stat(data->x509_key, &st) != 0)
                 {
                     strerror_r(errno, err_buffer, sizeof(err_buffer));
                     cgsi_err(soap, err_buffer);
@@ -900,7 +904,7 @@ static int client_cgsi_plugin_import_cred(struct soap *soap,
     fread(buffer.value, cert_size, 1, fd);
     fclose(fd);
 
-    if (data->x509_key && strcmp(data->x509_key, data->x509_cert) != 0)
+    if (data->x509_key && !key_is_cert)
         {
             fd = fopen(data->x509_key, "r");
             if (!fd)
