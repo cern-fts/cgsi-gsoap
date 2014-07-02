@@ -1367,7 +1367,7 @@ static int client_cgsi_plugin_close(struct soap *soap)
 
 static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct soap_plugin *src)
 {
-    struct cgsi_plugin_data *dst_data;
+    struct cgsi_plugin_data *dst_data, *src_data;
 
     *dst = *src;
     dst->data =  (struct cgsi_plugin_data *)malloc(sizeof(struct cgsi_plugin_data));
@@ -1381,6 +1381,7 @@ static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct s
     */
 
     dst_data = (struct cgsi_plugin_data *)dst->data;
+    src_data = (struct cgsi_plugin_data *)src->data;
 
     /* don't want to share these with the source */
     dst_data->deleg_credential_handle = GSS_C_NO_CREDENTIAL;
@@ -1389,6 +1390,11 @@ static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct s
     dst_data->voname = NULL;
     dst_data->deleg_credential_token = NULL;
     dst_data->fqan = NULL;
+
+    if (src_data->x509_cert)
+        dst_data->x509_cert = strdup(src_data->x509_cert);
+    if (src_data->x509_key)
+        dst_data->x509_key = strdup(src_data->x509_key);
 
     /* reset everything else connection related */
     free_conn_state(dst_data);
@@ -1413,6 +1419,8 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p)
         }
 
     free_conn_state(data);
+    free(data->x509_cert);
+    free(data->x509_key);
     free(p->data);
     p->data = NULL;
 
