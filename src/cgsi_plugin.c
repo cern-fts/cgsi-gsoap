@@ -1836,7 +1836,7 @@ void cgsi_plugin_print_token(struct cgsi_plugin_data *data, char *token, int len
 
     /* can avoid printing all the token if the trace routine
      * is disabled */
-    if (!data->trace_mode)
+    if (data->trace_mode < 2)
         {
             return;
         }
@@ -2126,13 +2126,16 @@ static int setup_trace(struct cgsi_plugin_data *data)
 {
     char *envar;
 
-    data->trace_mode=0;
-    data->trace_file[0]= data->trace_file[CGSI_MAXNAMELEN-1]= '\0';
+    data->trace_mode = 0;
+    data->trace_file[0] = data->trace_file[CGSI_MAXNAMELEN-1]= '\0';
 
     envar = getenv(CGSI_TRACE);
     if (envar != NULL)
         {
-            data->trace_mode=1;
+            errno = 0;
+            data->trace_mode = strtol(envar, NULL, 10);
+            if (errno)
+                data->trace_mode = 1;
             envar = getenv(CGSI_TRACEFILE);
             if (envar != NULL)
                 {
