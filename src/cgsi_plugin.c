@@ -134,6 +134,8 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
     p->fdelete = cgsi_plugin_delete;
     if (p->data)
         {
+            ((struct cgsi_plugin_data*)p->data)->start_new_line = 1;
+
             if (server_cgsi_plugin_init(soap, (struct cgsi_plugin_data*)p->data) ||
                     cgsi_parse_opts((struct cgsi_plugin_data *)p->data, arg,0))
                 {
@@ -142,7 +144,6 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
                     return SOAP_EOM; /* return error */
                 }
         }
-
     return SOAP_OK;
 }
 
@@ -802,6 +803,8 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
     p->fdelete = cgsi_plugin_delete;
     if (p->data)
         {
+            ((struct cgsi_plugin_data*)p->data)->start_new_line = 1;
+
             if (client_cgsi_plugin_init(soap, (struct cgsi_plugin_data*)p->data) ||
                     cgsi_parse_opts((struct cgsi_plugin_data *)p->data, arg,1))
                 {
@@ -2166,7 +2169,17 @@ static int trace_str(struct cgsi_plugin_data *data, const char *msg, int len)
     /* If no trace file defined, write to stderr */
     if (data->trace_file[0]=='\0')
         {
-            fprintf(stderr, "%.*s", len, msg);
+            int i;
+            for (i = 0; i < len; ++i) {
+                if (data->start_new_line) {
+                    fputs("[CGSI-GSOAP] ", stderr);
+                    data->start_new_line = 0;
+                }
+
+                fputc(msg[i], stderr);
+                if (msg[i] == '\n')
+                    data->start_new_line = 1;
+            }
         }
     else
         {
