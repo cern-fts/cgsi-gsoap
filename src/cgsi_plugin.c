@@ -496,7 +496,7 @@ static int server_cgsi_plugin_accept(struct soap *soap)
     if (data->credential_handle != GSS_C_NO_CREDENTIAL)
         ctx = ((gss_cred_id_desc*)data->credential_handle)->ssl_context;
 
-    if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW" ))
+    if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW:!SSLv3" ))
         {
             cgsi_err(soap, "Error setting the SSL context cipher list");
             goto error;
@@ -656,7 +656,7 @@ static int server_cgsi_plugin_accept(struct soap *soap)
             if (data->credential_handle != GSS_C_NO_CREDENTIAL)
                 ctx = ((gss_cred_id_desc*)data->credential_handle)->ssl_context;
 
-            if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW" ))
+            if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW:!SSLv3" ))
                 {
                     cgsi_err(soap, "Error setting the SSL context cipher list");
                     goto error;
