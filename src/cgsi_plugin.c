@@ -496,7 +496,10 @@ static int server_cgsi_plugin_accept(struct soap *soap)
     if (data->credential_handle != GSS_C_NO_CREDENTIAL)
         ctx = ((gss_cred_id_desc*)data->credential_handle)->ssl_context;
 
-    if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW:!SSLv3" ))
+    if (ctx != NULL)
+        SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3);
+
+    if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW:!SSLv3"))
         {
             cgsi_err(soap, "Error setting the SSL context cipher list");
             goto error;
@@ -655,6 +658,9 @@ static int server_cgsi_plugin_accept(struct soap *soap)
             /* remove the LOW cipher suites */
             if (data->credential_handle != GSS_C_NO_CREDENTIAL)
                 ctx = ((gss_cred_id_desc*)data->credential_handle)->ssl_context;
+
+            if (ctx != NULL)
+                SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv3);
 
             if (ctx == NULL || !SSL_CTX_set_cipher_list(ctx, SSL_DEFAULT_CIPHER_LIST ":!LOW:!SSLv3" ))
                 {
@@ -1039,7 +1045,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
         }
 
     /* gSOAP 2.7.x will try to open a https endpoint with SSL,
-     * if it was built WITH_SLL. Since endpoint is only used
+     * if it was built WITH_SSL. Since endpoint is only used
      * to compare the first six bytes, we pass one, which does
      * not start with 'https://'. */
     data->socket_fd = data->fopen(soap, endpoint+1, hostname, port);
@@ -1054,10 +1060,10 @@ static int client_cgsi_plugin_open(struct soap *soap,
 
     /* setting 'target_name':
      * if CGSI_OPT_ALLOW_ONLY_SELF is in effect we check that the peer's
-     * name is the same as ours by speficying it as the target name.
+     * name is the same as ours by specifying it as the target name.
      * Otherwise, if CGSI_OPT_DISABLE_NAME_CHECK was set then we check the
      * peer's certificate name against the name built from the peer's
-     * address (i.e. via a reverse lookup). Otherwise explictly check
+     * address (i.e. via a reverse lookup). Otherwise explicitly check
      * the DN against whatever hostname this function was called with */
 
     if (data->allow_only_self)
