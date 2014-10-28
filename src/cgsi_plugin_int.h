@@ -74,4 +74,5 @@ struct cgsi_plugin_data
     int had_send_error;
     void *deleg_credential_token;
     size_t deleg_credential_token_len;
+    int start_new_line;
 };

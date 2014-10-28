@@ -134,6 +134,8 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
     p->fdelete = cgsi_plugin_delete;
     if (p->data)
         {
+            ((struct cgsi_plugin_data*)p->data)->start_new_line = 1;
+
             if (server_cgsi_plugin_init(soap, (struct cgsi_plugin_data*)p->data) ||
                     cgsi_parse_opts((struct cgsi_plugin_data *)p->data, arg,0))
                 {
@@ -142,7 +144,6 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
                     return SOAP_EOM; /* return error */
                 }
         }
-
     return SOAP_OK;
 }
 
@@ -632,7 +633,7 @@ static int server_cgsi_plugin_accept(struct soap *soap)
         {
             if (retrieve_userca_and_voms_creds(soap))
                 {
-                    cgsi_err(soap, "Error retrieveing the userca/VOMS credentials");
+                    cgsi_err(soap, "Error retrieving the userca/VOMS credentials");
                     goto error;
                 }
         }
@@ -802,6 +803,8 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
     p->fdelete = cgsi_plugin_delete;
     if (p->data)
         {
+            ((struct cgsi_plugin_data*)p->data)->start_new_line = 1;
+
             if (client_cgsi_plugin_init(soap, (struct cgsi_plugin_data*)p->data) ||
                     cgsi_parse_opts((struct cgsi_plugin_data *)p->data, arg,1))
                 {
@@ -962,14 +965,18 @@ static int client_cgsi_plugin_open(struct soap *soap,
     /* Getting the credenttials */
     if (data->x509_cert)
         {
-            trace(data, "Using gss_import_cred to load credentials");
+            trace(data, "Using gss_import_cred to load credentials\n");
             // client_cgsi_plugin_import_cred should set the error itself
-            if (client_cgsi_plugin_import_cred(soap, data) != 0)
+            if (client_cgsi_plugin_import_cred(soap, data) != 0) {
+                char buf[TBUFSIZE];
+                snprintf(buf, TBUFSIZE, "Could NOT import client credentials from %s/%s\n", data->x509_cert, data->x509_key);
+                trace(data, buf);
                 goto error;
+            }
         }
     else
         {
-            trace(data, "Using gss_acquire_cred to load credentials");
+            trace(data, "Using gss_acquire_cred to load credentials\n");
             major_status = gss_acquire_cred(&minor_status,
                                             GSS_C_NO_NAME,
                                             0,
@@ -981,6 +988,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
 
             if (major_status != GSS_S_COMPLETE)
                 {
+                    trace(data, "Could NOT load client credentials\n");
                     cgsi_gssapi_err(soap,
                                     "Could NOT load client credentials",
                                     major_status,
@@ -1038,7 +1046,8 @@ static int client_cgsi_plugin_open(struct soap *soap,
     if (data->socket_fd < 0)
         {
             char buf[BUFSIZE];
-            snprintf(buf, BUFSIZE, "could not open connection to %s", hostname);
+            snprintf(buf, BUFSIZE, "could not open connection to %s:%d\n", hostname, port);
+            trace(data, buf);
             cgsi_err(soap, buf);
             goto error;
         }
@@ -1773,7 +1782,7 @@ int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
 
     {
         char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE,  "================= RECVING: %x\n", len + SSLHSIZE);
+        snprintf(buf, TBUFSIZE,  "================= RECVING: %d\n", len + SSLHSIZE);
         trace(data, buf);
     }
     cgsi_plugin_print_token(data, tok, len+SSLHSIZE);
@@ -1800,7 +1809,7 @@ int cgsi_plugin_send_token(void *arg, void *token, size_t token_length)
 
     {
         char buf[TBUFSIZE];
-        snprintf(buf, TBUFSIZE,  "================= SENDING: %x\n",
+        snprintf(buf, TBUFSIZE,  "================= SENDING: %d\n",
                  (unsigned int)token_length);
         trace(data, buf);
     }
@@ -2166,7 +2175,17 @@ static int trace_str(struct cgsi_plugin_data *data, const char *msg, int len)
     /* If no trace file defined, write to stderr */
     if (data->trace_file[0]=='\0')
         {
-            fprintf(stderr, "%.*s", len, msg);
+            int i;
+            for (i = 0; i < len; ++i) {
+                if (data->start_new_line) {
+                    fputs("[CGSI-GSOAP] ", stderr);
+                    data->start_new_line = 0;
+                }
+
+                fputc(msg[i], stderr);
+                if (msg[i] == '\n')
+                    data->start_new_line = 1;
+            }
         }
     else
         {
@@ -2477,7 +2496,7 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
     data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, server_plugin_id);
     if (data == NULL)
         {
-            cgsi_err(soap, "retrieve_voms: could not get data structure");
+            cgsi_err(soap, "retrieve_userca_and_voms_creds: could not get data structure");
             return -1;
         }
 
@@ -2485,6 +2504,7 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
     /* connection initialization resets this structure  */
     if (data->fqan != NULL)
         {
+            trace(data, "retrieve_userca_and_voms_creds: data->fqans already initialized\n");
             return 0;
         }
 
@@ -2495,6 +2515,7 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
     /* cast to gss_cred_id_desc */
     if (cred == GSS_C_NO_CREDENTIAL)
         {
+            trace(data, "retrieve_userca_and_voms_creds: No credentials given\n");
             goto leave;
         }
 
@@ -2502,6 +2523,7 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
 
     if (globus_module_activate(GLOBUS_GSI_CREDENTIAL_MODULE) != GLOBUS_SUCCESS)
         {
+            trace(data, "retrieve_userca_and_voms_creds: Could not activate GLOBUS_GSI_CREDENTIAL_MODULE\n");
             goto leave;
         }
 
@@ -2509,6 +2531,7 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
     gsi_cred_handle = cred_desc->cred_handle;
     if (globus_gsi_cred_get_cert(gsi_cred_handle, &px509_cred) != GLOBUS_SUCCESS)
         {
+            trace(data, "retrieve_userca_and_voms_creds: failed to get the credentials\n");
             globus_module_deactivate(GLOBUS_GSI_CREDENTIAL_MODULE);
             goto leave;
         }
@@ -2516,13 +2539,16 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
     /* Getting the certificate chain */
     if (globus_gsi_cred_get_cert_chain (gsi_cred_handle, &px509_chain) != GLOBUS_SUCCESS)
         {
+            trace(data, "retrieve_userca_and_voms_creds: failed to get the credentials chain\n");
             X509_free (px509_cred);
             (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
             goto leave;
         }
 
-    if (_get_user_ca (px509_cred, px509_chain, data->user_ca) < 0)
+    if (_get_user_ca (px509_cred, px509_chain, data->user_ca) < 0) {
+        trace(data, "retrieve_userca_and_voms_creds: could not get the user's CA\n");
         goto leave;
+    }
 
     /* No need for the globus module anymore, the rest are calls to VOMS */
     (void)globus_module_deactivate (GLOBUS_GSI_CREDENTIAL_MODULE);
@@ -2531,11 +2557,13 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
 
     if (data->disable_voms_check)
         {
+            trace(data, "retrieve_userca_and_voms_creds: voms_check disabled\n");
             ret = 0;
             goto leave;
         }
     if ((vd = VOMS_Init (NULL, NULL)) == NULL)
         {
+            trace(data, "retrieve_userca_and_voms_creds: failed to initialize VOMS\n");
             goto leave;
         }
 
@@ -2544,6 +2572,9 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
         {
             char buffer[BUFSIZE];
             VOMS_ErrorMessage(vd, error, buffer, BUFSIZE);
+            trace(data, "retrieve_userca_and_voms_creds: failed to get the VOMS extensions\n");
+            trace(data, buffer);
+            trace(data, "\n");
             cgsi_err(soap, buffer);
             VOMS_Destroy (vd);
             goto leave;
@@ -2551,15 +2582,18 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
 
     volist = vd->data;
 
-    if (volist !=NULL)
+    if (volist != NULL)
         {
             int i = 0;
             int nbfqan;
+            char buffer[BUFSIZE];
 
             /* Copying the voname */
             if ((*volist)->voname != NULL)
                 {
                     data->voname = strdup((*volist)->voname);
+                    snprintf(buffer, BUFSIZE, "retrieve_userca_and_voms_creds: got VO %s\n", data->voname);
+                    trace(data, buffer);
                 }
 
 
@@ -2578,11 +2612,17 @@ int retrieve_userca_and_voms_creds(struct soap *soap)
                             for (i=0; i<nbfqan; i++)
                                 {
                                     data->fqan[i] = strdup( volist[0]->fqan[i]);
+                                    snprintf(buffer, BUFSIZE, "retrieve_userca_and_voms_creds: got FQAN %s\n", data->fqan[i]);
+                                    trace(data, buffer);
                                 }
                             data->fqan[nbfqan] = NULL;
                             data->nbfqan = nbfqan;
                         }
                 } /* if (nbfqan > 0) */
+        }
+    else
+        {
+            trace(data, "retrieve_userca_and_voms_creds: no vos present\n");
         }
     VOMS_Destroy (vd);
 
