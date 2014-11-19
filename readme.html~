@@ -38,12 +38,16 @@
 		<h2>Contact</h2>
 		<p>
 			You can notify bugs or ask for feature requests via
+			<ul>
+				<li>
+					<em>Tracker</em>
+					<a href="https://its.cern.ch/jira/browse/DMC/component/14238">https://its.cern.ch/jira/browse/DMC/component/14238</a>
+				</li>
+				<li>
+					<em>Mailing list</em>
+					<a href="mailto:dmc-support@cern.ch">dmc-support@cern.ch</a>
+				</li>
+			</ul>
 		</p>
-		<dl>
-			<dt>Tracker</dt>
-			<dd><a href="https://its.cern.ch/jira/browse/DMC/component/14238">https://its.cern.ch/jira/browse/DMC/component/14238</a></dd>
-			<dt>Mailing list</dt>
-			<dd><a href="mailto:dmc-support@cern.ch">dmc-support@cern.ch</a></dd>
-		</dl>
 	</body>
 </html>
