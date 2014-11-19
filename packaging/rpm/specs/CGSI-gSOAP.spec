@@ -82,7 +82,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libcgsi_plugin_cpp.so.*
 %{_libdir}/libcgsi_plugin_voms.so.*
 %{_libdir}/libcgsi_plugin_voms_cpp.so.*
-%doc LICENSE RELEASE-NOTES
+%doc LICENSE RELEASE-NOTES README readme.html
 
 %files devel
 %defattr(-,root,root,-)

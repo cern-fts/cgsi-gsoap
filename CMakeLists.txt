@@ -37,10 +37,12 @@ pkg_check_modules(GLOBUS_GSSAPI_GSI_PKG REQUIRED globus-gssapi-gsi)
 add_definitions( -D_GNU_SOURCE)
 add_definitions( -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64)
 
+install(FILES README readme.html
+    DESTINATION ${DOC_INSTALL_DIR}/)
 install(FILES RELEASE-NOTES
-		DESTINATION ${DOC_INSTALL_DIR}/) # install release notes
+		DESTINATION ${DOC_INSTALL_DIR}/)
 install(FILES LICENSE
-		DESTINATION ${DOC_INSTALL_DIR}/) # install release notes
+		DESTINATION ${DOC_INSTALL_DIR}/)
 
 add_subdirectory (src)
 
