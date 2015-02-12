@@ -28,14 +28,14 @@ set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 
 # libs checks
-pkg_check_modules(GSOAP_PKG REQUIRED gsoap)
-pkg_search_module(VOMS_PKG REQUIRED voms-2.0 voms)
-pkg_check_modules(GLOBUS_ASSIST_PKG REQUIRED globus-gss-assist)
-pkg_check_modules(GLOBUS_GSSAPI_GSI_PKG REQUIRED globus-gssapi-gsi)
+find_package(gSOAP REQUIRED)
+find_package(VOMS REQUIRED)
+find_package(Globus_GSSAPI_GSI REQUIRED)
+find_package(Globus_GSS_ASSIST REQUIRED)
 
 ## general def
-add_definitions( -D_GNU_SOURCE)
-add_definitions( -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64)
+add_definitions(-D_GNU_SOURCE)
+add_definitions(-D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64)
 
 install(FILES README readme.html
     DESTINATION ${DOC_INSTALL_DIR}/)
@@ -45,5 +45,3 @@ install(FILES LICENSE
 		DESTINATION ${DOC_INSTALL_DIR}/)
 
 add_subdirectory (src)
-
-
