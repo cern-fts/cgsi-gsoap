@@ -1496,7 +1496,7 @@ static int cgsi_plugin_send(struct soap *soap, const char *buf, size_t len, cons
     struct cgsi_plugin_data *data = (struct cgsi_plugin_data*)soap_lookup_plugin(soap, plugin_id);
 
     trace(data, "<Sending SOAP Packet>-------------\n");
-    trace(data, (char *)buf);
+    trace_str(data, (char *)buf, len);
     trace(data, "\n----------------------------------\n");
 
     input_tok.value = (char *)buf;
