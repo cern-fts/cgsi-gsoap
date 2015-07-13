@@ -1,0 +1,95 @@
+cgsi-gsoap (1.3.7-1) unstable; urgency=medium
+
+  * Update to version 1.3.7
+  * Add dbg package
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Sat, 08 Nov 2014 16:46:32 +0100
+
+cgsi-gsoap (1.3.6-1) unstable; urgency=medium
+
+  * Update to version 1.3.6
+  * Add @brief description to header file - fixes manpage (Closes: #630033)
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Fri, 27 Jun 2014 16:45:06 +0200
+
+cgsi-gsoap (1.3.5-3) unstable; urgency=low
+
+  * Adapt to multi-arch Globus installation
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Sun, 01 Dec 2013 04:49:07 +0100
+
+cgsi-gsoap (1.3.5-2) unstable; urgency=low
+
+  * Rebuild for new gsoap
+  * Remove DM-Upload-Allowed from debian/control
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Wed, 15 May 2013 16:59:13 +0200
+
+cgsi-gsoap (1.3.5-1) unstable; urgency=low
+
+  * Update to version 1.3.5 (EMI 2 version)
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Fri, 25 May 2012 13:28:37 +0200
+
+cgsi-gsoap (1.3.4.2-4) unstable; urgency=low
+
+  * Properly use default LDFLAGS
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Wed, 07 Dec 2011 21:49:27 +0100
+
+cgsi-gsoap (1.3.4.2-3) unstable; urgency=low
+
+  * Convert copyright file to dep5 format
+  * Fix old Vcs links in debian/control file
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Tue, 08 Nov 2011 06:33:17 +0100
+
+cgsi-gsoap (1.3.4.2-2) unstable; urgency=low
+
+  * Use dpkg's build flags
+  * Add versioned gsoap dependencies to the binary packages
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Wed, 02 Nov 2011 10:39:21 +0100
+
+cgsi-gsoap (1.3.4.2-1) unstable; urgency=low
+
+  * Update to version 1.3.4.2.
+  * Build against new gsoap (Closes: #636878).
+  * Build against new voms.
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Thu, 01 Sep 2011 21:06:28 +0200
+
+cgsi-gsoap (1.3.4.0-1) unstable; urgency=low
+
+  * Update to version 1.3.4.0.
+  * Convert to source format 3.0.
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Mon, 20 Dec 2010 18:59:30 +0100
+
+cgsi-gsoap (1.3.3.2-1) unstable; urgency=low
+
+  * Update to version 1.3.3.2 (Closes: #515226).
+  * Change copyright file to reflect upstream license change.
+  * Drop the patches - all applied upstream.
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Wed, 23 Sep 2009 18:03:11 +0200
+
+cgsi-gsoap (1.3.3.1-1) UNRELEASED; urgency=low
+
+  * Update to version 1.3.3.1.
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Mon, 17 Aug 2009 13:10:34 +0200
+
+cgsi-gsoap (1.3.2.2-3) UNRELEASED; urgency=low
+
+  * Changing deprecated Source:Version to binary:Version
+    as requested by ftpmasters.
+  * Overriding lintian warning about non-matching soname with package name.
+
+ -- Steffen Moeller <moeller@debian.org>  Mon, 30 Mar 2009 00:02:00 +0200
+
+cgsi-gsoap (1.3.2.2-2) UNRELEASED; urgency=low
+
+  * Initial package uploaded.
+
+ -- Mattias Ellert <mattias.ellert@fysast.uu.se>  Tue, 20 Jan 2009 00:57:22 +0100

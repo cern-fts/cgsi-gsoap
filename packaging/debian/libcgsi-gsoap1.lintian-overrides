@@ -1,0 +1,5 @@
+# The names of the packages is a mixture between Debian's principles and
+# the gathering of files in groups that Upstream has historically
+# determined. The naming should not be changed and the package not be
+# split.
+libcgsi-gsoap1 binary: package-name-doesnt-match-sonames libcgsi-plugin1 libcgsi-plugin-cpp1 libcgsi-plugin-voms1 libcgsi-plugin-voms-cpp1

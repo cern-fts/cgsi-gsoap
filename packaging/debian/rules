@@ -1,0 +1,142 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+-include /usr/share/dpkg/buildflags.mk
+
+INSTALLDIR = $(CURDIR)/debian/tmp
+
+_prefix = /usr
+_datadir = $(_prefix)/share
+_docdir = $(_datadir)/doc
+
+configure: configure-stamp
+
+configure-stamp:
+	dh_testdir
+
+	[ ! -r src/Makefile.save ] && cp -p src/Makefile src/Makefile.save || :
+
+	# Fix bad permissions
+	find . '(' -name '*.h' -o -name '*.c' -o -name '*.cpp' -o \
+		   -name '*.cc' ')' -exec chmod 644 {} ';'
+	chmod 644 LICENSE RELEASE-NOTES
+
+	# Remove -L/usr/lib and -L/usr/lib64 since they may cause problems
+	sed -e 's!-L$$([A-Z_]*)/lib!!' \
+	    -e 's!-L$$([A-Z_]*)/$$(LIBDIR)!!' -i src/Makefile
+
+	# Remove gsoap version from library names
+	sed -e 's!$$(GSOAP_VERSION)!!g' -i src/Makefile
+
+	touch $@
+
+build: build-indep build-arch
+
+build-indep: build-stamp
+
+build-arch: build-stamp
+
+build-stamp: configure-stamp
+	dh_testdir
+
+	. ./VERSION && \
+	cd src && \
+	$(MAKE) CFLAGS="$(CFLAGS) $(CPPFLAGS) -fPIC -I. `pkg-config --cflags gsoap`" \
+		GLOBUS_INCLUDE="-I/usr/include/globus -I/usr/lib/globus/include -I/usr/include/$(DEB_HOST_MULTIARCH)/globus" \
+		SHLIBLDFLAGS="$(LDFLAGS) -shared" \
+		USE_VOMS=yes WITH_EMI=yes WITH_CPP_LIBS=yes \
+		LIBDIR=lib VERSION=$$VERSION all doc
+
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	. ./VERSION && \
+	cd src && \
+	$(MAKE) CFLAGS="$(CFLAGS) $(CPPFLAGS) -fPIC -I. `pkg-config --cflags gsoap`" \
+		GLOBUS_INCLUDE="-I/usr/include/globus -I/usr/lib/globus/include -I/usr/include/$(DEB_HOST_MULTIARCH)/globus" \
+		SHLIBLDFLAGS="$(LDFLAGS) -shared" \
+		USE_VOMS=yes WITH_EMI=yes WITH_CPP_LIBS=yes \
+		LIBDIR=lib VERSION=$$VERSION clean
+
+	rm -rf src/html
+	rm -rf src/man
+	rm -f src/doxygen_sqlite3.db
+
+	rm -rf src/*.a
+	rm -rf src/*.so
+
+	[ -r src/Makefile.save ] && mv src/Makefile.save src/Makefile || :
+
+	rm -f build-stamp configure-stamp
+
+	dh_clean
+
+install: build-stamp
+	dh_testdir
+	dh_testroot
+	dh_prep
+
+	# Yes, the makefile uses RPM_BUILD_ROOT instead of the normal DESTDIR
+
+	. ./VERSION && \
+	cd src && \
+	$(MAKE) CFLAGS="$(CFLAGS) $(CPPFLAGS) -fPIC -I. `pkg-config --cflags gsoap`" \
+		GLOBUS_INCLUDE="-I/usr/include/globus -I/usr/lib/globus/include -I/usr/include/$(DEB_HOST_MULTIARCH)/globus" \
+		SHLIBLDFLAGS="$(LDFLAGS) -shared" \
+		USE_VOMS=yes WITH_EMI=yes WITH_CPP_LIBS=yes \
+		LIBDIR=lib VERSION=$$VERSION \
+		RPM_BUILD_ROOT=$(INSTALLDIR) install install.man
+
+	mv $(INSTALLDIR)$(_docdir)/CGSI $(INSTALLDIR)$(_docdir)/cgsi-gsoap-dev
+
+binary-indep:
+
+binary-arch: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_install --fail-missing
+	dh_installman
+	dh_lintian
+	dh_link
+	dh_strip --dbg-package=libcgsi-gsoap-dbg
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps -l debian/libcgsi-gsoap1/usr/lib
+
+	if [ -r /usr/lib/$(DEB_HOST_MULTIARCH)/libgsoap.so ] ; then \
+	GSOAPLIB=`readlink /usr/lib/$(DEB_HOST_MULTIARCH)/libgsoap.so` ; else \
+	GSOAPLIB=`readlink /usr/lib/libgsoap.so` ; fi && \
+	GSOAPPKG=`dpkg -S $$GSOAPLIB | sed 's/:.*//'` && \
+	echo "gsoap:Depends=$$GSOAPPKG" >> debian/libcgsi-gsoap1.substvars
+
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+
+VERSION=1.3.7
+VERSTAG=1_3_7
+get-orig-source:
+	if [ -r ../cgsi-gsoap_$(VERSION).orig.tar.gz ] ; then \
+	  echo "cgsi-gsoap_$(VERSION).orig.tar.gz is already existing." ; \
+	else \
+	  echo "Fetching upstream svn version" ; \
+	  svn export http://svn.cern.ch/guest/lcgutil/cgsi-gsoap/tags/cgsi-gsoap_R_$(VERSTAG) cgsi-gsoap-$(VERSION) ; \
+	  echo "Packing it up." ; \
+	  tar -z -c -f ../cgsi-gsoap_$(VERSION).orig.tar.gz \
+	    cgsi-gsoap-$(VERSION) ; \
+	  echo "Cleaning up." ; \
+	  rm -rf cgsi-gsoap-$(VERSION) ; \
+	fi
+
+.Phony: binary binary-arch binary-indep build build-arch build-indep clean configure get-orig-source install

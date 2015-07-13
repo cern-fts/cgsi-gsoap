@@ -1,4 +1,5 @@
 NAME=CGSI-gSOAP
+DEB_NAME=cgsi-gsoap
 SPEC=rpm/$(NAME).spec
 VERSION=${shell grep '^Version:' $(SPEC) | awk '{print $$2}' }
 # Leave blank. To be overriden by CI tools.
@@ -28,6 +29,11 @@ RPMDEFINES_BIN=--define='_topdir $(RPMBUILD)' \
 	--define='_rpmdir $(RPMS)' \
     --define "_binary_filedigest_algorithm md5"
 
+
+PBUILDER_FLAGS=
+PBUILDER_TMP="/tmp/"
+
+
 all: srpm
 
 clean:
@@ -54,3 +60,19 @@ rpm: srpm
 
 mock: srpm
 	/usr/bin/mock $(MOCK_FLAGS) -r $(MOCK_CHROOT) $(NAME)-$(VERSION)-*.src.rpm
+
+deb-src: dist
+	rm -rf "$(PBUILDER_TMP)/$(NAME)-$(VERSION)"
+	tar xzf "$(NAME)-$(VERSION).tar.gz" -C "$(PBUILDER_TMP)"
+	mv "$(PBUILDER_TMP)/$(NAME)-$(VERSION)" "$(PBUILDER_TMP)/$(DEB_NAME)-$(VERSION)"
+	cp -rv debian "$(PBUILDER_TMP)/$(DEB_NAME)-$(VERSION)"
+	$(if $(RELEASE), sed -ri "s/($(DEB_NAME) )\((([0-9]+\.)+[0-9]+)-[0-9]+\)/\\1(\\2-$(RELEASE))/g" "$(PBUILDER_TMP)/$(DEB_NAME)-$(VERSION)/debian/changelog")
+	cp -f "$(NAME)-$(VERSION).tar.gz" "$(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION).orig.tar.gz" 
+	cd "$(PBUILDER_TMP)/$(DEB_NAME)-$(VERSION)"; \
+		debuild -us -uc -S
+	mv $(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION)*.gz .
+	mv $(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION)*.dsc .
+
+deb: deb-src
+	pbuilder build $(PBUILDER_FLAGS) $(DEB_NAME)_$(VERSION)*.dsc
+

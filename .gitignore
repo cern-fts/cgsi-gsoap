@@ -3,4 +3,5 @@
 *.log
 .cproject
 .project
-
+*.gz
+*.dsc
