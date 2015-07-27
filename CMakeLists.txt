@@ -26,12 +26,14 @@ set(VERSION_PATCH 7)
 set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 
-
 # libs checks
 find_package(gSOAP REQUIRED)
 find_package(VOMS REQUIRED)
+find_package(Globus_COMMON REQUIRED)
 find_package(Globus_GSSAPI_GSI REQUIRED)
 find_package(Globus_GSS_ASSIST REQUIRED)
+find_package(Globus_GSI_CERT_UTILS REQUIRED)
+find_package(Globus_GSI_CREDENTIAL REQUIRED)
 
 ## general def
 add_definitions(-D_GNU_SOURCE)
