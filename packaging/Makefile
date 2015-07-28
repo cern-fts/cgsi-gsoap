@@ -42,9 +42,11 @@ clean:
 	rm -fv *.log
 	rm -rfv out
 	rm -rfv "$(RPMBUILD)"
+	rm -fv *.gz
+	rm -fv *.dsc
 
 dist: clean
-	tar vczf "$(NAME)-$(VERSION).tar.gz" --exclude="packaging" --exclude=".git" --exclude="*.pyc" --transform="s,^,$(NAME)-$(VERSION)/," ..
+	tar vczf "$(NAME)-$(VERSION).tar.gz" --exclude="packaging" --exclude-vcs --exclude="*.pyc" --transform="s,^,$(NAME)-$(VERSION)/," ..
 
 $(RPMBUILD):
 	mkdir -p "$(RPMBUILD)"
@@ -70,8 +72,8 @@ deb-src: dist
 	cp -f "$(NAME)-$(VERSION).tar.gz" "$(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION).orig.tar.gz" 
 	cd "$(PBUILDER_TMP)/$(DEB_NAME)-$(VERSION)"; \
 		debuild -us -uc -S
-	mv $(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION)*.gz .
-	mv $(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION)*.dsc .
+	cp -f $(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION)*.gz .
+	cp -f $(PBUILDER_TMP)/$(DEB_NAME)_$(VERSION)*.dsc .
 
 deb: deb-src
 	pbuilder build $(PBUILDER_FLAGS) $(DEB_NAME)_$(VERSION)*.dsc
