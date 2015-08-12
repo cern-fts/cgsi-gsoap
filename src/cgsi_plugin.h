@@ -18,6 +18,7 @@
 /** cgsi_plugin.h - Header file for the GSI gSOAP plugin
  *
  * @file cgsi_plugin.h
+ * @brief Header file for the GSI gSOAP plugin
  * @author Ben Couturier CERN, IT/ADC
  *
  * This is a GSI plugin for gSOAP. It uses the globus GSI libraries to implement

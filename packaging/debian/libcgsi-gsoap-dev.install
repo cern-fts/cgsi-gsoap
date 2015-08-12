@@ -1,0 +1,11 @@
+debian/tmp/usr/include/cgsi_plugin.h
+debian/tmp/usr/lib/libcgsi_plugin.a
+debian/tmp/usr/lib/libcgsi_plugin.so
+debian/tmp/usr/lib/libcgsi_plugin_cpp.a
+debian/tmp/usr/lib/libcgsi_plugin_cpp.so
+debian/tmp/usr/lib/libcgsi_plugin_voms.a
+debian/tmp/usr/lib/libcgsi_plugin_voms.so
+debian/tmp/usr/lib/libcgsi_plugin_voms_cpp.a
+debian/tmp/usr/lib/libcgsi_plugin_voms_cpp.so
+debian/tmp/usr/share/man/man3/cgsi_plugin.h.3
+debian/tmp/usr/share/doc/cgsi-gsoap-dev

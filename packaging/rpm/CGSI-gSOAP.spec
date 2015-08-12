@@ -1,5 +1,5 @@
 Name:		CGSI-gSOAP
-Version:	1.3.7
+Version:	1.3.8
 Release:	1%{?dist}
 Summary:	GSI plugin for gSOAP
 
@@ -82,7 +82,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libcgsi_plugin_cpp.so.*
 %{_libdir}/libcgsi_plugin_voms.so.*
 %{_libdir}/libcgsi_plugin_voms_cpp.so.*
-%doc LICENSE RELEASE-NOTES
+%doc LICENSE RELEASE-NOTES README readme.html
 
 %files devel
 %defattr(-,root,root,-)

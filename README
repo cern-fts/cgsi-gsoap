@@ -1,0 +1,11 @@
+CGSI-gSOAP
+----------
+Client and server side library to secure gSOAP using the Globus Security Infrastructure.
+It is licensed under the Apache 2 License. See LICENSE for details.
+
+See RELEASE-NOTES for a detailed changelog.
+
+You can notify bugs or ask for feature requests via
+  * Tracker: https://its.cern.ch/jira/browse/DMC/component/14238
+  * Mailing list: dmc-support@cern.ch
+

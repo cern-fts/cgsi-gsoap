@@ -1,0 +1,7 @@
+*.rpm
+*.tar.gz
+*.log
+.cproject
+.project
+*.gz
+*.dsc

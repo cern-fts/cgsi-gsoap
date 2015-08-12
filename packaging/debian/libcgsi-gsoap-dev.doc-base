@@ -1,0 +1,9 @@
+Document: cgsi-gsoap
+Title: Debian CGSI-gSOAP Manual
+Author: EGEE Collaboration
+Abstract: This manual describes what cgsi-gsoap is
+Section: Programming
+
+Format: HTML
+Index: /usr/share/doc/cgsi-gsoap-dev/html/index.html
+Files: /usr/share/doc/cgsi-gsoap-dev/html/*.html
