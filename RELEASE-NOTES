@@ -1,3 +1,7 @@
+* Wed Aug 12 2015 Alejandro Alvarez <alejandro.alvarez@cern.ch> 1.3.8
+- [DMC-646] - When trace is on, the output buffer is printed full, regardless of the actual length
+- [DMC-698] - Port DMC clients to MacOSX
+
 * Thu Nov 06 2014 Alejandro Alvarez <alejandro.alvarez@cern.ch> 1.3.7
 - [DMC-437] - x509_* data members are leaking
 - [DMC-438] - client_cgsi_plugin_import_cred wrongly check the existence of ukey
