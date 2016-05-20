@@ -1,3 +1,9 @@
+cgsi-gsoap (1.3.9-1) unstable; urgency=medium
+
+  * Update to verstion 1.3.9
+
+ -- Alejandro Alvarez Ayllon <aalvarez@cern.ch> Fri, 20 May 2016 10:30:00 +0100
+
 cgsi-gsoap (1.3.8-1) unstable; urgency=medium
 
   * Update to version 1.3.8
