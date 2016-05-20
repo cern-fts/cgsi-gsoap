@@ -35,6 +35,7 @@
 #include <openssl/err.h>
 #include "gssapi_openssl.h"
 #include "globus_gsi_credential.h"
+#include "globus_openssl.h"
 #if defined(USE_VOMS)
 #ifdef __cplusplus
 extern "C" {
@@ -2396,16 +2397,17 @@ int soap_cgsi_init(struct soap *soap, int cgsi_options)
  */
 static void cgsi_plugin_globus_modules(int activate)
 {
-
     if (activate)
         {
             (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
             (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+            (void) globus_module_activate(GLOBUS_OPENSSL_MODULE);
         }
     else
         {
             (void) globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
             (void) globus_module_deactivate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+            (void) globus_module_deactivate(GLOBUS_OPENSSL_MODULE);
         }
 }
 
