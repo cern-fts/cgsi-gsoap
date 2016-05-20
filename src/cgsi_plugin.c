@@ -82,7 +82,7 @@ static struct cgsi_plugin_data* get_plugin(struct soap *soap);
 static int setup_trace(struct cgsi_plugin_data *data);
 static int trace(struct cgsi_plugin_data *data, const char *tracestr);
 static int trace_str(struct cgsi_plugin_data *data, const char *msg, int len);
-static void cgsi_plugin_globus_modules(int activate);
+static void cgsi_plugin_init_globus_modules(void);
 static int is_loopback(struct sockaddr *);
 static void free_conn_state(struct cgsi_plugin_data *data);
 
@@ -125,9 +125,8 @@ int cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
  */
 int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
 {
-
     /* Activate globus modules */
-    cgsi_plugin_globus_modules(1);
+    cgsi_plugin_init_globus_modules();
 
     p->id = server_plugin_id;
     p->data = (void*)calloc(sizeof(struct cgsi_plugin_data), 1);
@@ -141,7 +140,6 @@ int server_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
                     cgsi_parse_opts((struct cgsi_plugin_data *)p->data, arg,0))
                 {
                     free(p->data); /* error: could not init or pass options*/
-                    cgsi_plugin_globus_modules(0);
                     return SOAP_EOM; /* return error */
                 }
         }
@@ -794,9 +792,8 @@ static int server_cgsi_plugin_close(struct soap *soap)
  */
 int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
 {
-
     /* Activate globus modules */
-    cgsi_plugin_globus_modules(1);
+    cgsi_plugin_init_globus_modules();
 
     p->id = client_plugin_id;
     p->data = (void*)calloc(sizeof(struct cgsi_plugin_data), 1);
@@ -810,7 +807,6 @@ int client_cgsi_plugin(struct soap *soap, struct soap_plugin *p, void *arg)
                     cgsi_parse_opts((struct cgsi_plugin_data *)p->data, arg,1))
                 {
                     free(p->data); /* error: could not init or parse options */
-                    cgsi_plugin_globus_modules(0);
                     return SOAP_EOM; /* return error */
                 }
         }
@@ -1407,7 +1403,7 @@ static int cgsi_plugin_copy(struct soap *soap, struct soap_plugin *dst, struct s
     free_conn_state(dst_data);
 
     /* Activate globus modules, as the new object will also need them */
-    cgsi_plugin_globus_modules(1);
+    cgsi_plugin_init_globus_modules();
     return SOAP_OK;
 }
 
@@ -1417,7 +1413,6 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p)
 
     if (p->data == NULL)
         {
-            cgsi_plugin_globus_modules(0);
             return;
         }
     else
@@ -1430,9 +1425,6 @@ static void cgsi_plugin_delete(struct soap *soap, struct soap_plugin *p)
     free(data->x509_key);
     free(p->data);
     p->data = NULL;
-
-    /* Deactivate globus modules */
-    cgsi_plugin_globus_modules(0);
 }
 
 
@@ -2391,24 +2383,20 @@ int soap_cgsi_init(struct soap *soap, int cgsi_options)
     return 0;
 }
 
+static void activate_globus_modules(void)
+{
+    (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
+    (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+    (void) globus_module_activate(GLOBUS_OPENSSL_MODULE);
+}
 
 /**
  * Activate or deactivate required globus modules
  */
-static void cgsi_plugin_globus_modules(int activate)
+static void cgsi_plugin_init_globus_modules(void)
 {
-    if (activate)
-        {
-            (void) globus_module_activate(GLOBUS_GSI_GSS_ASSIST_MODULE);
-            (void) globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
-            (void) globus_module_activate(GLOBUS_OPENSSL_MODULE);
-        }
-    else
-        {
-            (void) globus_module_deactivate(GLOBUS_GSI_GSSAPI_MODULE);
-            (void) globus_module_deactivate(GLOBUS_GSI_GSS_ASSIST_MODULE);
-            (void) globus_module_deactivate(GLOBUS_OPENSSL_MODULE);
-        }
+    static pthread_once_t globus_initialized = PTHREAD_ONCE_INIT;
+    pthread_once(&globus_initialized, activate_globus_modules);
 }
 
 static int _get_user_ca (X509 *px509_cred, STACK_OF(X509) *px509_chain, char *user_ca)
