@@ -1,5 +1,10 @@
 ## default set of build
-
+#
+# Note: In Darwin (MacOSX), these libraries are generated as static because
+#       the gsoap libraries are. If we generate them as dynamic, when trying to link
+#       we get undefined errors because those symbols are expected to be defined
+#       by the gsoap generated code from a WSDL (for instance, when generating the
+#       sources for srm-ifce)
 
 ## defaults sources
 SET(src_core_csgsi "cgsi_plugin.c")
