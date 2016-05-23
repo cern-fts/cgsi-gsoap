@@ -34,6 +34,8 @@ find_package(Globus_GSSAPI_GSI REQUIRED)
 find_package(Globus_GSS_ASSIST REQUIRED)
 find_package(Globus_GSI_CERT_UTILS REQUIRED)
 find_package(Globus_GSI_CREDENTIAL REQUIRED)
+find_package(Globus_OPENSSL REQUIRED)
+
 
 ## general def
 add_definitions(-D_GNU_SOURCE)
