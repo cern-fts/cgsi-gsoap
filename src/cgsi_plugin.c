@@ -1219,6 +1219,8 @@ static int client_cgsi_plugin_open(struct soap *soap,
                 trace(data, buf);
             }
 
+            static pthread_mutex_t globus_gss = PTHREAD_MUTEX_INITIALIZER;
+            pthread_mutex_lock(&globus_gss);
             major_status = gss_init_sec_context(&minor_status,
                                                 data->credential_handle,
                                                 &data->context_handle,
@@ -1232,6 +1234,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
                                                 &send_tok,
                                                 &ret_flags,
                                                 NULL);  /* ignore time_rec */
+            pthread_mutex_unlock(&globus_gss);
 
             (void)gss_release_buffer(&tmp_status, &recv_tok);
 
