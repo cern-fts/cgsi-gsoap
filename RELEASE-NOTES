@@ -1,3 +1,8 @@
+* Mon Aug 01 2016 Alejandro Alvarez <alejandro.alvarez@cern.ch> 1.3.9
+- [DMC-838] - cgsi_plugin fails to initialise globus OpenSSL module
+- [DMC-839] - Initialize globus modules in a thread safe manner
+- [DMC-840] - cgsi_plugin work-around for Globus GSS threadsafe issue
+
 * Wed Aug 12 2015 Alejandro Alvarez <alejandro.alvarez@cern.ch> 1.3.8
 - [DMC-646] - When trace is on, the output buffer is printed full, regardless of the actual length
 - [DMC-698] - Port DMC clients to MacOSX
