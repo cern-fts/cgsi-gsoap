@@ -959,6 +959,8 @@ static int client_cgsi_plugin_open(struct soap *soap,
 
     free_conn_state(data);
 
+    int do_reverse_lookup = data->disable_hostname_check;
+
     /* Getting the credenttials */
     if (data->x509_cert)
         {
@@ -1049,6 +1051,21 @@ static int client_cgsi_plugin_open(struct soap *soap,
             goto error;
         }
 
+    /*
+     * Figure out what sort of validation we need to do.
+     * If not set by the user, Globus set the environment GLOBUS_GSSAPI_NAME_COMPATIBILITY
+     * from /etc/grid-security/gsi.conf
+     * If the mode is HYBRID, we need to do the old fashion way (reverse lookup)
+     * If strict, we go to the new way where we check the host name given by the user
+     */
+    if (!do_reverse_lookup) {
+        const char *compat = getenv("GLOBUS_GSSAPI_NAME_COMPATIBILITY");
+        if (compat != NULL && strcmp(compat, "STRICT_RFC2818") != 0) {
+            do_reverse_lookup = 1;
+            trace(data, "GLOBUS_GSSAPI_NAME_COMPATIBILITY set to HYBRID, so use reverse lookup\n");
+        }
+    }
+
     /* setting 'target_name':
      * if CGSI_OPT_ALLOW_ONLY_SELF is in effect we check that the peer's
      * name is the same as ours by speficying it as the target name.
@@ -1068,7 +1085,7 @@ static int client_cgsi_plugin_open(struct soap *soap,
                     goto error;
                 }
         }
-    else if (data->disable_hostname_check)
+    else if (do_reverse_lookup)
         {
             /* take target name from reverse lookup */
 
