@@ -1,5 +1,5 @@
 Name:		CGSI-gSOAP
-Version:	1.3.9
+Version:	1.3.10
 Release:	1%{?dist}
 Summary:	GSI plugin for gSOAP
 
