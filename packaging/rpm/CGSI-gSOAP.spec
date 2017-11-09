@@ -1,14 +1,16 @@
 Name:		CGSI-gSOAP
-Version:	1.3.10
+Version:	1.3.11
 Release:	1%{?dist}
 Summary:	GSI plugin for gSOAP
 
 Group:		System Environment/Libraries
 License:	ASL 2.0
 URL:		http://glite.web.cern.ch/glite/
-#		The source tarfile is created from a subversion checkout:
-#		svn co http://svnweb.cern.ch/guest/lcgutil/cgsi-gsoap/tags/cgsi-gsoap_R_1_3_4_2 CGSI-gSOAP-1.3.4.2
-#		tar --exclude .svn -z -c -f CGSI-gSOAP-1.3.4.2.tar.gz CGSI-gSOAP-1.3.4.2
+# git clone https://gitlab.cern.ch/dmc/cgsi-gsoap.git cgsi-gsoap-1.3.11
+# pushd cgsi-gsoap-1.3.11
+# git checkout v1.3.11
+# popd
+# tar czf cgsi-gsoap-1.3.11.tar.gz cgsi-gsoap-1.3.11 --exclude-vcs
 Source0:	%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
