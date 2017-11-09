@@ -100,13 +100,13 @@ string(REGEX MATCH "[0-9]*\\.[0-9]*\\.[0-9]*" GSOAP_VERSION ${GSOAP_STRING_VERSI
 
 # for some reason, -help stopped giving the version at some point
 # but -v also hangs, so try -V (gah)
-if( "${GSOAP_VERSION}" STREQUAL "..")
+if( "${GSOAP_VERSION}" STREQUAL ".." OR "${GSOAP_VERSION}" STREQUAL "")
   execute_process(COMMAND ${GSOAP_SOAPCPP2}  "-V"   OUTPUT_VARIABLE GSOAP_STRING_VERSION ERROR_VARIABLE GSOAP_STRING_VERSION )
   string(REGEX MATCH "[0-9]*\\.[0-9]*\\.[0-9]*" GSOAP_VERSION ${GSOAP_STRING_VERSION})
 endif()
 
 # nothing worked, fallback to -v
-if( "${GSOAP_VERSION}" STREQUAL "..")
+if( "${GSOAP_VERSION}" STREQUAL ".." OR "${GSOAP_VERSION}" STREQUAL "")
   execute_process(COMMAND ${GSOAP_SOAPCPP2}  "-v"   OUTPUT_VARIABLE GSOAP_STRING_VERSION ERROR_VARIABLE GSOAP_STRING_VERSION )
   string(REGEX MATCH "[0-9]*\\.[0-9]*\\.[0-9]*" GSOAP_VERSION ${GSOAP_STRING_VERSION})
 endif()
