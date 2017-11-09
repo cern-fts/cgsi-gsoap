@@ -94,10 +94,18 @@ message(STATUS " - wsdlh : ${GSOAP_WSDL2H}")
 message(STATUS " - SOAPCPP2 : ${GSOAP_SOAPCPP2}")
 
 # some versions of soapcpp2 interpret "-v" as verbose, and hang while waiting for input
-# try "-help" first, and if it fails, do "-v"
+# try "-help" first
 execute_process(COMMAND ${GSOAP_SOAPCPP2}  "-help"   OUTPUT_VARIABLE GSOAP_STRING_VERSION ERROR_VARIABLE GSOAP_STRING_VERSION )
 string(REGEX MATCH "[0-9]*\\.[0-9]*\\.[0-9]*" GSOAP_VERSION ${GSOAP_STRING_VERSION})
 
+# for some reason, -help stopped giving the version at some point
+# but -v also hangs, so try -V (gah)
+if( "${GSOAP_VERSION}" STREQUAL "..")
+  execute_process(COMMAND ${GSOAP_SOAPCPP2}  "-V"   OUTPUT_VARIABLE GSOAP_STRING_VERSION ERROR_VARIABLE GSOAP_STRING_VERSION )
+  string(REGEX MATCH "[0-9]*\\.[0-9]*\\.[0-9]*" GSOAP_VERSION ${GSOAP_STRING_VERSION})
+endif()
+
+# nothing worked, fallback to -v
 if( "${GSOAP_VERSION}" STREQUAL "..")
   execute_process(COMMAND ${GSOAP_SOAPCPP2}  "-v"   OUTPUT_VARIABLE GSOAP_STRING_VERSION ERROR_VARIABLE GSOAP_STRING_VERSION )
   string(REGEX MATCH "[0-9]*\\.[0-9]*\\.[0-9]*" GSOAP_VERSION ${GSOAP_STRING_VERSION})
