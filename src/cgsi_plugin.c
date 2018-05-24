@@ -1711,7 +1711,7 @@ int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
                     else {
                         snprintf(buf, BUFSIZE, "Error reading token data header: Connection closed");
                         /* Avoid the error being retransmitted to the client upon reconnection */
-                        soap_force_closesock(soap); 
+                        // soap_force_closesock(soap); 
                         return -1;
                     }
 
