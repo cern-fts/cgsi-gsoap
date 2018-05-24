@@ -1696,7 +1696,7 @@ int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
             /* trace(data, "%d Remaining %d\n", getpid(), rem); */
             errno = 0;
             soap->error = 0;
-            soap->errnum = 0;
+            soap->errnum = 0; 
             ret = data->frecv(soap, p, rem);
             if (ret <= 0)   /* BEWARE soap_recv returns 0 when an error occurs ! */
                 {
@@ -1708,8 +1708,12 @@ int cgsi_plugin_recv_token(void *arg, void **token, size_t *token_length)
                         snprintf(buf, BUFSIZE, "Error reading token data header: %s", strerror(errno));
                     else if (soap->error)
                         snprintf(buf, BUFSIZE, "Error reading token data header: SOAP error %d", soap->error);
-                    else
+                    else {
                         snprintf(buf, BUFSIZE, "Error reading token data header: Connection closed");
+                        /* Avoid the error being retransmitted to the client upon reconnection */
+                        soap_force_closesock(soap); 
+                        return -1;
+                    }
 
                     cgsi_err(soap, buf);
                     return -1;
