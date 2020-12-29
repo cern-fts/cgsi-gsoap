@@ -172,14 +172,7 @@ INCFILES =cgsi_plugin.h
 
 INSTALL_FLAGS =
 
-# install targets
-ifneq ($(USE_VOMS), $(EMPTY))
-installtargets = installinc installlib installbin installman installdoc installshlib installshlibvoms installshlibvomspthr
-else
-installtargets = installinc installlib installbin installman installdoc installshlib
-endif
-
-.PHONY: uninstall install $(installtargets)
+.PHONY: uninstall install install.man
 install: $(INCFILES) $(LIBFILES) $(SHLIBFILES)
 	install -d $(PREFIX)/$(INCDIR)
 	for i in $(INCFILES); do cp $(SRCDIR)/$$i $(PREFIX)/$(INCDIR); done
