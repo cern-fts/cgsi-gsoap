@@ -39,7 +39,7 @@ endif
 GSOAP_INCLUDE=-I$(GSOAP_LOCATION)/include
 
 ifeq ($(GSOAP_VERSION), $(EMPTY))
-GSOAP_VERSION=_gsoap_2.7
+GSOAP_VERSION=
 endif
 
 LIBFILES =libcgsi_plugin$(GSOAP_VERSION).a 
