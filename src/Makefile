@@ -51,7 +51,13 @@ SHLIBFILES +=libcgsi_plugin$(GSOAP_VERSION)_cpp.so
 endif
 
 GLOBUS_INCLUDE = -I$(GLOBUS_LOCATION)/include/globus -I$(GLOBUS_LOCATION)/$(LIBDIR)/globus/include
-GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/$(LIBDIR) -lglobus_gssapi_gsi -lglobus_gss_assist
+GLOBUS_LIBS = -L$(GLOBUS_LOCATION)/$(LIBDIR) \
+	-lglobus_gss_assist \
+	-lglobus_gssapi_gsi \
+	-lglobus_gsi_credential \
+	-lglobus_gsi_cert_utils \
+	-lglobus_openssl \
+	-lglobus_common -lpthread -lssl -lcrypto
 
 ifneq ($(USE_VOMS), $(EMPTY))
 LIBFILES +=libcgsi_plugin_voms$(GSOAP_VERSION).a
