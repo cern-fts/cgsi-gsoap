@@ -162,7 +162,7 @@ doc: doxygenConfig
 
 # installation directories defaults are generic unix
 PPREFIX=/usr
-PREFIX =$(RPM_BUILD_ROOT)$(PPREFIX)# could be /usr/local but you may not have perms
+PREFIX =$(DESTDIR)$(PPREFIX)# could be /usr/local but you may not have perms
 INCDIR =include
 BINDIR =bin
 MANDIR =share
