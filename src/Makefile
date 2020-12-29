@@ -13,7 +13,7 @@ endif
 ## implicit rule flags ##
 SHELL = /bin/sh
 CC = gcc
-CPP = g++
+CXX = g++
 CFLAGS = -Wall -g -fPIC
 LDFLAGS =
 RANLIB = ranlib
@@ -158,14 +158,14 @@ libcgsi_plugin$(GSOAP_VERSION).so: cgsi_plugin.o
 
 ifneq ($(WITH_CPP_LIBS), $(EMPTY))
 cgsi_plugin_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
-	$(CPP) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ $<
+	$(CXX) $(CFLAGS) $(GLOBUS_INCLUDE)  -c -o $@ $<
 
 libcgsi_plugin$(GSOAP_VERSION)_cpp.a: cgsi_plugin_cpp.o
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
 libcgsi_plugin$(GSOAP_VERSION)_cpp.so: cgsi_plugin_cpp.o
-	$(CPP) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS)
+	$(CXX) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS)
 endif
 
 ifneq ($(USE_VOMS), $(EMPTY))
@@ -201,34 +201,34 @@ libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR).so: cgsi_plugin_voms_
 
 ifneq ($(WITH_CPP_LIBS), $(EMPTY))
 cgsi_plugin_voms_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
-	$(CPP) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_cpp.a: cgsi_plugin_voms_cpp.o
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_cpp.so: cgsi_plugin_voms_cpp.o
-	$(CPP) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+	$(CXX) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
 
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
-	$(CPP) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(VOMS_FLAGS)  $(GLOBUS_INCLUDE) -c -o $@ $<
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR)_cpp.so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR)_cpp.o
-	$(CPP) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
+	$(CXX) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS) $(VOMS_LIBS)
 
 cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o: cgsi_plugin.c cgsi_plugin.h cgsi_plugin_int.h
-	$(CPP) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(VOMS_FLAGS_PTHR)  $(GLOBUS_INCLUDE_PTHR) -c -o $@ $<
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.a: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
 libcgsi_plugin_voms$(GSOAP_VERSION)_$(GLOBUS_FLAVOUR_PTHR)_cpp.so: cgsi_plugin_voms_$(GLOBUS_FLAVOUR_PTHR)_cpp.o
-	$(CPP) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS)
+	$(CXX) $(SHLIBLDFLAGS) -Wl,-soname,$@.$(VMAJOR) -o $@ $? $(SHLIBREQLIBS) $(GLOBUS_LIBS_PTHR) $(VOMS_LIBS)
 endif
 
 endif
