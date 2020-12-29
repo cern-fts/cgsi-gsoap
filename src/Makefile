@@ -196,6 +196,7 @@ install.man: doc
 clean:
 # files vars are specified in install
 	-$(RM) *.o $(LIBFILES) $(SHLIBFILES)
+	-$(RM) -rf man html
 
 
 ################################################################################
