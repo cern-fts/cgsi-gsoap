@@ -8,6 +8,7 @@ else
 VPATH=.:$(SRCDIR)
 endif
 
+include ../VERSION
 
 ################################################################################
 ## implicit rule flags ##
