@@ -152,6 +152,7 @@ endif
 
 doc: doxygenConfig
 	SRCDIR=$(SRCDIR) VERSION=$(VERSION) doxygen $<
+	touch doc
 
 ###############################################
 ## THIS IS STANDARD Makefile BELOW THIS LINE ##
@@ -197,7 +198,7 @@ install.man: doc
 clean:
 # files vars are specified in install
 	-$(RM) *.o $(LIBFILES) $(SHLIBFILES)
-	-$(RM) -rf man html
+	-$(RM) -rf man html doc
 
 
 ################################################################################
