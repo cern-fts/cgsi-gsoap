@@ -1,4 +1,4 @@
-debian/tmp/usr/lib/libcgsi_plugin.so.*
-debian/tmp/usr/lib/libcgsi_plugin_cpp.so.*
-debian/tmp/usr/lib/libcgsi_plugin_voms.so.*
-debian/tmp/usr/lib/libcgsi_plugin_voms_cpp.so.*
+/usr/lib/*/libcgsi_plugin.so.*
+/usr/lib/*/libcgsi_plugin_cpp.so.*
+/usr/lib/*/libcgsi_plugin_voms.so.*
+/usr/lib/*/libcgsi_plugin_voms_cpp.so.*

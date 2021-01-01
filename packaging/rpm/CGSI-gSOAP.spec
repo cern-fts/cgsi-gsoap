@@ -3,21 +3,20 @@ Version:	1.3.11
 Release:	1%{?dist}
 Summary:	GSI plugin for gSOAP
 
-Group:		System Environment/Libraries
 License:	ASL 2.0
-URL:		http://glite.web.cern.ch/glite/
-# git clone https://gitlab.cern.ch/dmc/cgsi-gsoap.git cgsi-gsoap-1.3.11
-# pushd cgsi-gsoap-1.3.11
-# git checkout v1.3.11
-# popd
-# tar czf cgsi-gsoap-1.3.11.tar.gz cgsi-gsoap-1.3.11 --exclude-vcs
+URL:		https://dmc-docs.web.cern.ch/dmc-docs/cgsi-gsoap.html
+#		The source tarfile is created from a repository checkout:
+#		git clone https://gitlab.cern.ch/dmc/cgsi-gsoap.git
+#		cd cgsi-gsoap
+#		git archive --prefix CGSI-gSOAP-1.3.11/ -o CGSI-gSOAP-1.3.11.tar.gz v1.3.11
 Source0:	%{name}-%{version}.tar.gz
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:	globus-gss-assist-devel%{?_isa}
-BuildRequires:	globus-gssapi-gsi-devel%{?_isa}
-BuildRequires:	gsoap-devel%{?_isa}
-BuildRequires:	voms-devel%{?_isa}
+BuildRequires:	gcc-c++
+BuildRequires:	make
+BuildRequires:	globus-gss-assist-devel
+BuildRequires:	globus-gssapi-gsi-devel
+BuildRequires:	gsoap-devel
+BuildRequires:	voms-devel
 BuildRequires:	doxygen
 
 %description
@@ -26,7 +25,6 @@ GSI secure authentication and encryption on top of gSOAP.
 
 %package devel
 Summary:	GSI plugin for gSOAP - development files
-Group:		Development/Libraries
 Requires:	%{name}%{?_isa} = %{version}-%{release}
 Requires:	gsoap-devel
 
@@ -37,66 +35,59 @@ plugins.
 %prep
 %setup -q
 
-# Fix bad permissions (which otherwise end up in the debuginfo package)
-find . '(' -name '*.h' -o -name '*.c' -o -name '*.cpp' -o -name '*.cc' ')' \
-    -exec chmod 644 {} ';'
-chmod 644 LICENSE RELEASE-NOTES
-
-# Remove -L/usr/lib and -L/usr/lib64 since they may cause problems
-sed -e 's!-L$([A-Z_]*)/lib!!' \
-    -e 's!-L$([A-Z_]*)/$(LIBDIR)!!' -i src/Makefile
-
-# Remove gsoap version from library names
-sed -e 's!$(GSOAP_VERSION)!!g' -i src/Makefile
-
 %build
-. ./VERSION
 cd src
-make CFLAGS="%optflags -fPIC -I. `pkg-config --cflags gsoap`" \
-     USE_VOMS=yes WITH_EMI=yes WITH_CPP_LIBS=yes \
-     LIBDIR=%{_lib} VERSION=$VERSION all doc
+%make_build \
+     USE_VOMS=yes WITH_CPP_LIBS=yes \
+     CFLAGS="%{build_cflags} -fPIC -I. $(pkg-config --cflags gsoap)" \
+     SHLIBLDFLAGS="%{build_ldflags} -shared" \
+     LIBDIR=%{_lib} \
+     all doc
 
 %install
-rm -rf $RPM_BUILD_ROOT
+pushd src
+%make_install \
+     USE_VOMS=yes WITH_CPP_LIBS=yes \
+     LIBDIR=%{_lib} \
+     DOCDIR=$(sed 's!^%{_prefix}/!!' <<< %{_pkgdocdir}) \
+     install.man
+popd
+install -p -m 644 RELEASE-NOTES %{buildroot}%{_pkgdocdir}
+rm %{buildroot}%{_libdir}/*.a
 
-. ./VERSION
-cd src
-make CFLAGS="%optflags -fPIC -I. `pkg-config --cflags gsoap`" \
-     USE_VOMS=yes WITH_EMI=yes WITH_CPP_LIBS=yes \
-     LIBDIR=%{_lib} VERSION=$VERSION install install.man
-
-mkdir -p $RPM_BUILD_ROOT%{_docdir}/%{name}-devel-%{version}
-mv $RPM_BUILD_ROOT%{_datadir}/doc/CGSI \
-   $RPM_BUILD_ROOT%{_docdir}/%{name}-devel-%{version}
-
-rm $RPM_BUILD_ROOT%{_libdir}/*.a
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %files
-%defattr(-,root,root,-)
 %{_libdir}/libcgsi_plugin.so.*
 %{_libdir}/libcgsi_plugin_cpp.so.*
 %{_libdir}/libcgsi_plugin_voms.so.*
 %{_libdir}/libcgsi_plugin_voms_cpp.so.*
-%doc LICENSE RELEASE-NOTES README readme.html
+%dir %{_pkgdocdir}
+%doc %{_pkgdocdir}/RELEASE-NOTES
+%license LICENSE
 
 %files devel
-%defattr(-,root,root,-)
 %{_includedir}/cgsi_plugin.h
 %{_libdir}/libcgsi_plugin.so
 %{_libdir}/libcgsi_plugin_cpp.so
 %{_libdir}/libcgsi_plugin_voms.so
 %{_libdir}/libcgsi_plugin_voms_cpp.so
-%doc %{_docdir}/%{name}-devel-%{version}
+%doc %{_pkgdocdir}/html
 %doc %{_mandir}/man*/*
 
 %changelog
+* Wed May 30 2018 Oliver Keeble <oliver.keeble@cern.ch> - 1.3.11-1
+- New upstream release
+
+* Thu Sep 22 2016 Alejandro Alvarez Ayllon <aalvarez@cern.ch> - 1.3.10-1
+- Update for new upstream release
+
+* Wed Aug 12 2015 Alejandro Alvarez Ayllon <aalvarez@cern.ch> - 1.3.8-1
+- Update for new upstream release
+
+* Thu Nov 06 2014 Alejandro Alvarez Ayllon <aalvarez@cern.ch> - 1.3.7-1
+- Update for new upstream release
+
 * Wed Jun 25 2014 Alejandro Alvarez <aalvarez@cern.ch> - 1.3.6-1
 - Up for new upstream release
 

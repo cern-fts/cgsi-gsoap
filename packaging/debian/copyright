@@ -1,26 +1,104 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: CGSI-gSOAP
 Upstream-Contact:
  Ben Couturier CERN, IT/ADC, ben.couturier@cern.ch
  Akos Frohner CERN, IT/GD, akos.frohner@cern.ch
 Source:
- Downloaded from cvs: glite.cvs.cern.ch
- See the get-orig-source rule in debian/rules for details
+ https://gitlab.cern.ch/dmc/cgsi-gsoap/-/archive/v1.3.11/cgsi-gsoap-v1.3.11.tar.gz
 
 Files: *
 Copyright:
- Copyright (c) Members of the EGEE Collaboration. 2004-2012.
- See http://www.eu-egee.org/partners/ for details on the copyright holders.
+ Copyright (c) Members of the EGEE Collaboration. 2004.
+ Members of the EGEE Collaboration
+ ---------------------------------
+ European Organization for Particle Physics (CERN)
+ Institut für Graphische und Parallele Datenverarbeitung der
+   Joh. Kepler Universität Linz (AT)
+ Institut für Informatik der Universität Innsbruck (AT)
+ CESNET, z.s.p.o. (CZ)
+ Budapest University of Technology and Economics (HU)
+ Eötvös Loránd University Budapest (HU)
+ KFKI Research Institute for Particle and Nuclear Physics (HU)
+ Magyar Tudományos Akadémia Számítástechnikai és Automatizálási
+   Kutatóintézet (HU)
+ Office for National Information and Infrastructure Development (HU)
+ Akademickie Centrum Komputerowe CYFRONET akademii Górniczo-Hutniczej
+   im. St. Staszica w Krakowie (PL)
+ Warsaw University Interdisciplinary Centre for Mathematical and
+   Computational Modelling (PL)
+ Institute of Bioorganic Chemistry PAN, Poznan Supercomputing and
+   Networking Center (PL)
+ Ustav Informatiky, Slovenská Akadémia Vied (SK)
+ Jožef Stefan Institute (SI)
+ The Provost Fellows and Scholars of the College of the Holy and
+   Undivided Trinity of Queen Elizabeth near Dublin (IE)
+ Council for the Central Laboratory of the Research Councils (GB)
+ The University of Edinburgh (GB)
+ Particle Physics and Astronomy Research Council (GB)
+ University College of London (GB)
+ Commissariat l'Energie Atomique, Direction des Sciences de la Matière (FR)
+ Compagnie Générale de Géophysique (FR)
+ Centre National de la Recherche Scientifique (FR)
+ CS Système d'Information Communication & Systèmes (FR)
+ Centrale Recherche S.A. (FR)
+ Deutsches Elektronen-Synchrotron (DE)
+ Deutsches Klimarechenzentrum GmbH (DE)
+ Fraunhofer-Gesellschaft zur Förderung der Angewandten Forschung e.V. (DE)
+ Forschungszentrum Karlsruhe GmbH (DE)
+ Gesellschaft für Schwerionenforschung GmbH (DE)
+ DATAMAT S.p.A. (IT)
+ Istituto Nazionale di Fisica Nucleare (IT)
+ Trans-European Research and Networking Association (NL)
+ Vrije Universiteit Brussel (BE)
+ Faculty of Science University of Copenhagen (DK)
+ University of Helsinki (FI)
+ Foundation for Fundamental Research on Matter (NL)
+ Stichting Academisch Rekencentrum Amsterdam (NL)
+ Universiteit van Amsterdam (NL)
+ University of Bergen (NO)
+ Vetenskapsrådet, The Swedish Research Council (SE)
+ Institute of High Energy Physics (RU)
+ Institute of Mathematical Problems of Biology of Russian Academy of
+   Sciences (RU)
+ Institute of Theoretical and Experimental Physics (RU)
+ Joint Institute for Nuclear Research (RU)
+ Keldysh Institute of Applied Mathematics of Russian Academy of Sciences
+   Moscow (RU)
+ Petersburg Nuclear Physics Institute of Russian Academy of Sciences (RU)
+ Russian Research Centre "Kurchatov Institute" (RU)
+ Skobeltsyn Institute of Nuclear Physics of Moscow State University (RU)
+ Central Lab. for Parallel Processing, Bulgarian Academy of Sciences (BG)
+ University of Cyprus (CY)
+ Greek Research and Technology Network (GR)
+ Tel Aviv University (IL)
+ National Institute for Research and Development in Informatics (RO)
+ Laboratório de Instrumentação e Física Experimental de Partículas (PT)
+ S.A.X. Centro de Supercomputación de Galicia (ES)
+ Consejo Superior de Investigaciones Cientificas (ES)
+ Institut de Física d'Altes Energies (ES)
+ Instituto Nacional de Tecnica Aeroespacial (ES)
+ Universidad Politécnica de Valencia (ES)
+ University of Chicago (US)
+ University of Southern California, Marina del Rey (US)
+ The Board of Regents for the University of Wisconsin System (US)
+ Royal Institute of Technology - Center for Parallel Computers (SE)
+ Ente per le Nuove Tecnologie, l'Energia e l'Ambiente (IT)
+ Università degli Studi della Calabria (IT)
+ Università degli Studi di Lecce (IT)
+ Università degli Studi di Napoli Federico II (IT)
+ Delivery of Advanced Network Technology to Europe Limited (GB)
+ Verein zur Förderung eines Deutschen Forschungsnetzes e.V. (DE)
+ Consortium GARR (IT)
 License: Apache-2.0
 
-Files: src/globus_gsi_gss_constants.h src/globus_i_gsi_credential.h src/gssapi_openssl.h
+Files: src/globus_gsi_gss_constants.h src/gssapi_openssl.h
 Copyright:
  Copyright 1999-2006 University of Chicago
 License: Apache-2.0
 
 Files: debian/*
 Copyright:
- 2008-2013, Mattias Ellert <mattias.ellert@fysast.uu.se>
+ 2008-2021, Mattias Ellert <mattias.ellert@physics.uu.se>
 License: Apache-2.0
 
 License: Apache-2.0
