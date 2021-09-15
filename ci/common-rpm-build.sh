@@ -11,10 +11,15 @@ function print_info {
 
 TIMESTAMP=`date +%y%m%d%H%M`
 GITREF=`git rev-parse --short HEAD`
-BRANCH=`git name-rev $GITREF --name-only`
 RELEASE=r${TIMESTAMP}git${GITREF}
 
-if [[ $BRANCH == tags/* ]]; then
+if [[ -z ${BRANCH} ]]; then
+  BRANCH=`git name-rev $GITREF --name-only`
+else
+  printf "Using environment set variable BRANCH=%s\n" "${BRANCH}"
+fi
+
+if [[ $BRANCH =~ ^(tags/)?(v)[.0-9]+(-[0-9]+)?$ ]]; then
   RELEASE=
 fi
 
