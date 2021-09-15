@@ -3,7 +3,12 @@ set -e
 
 TIMESTAMP=`date +%y%m%d%H%M`
 GITREF=`git rev-parse --short HEAD`
+BRANCH=`git name-rev $GITREF --name-only`
 RELEASE=r${TIMESTAMP}git${GITREF}
+
+if [[ $BRANCH == tags/* ]]; then
+  RELEASE=
+fi
 
 RPMBUILD=${PWD}/build
 SRPMS=${RPMBUILD}/SRPMS
@@ -19,4 +24,3 @@ else
 fi
 
 rpmbuild --rebuild --define="_topdir ${RPMBUILD}" ${SRPMS}/*
-

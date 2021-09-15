@@ -30,6 +30,20 @@ centos8:
   image: gitlab-registry.cern.ch/linuxsupport/c8-base
   <<: *build-template_definition
 
+fedora-33:
+  image: fedora:33
+  <<: *build-template_definition
+
+fedora-34:
+  image: fedora:34
+  <<: *build-template_definition
+
+fedora-rawhide:
+  image: fedora:rawhide
+  <<: *build-template_definition
+  allow_failure: true
+  when: manual
+
 #--------------------------
 # Publish templates
 #--------------------------
@@ -40,14 +54,21 @@ centos8:
   dependencies:
     - cc7
     - centos8
+    - fedora-33
+    - fedora-34
+    - fedora-rawhide
   script:
     - yum install -y python sssd-client sudo createrepo
     - automount
     - cat "$repo_passwd" | kinit "$repo_user"
     - eosfusebind
     - |
-        for platform in cc7 centos8; do 
-            packaging/gfal2-repo-manager.py --action add --base /eos/project/d/dmc/www/repos/ --ref ${CI_COMMIT_REF_NAME} --packages ${platform}/RPMS/*/*.rpm ${platform}/SRPMS/*
+        for platform in cc7 centos8 fedora-33 fedora-34 fedora-rawhide; do
+          if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
+            echo "Skipping ${platform} packages..." ;
+            continue ;
+          fi
+          packaging/gfal2-repo-manager.py --action add --base /eos/project/d/dmc/www/repos/ --ref ${CI_COMMIT_REF_NAME} --packages ${platform}/RPMS/*/*.rpm ${platform}/SRPMS/*
         done
     - sleep 60
   tags:
