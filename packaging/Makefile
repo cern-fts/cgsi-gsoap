@@ -46,7 +46,7 @@ clean:
 	rm -fv *.dsc
 
 dist: clean
-	tar vczf "$(NAME)-$(VERSION).tar.gz" --exclude="packaging" --exclude-vcs --exclude="*.pyc" --transform="s,^,$(NAME)-$(VERSION)/," ..
+	tar vczf "$(NAME)-$(VERSION).tar.gz" --exclude="packaging" --exclude-vcs --exclude=".git*" --exclude="*.pyc" --transform="s,^,$(NAME)-$(VERSION)/," ..
 
 $(RPMBUILD):
 	mkdir -p "$(RPMBUILD)"
