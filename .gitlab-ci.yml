@@ -32,12 +32,12 @@ centos8:
   image: gitlab-registry.cern.ch/linuxsupport/c8-base
   <<: *build-template_definition
 
-fedora-33:
-  image: fedora:33
-  <<: *build-template_definition
-
 fedora-34:
   image: fedora:34
+  <<: *build-template_definition
+
+fedora-35:
+  image: fedora:35
   <<: *build-template_definition
 
 fedora-rawhide:
@@ -56,8 +56,8 @@ fedora-rawhide:
   dependencies:
     - cc7
     - centos8
-    - fedora-33
     - fedora-34
+    - fedora-35
     - fedora-rawhide
   script:
     - yum install -y python sssd-client sudo createrepo
@@ -65,7 +65,7 @@ fedora-rawhide:
     - cat "$repo_passwd" | kinit "$repo_user"
     - eosfusebind
     - |
-        for platform in cc7 centos8 fedora-33 fedora-34 fedora-rawhide; do
+        for platform in cc7 centos8 fedora-34 fedora-35 fedora-rawhide; do
           if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
             echo "Skipping ${platform} packages..." ;
             continue ;
