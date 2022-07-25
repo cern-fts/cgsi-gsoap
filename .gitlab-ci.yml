@@ -32,6 +32,10 @@ centos8:
   image: gitlab-registry.cern.ch/linuxsupport/c8-base
   <<: *build-template_definition
 
+centos-stream9:
+  image: gitlab-registry.cern.ch/linuxsupport/cs9-base
+  <<: *build-template_definition
+
 fedora-34:
   image: fedora:34
   <<: *build-template_definition
