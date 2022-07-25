@@ -32,7 +32,7 @@ centos8:
   image: gitlab-registry.cern.ch/linuxsupport/c8-base
   <<: *build-template_definition
 
-centos-stream9:
+cs9:
   image: gitlab-registry.cern.ch/linuxsupport/cs9-base
   <<: *build-template_definition
 
@@ -60,7 +60,7 @@ fedora-rawhide:
   dependencies:
     - cc7
     - centos8
-    - centos-stream9
+    - cs9
     - fedora-34
     - fedora-35
     - fedora-rawhide
@@ -70,7 +70,7 @@ fedora-rawhide:
     - cat "$repo_passwd" | kinit "$repo_user"
     - eosfusebind
     - |
-        for platform in cc7 centos8 centos-stream9 fedora-34 fedora-35 fedora-rawhide; do
+        for platform in cc7 centos8 cs9 fedora-34 fedora-35 fedora-rawhide; do
           if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
             echo "Skipping ${platform} packages..." ;
             continue ;
