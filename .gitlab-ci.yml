@@ -60,6 +60,7 @@ fedora-rawhide:
   dependencies:
     - cc7
     - centos8
+    - centos-stream9
     - fedora-34
     - fedora-35
     - fedora-rawhide
@@ -69,7 +70,7 @@ fedora-rawhide:
     - cat "$repo_passwd" | kinit "$repo_user"
     - eosfusebind
     - |
-        for platform in cc7 centos8 fedora-34 fedora-35 fedora-rawhide; do
+        for platform in cc7 centos8 centos-stream9 fedora-34 fedora-35 fedora-rawhide; do
           if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
             echo "Skipping ${platform} packages..." ;
             continue ;
