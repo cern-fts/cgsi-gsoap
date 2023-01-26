@@ -36,12 +36,12 @@ cs9:
   image: gitlab-registry.cern.ch/linuxsupport/cs9-base
   <<: *build-template_definition
 
-fedora-35:
-  image: fedora:35
-  <<: *build-template_definition
-
 fedora-36:
   image: fedora:36
+  <<: *build-template_definition
+
+fedora-37:
+  image: fedora:37
   <<: *build-template_definition
 
 fedora-rawhide:
@@ -61,8 +61,8 @@ fedora-rawhide:
     - cc7
     - centos8
     - cs9
-    - fedora-35
     - fedora-36
+    - fedora-37
     - fedora-rawhide
   script:
     - yum install -y python sssd-client sudo createrepo
@@ -70,7 +70,7 @@ fedora-rawhide:
     - cat "$repo_passwd" | kinit "$repo_user"
     - eosfusebind
     - |
-        for platform in cc7 centos8 cs9 fedora-35 fedora-36 fedora-rawhide; do
+        for platform in cc7 centos8 cs9 fedora-36 fedora-37 fedora-rawhide; do
           if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
             echo "Skipping ${platform} packages..." ;
             continue ;
