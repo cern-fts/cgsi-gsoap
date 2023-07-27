@@ -28,12 +28,12 @@ cc7:
   image: gitlab-registry.cern.ch/linuxsupport/cc7-base
   <<: *build-template_definition
 
-centos8:
-  image: gitlab-registry.cern.ch/linuxsupport/c8-base
+alma8:
+  image: gitlab-registry.cern.ch/linuxsupport/alma8-base
   <<: *build-template_definition
 
-cs9:
-  image: gitlab-registry.cern.ch/linuxsupport/cs9-base
+alma9:
+  image: gitlab-registry.cern.ch/linuxsupport/alma9-base
   <<: *build-template_definition
 
 fedora-36:
@@ -59,8 +59,8 @@ fedora-rawhide:
   image: gitlab-registry.cern.ch/eos/gitlab-eos/cc7:latest
   dependencies:
     - cc7
-    - centos8
-    - cs9
+    - alma8
+    - alma9
     - fedora-36
     - fedora-37
     - fedora-rawhide
@@ -70,7 +70,7 @@ fedora-rawhide:
     - cat "$repo_passwd" | kinit "$repo_user"
     - eosfusebind
     - |
-        for platform in cc7 centos8 cs9 fedora-36 fedora-37 fedora-rawhide; do
+        for platform in cc7 alma8 alma9 fedora-36 fedora-37 fedora-rawhide; do
           if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
             echo "Skipping ${platform} packages..." ;
             continue ;
