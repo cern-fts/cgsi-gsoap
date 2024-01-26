@@ -22,7 +22,7 @@
  * @author Ben Couturier CERN, IT/ADC
  *
  * This is a GSI plugin for gSOAP. It uses the globus GSI libraries to implement
- * GSI secure authentification and encryption on top of gSOAP.
+ * GSI secure authentication and encryption on top of gSOAP.
  * The globus GSI bundle is necessary for the plugin to compile and run.
  *
  */
@@ -74,7 +74,7 @@ extern "C" {
 int soap_cgsi_init(struct soap *soap, int cgsi_options);
 
 /**
- * Generic contructor for the cgsi_plugin
+ * Generic constructor for the cgsi_plugin
  *
  * @param soap The soap structure for the request
  * @param plugin Pointer to the plugin data structure
@@ -85,7 +85,7 @@ int soap_cgsi_init(struct soap *soap, int cgsi_options);
 int cgsi_plugin(struct soap *soap, struct soap_plugin *plugin, void *arg);
 
 /**
- * Client contructor for the cgsi_plugin
+ * Client constructor for the cgsi_plugin
  *
  * @param soap The soap structure for the request
  * @param plugin Pointer to the plugin data structure
@@ -96,7 +96,7 @@ int cgsi_plugin(struct soap *soap, struct soap_plugin *plugin, void *arg);
 int client_cgsi_plugin(struct soap *soap, struct soap_plugin *plugin, void *arg);
 
 /**
- * Server contructor for the cgsi_plugin
+ * Server constructor for the cgsi_plugin
  *
  * @param soap The soap structure for the request
  * @param plugin Pointer to the plugin data structure

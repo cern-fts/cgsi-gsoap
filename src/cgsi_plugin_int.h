@@ -21,7 +21,7 @@
  * @author Ben Couturier CERN, IT/ADC
  *
  * This is a GSI plugin for gSOAP. It uses the globus GSI libraries to implement
- * GSI secure authentification and encryption on top of gSOAP.
+ * GSI secure authentication and encryption on top of gSOAP.
  * The globus GSI bundle is necessary for the plugin to compile and run.
  *
  */
