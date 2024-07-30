@@ -1,3 +1,20 @@
+CGSI-gSOAP RELEASE-NOTES
+========================
+
+* Tue Jul 30 2024 Mihai Patrascoiu <mihai.patrascoiu@cern.ch> 1.3.12
+- [DMC-1264] - Gfal2 packages for Fedora >= 33
+- [DMC-1308] - Move Data Management Clients to Fedora 34 & 35
+- [DMC-1327] - DMC packages for Centos Stream 9
+- [DMC-1336] - Data Management Clients for Fedora 36
+- [DMC-1359] - Data Management Clients for Fedora 37
+- [DMC-1379] - Move DMC projects to Alma8 and Alma9
+- [DMC-1387] - Data Management Clients for Fedora 38
+- [DMC-1413] - Data Management Clients for Fedora 39 and Fedora 40
+- [DMC-1414] - Stop building Data Management Clients for CC7
+- [cgsi-gsoap/pull/2] - Makefile fixes
+- [cgsi-gsoap/pull/3] - Update rpm and debian packaging
+- [cgsi-gsoap/pull/5] - Fix manpage typos reported by lintian
+
 * Tue May 29 2018 Oliver Keeble <oliver.keeble@cern.ch> 1.3.11
 - [LCGDM-2604] - SRM timeout causing transfer failures on CC7
 

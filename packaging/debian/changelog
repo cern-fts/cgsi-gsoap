@@ -1,8 +1,14 @@
+cgsi-gsoap (1.3.12-1) unstable; urgency=medium
+
+  * Update to version 1.3.12
+
+ -- Mihai Patrascoiu <mihai.patrascoiu@cern.ch> Tue, 30 Jul 2024 14:00:00 +0100
+
 cgsi-gsoap (1.3.11-1) unstable; urgency=medium
 
   * Update to version 1.3.11
 
- -- Alejandro Alvarez Ayllon <aalvarez@cern.ch> Thu, 09 Nov 2017 13:48:00 +0100
+ -- Oliver Keeble <oliver.keeble@cern.ch> Tue, 29 May 2018 15:00:00 +0100
 
 cgsi-gsoap (1.3.10-1) unstable; urgency=medium
 

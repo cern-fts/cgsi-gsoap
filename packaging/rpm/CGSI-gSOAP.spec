@@ -1,5 +1,5 @@
 Name:		CGSI-gSOAP
-Version:	1.3.11
+Version:	1.3.12
 Release:	1%{?dist}
 Summary:	GSI plugin for gSOAP
 
@@ -8,7 +8,7 @@ URL:		https://dmc-docs.web.cern.ch/dmc-docs/cgsi-gsoap.html
 #		The source tarfile is created from a repository checkout:
 #		git clone https://gitlab.cern.ch/dmc/cgsi-gsoap.git
 #		cd cgsi-gsoap
-#		git archive --prefix CGSI-gSOAP-1.3.11/ -o CGSI-gSOAP-1.3.11.tar.gz v1.3.11
+#		git archive --prefix CGSI-gSOAP-1.3.12/ -o CGSI-gSOAP-1.3.12.tar.gz v1.3.12
 Source0:	%{name}-%{version}.tar.gz
 
 BuildRequires:	gcc-c++
@@ -76,6 +76,9 @@ rm %{buildroot}%{_libdir}/*.a
 %doc %{_mandir}/man*/*
 
 %changelog
+* Tue Jul 30 2024 Mihai Patrascoiu <mihai.patrascoiu@cern.ch> - 1.3.12-1
+- New upstream release
+
 * Wed May 30 2018 Oliver Keeble <oliver.keeble@cern.ch> - 1.3.11-1
 - New upstream release
 
