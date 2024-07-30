@@ -24,10 +24,6 @@ stages:
 # Build jobs
 #--------------------------
 
-cc7:
-  image: gitlab-registry.cern.ch/linuxsupport/cc7-base
-  <<: *build-template_definition
-
 alma8:
   image: gitlab-registry.cern.ch/linuxsupport/alma8-base
   <<: *build-template_definition
@@ -56,26 +52,23 @@ fedora-rawhide:
 
 .publish-template: &publish-template_definition
   stage: publish
-  image: gitlab-registry.cern.ch/eos/gitlab-eos/cc7:latest
+  image: gitlab-registry.cern.ch/eos/gitlab-eos/alma9:latest
   dependencies:
-    - cc7
     - alma8
     - alma9
     - fedora-39
     - fedora-40
     - fedora-rawhide
   script:
-    - yum install -y python sssd-client sudo createrepo
     - automount
     - cat "$repo_passwd" | kinit "$repo_user"
-    - eosfusebind
     - |
-        for platform in cc7 alma8 alma9 fedora-39 fedora-40 fedora-rawhide; do
+        for platform in alma8 alma9 fedora-39 fedora-40 fedora-rawhide; do
           if [[ "${platform}" == "fedora-rawhide" ]] && [[ ! -d ${platform} ]] ; then
             echo "Skipping ${platform} packages..." ;
             continue ;
           fi
-          packaging/gfal2-repo-manager.py --action add --base /eos/project/d/dmc/www/repos/ --ref ${CI_COMMIT_REF_NAME} --packages ${platform}/RPMS/*/*.rpm ${platform}/SRPMS/*
+          packaging/gfal2-repo-manager.py --action add --base /eos/project-d/dmc/www/repos/ --ref ${CI_COMMIT_REF_NAME} --packages ${platform}/RPMS/*/*.rpm ${platform}/SRPMS/*
         done
     - sleep 60
   tags:
