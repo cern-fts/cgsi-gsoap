@@ -72,7 +72,7 @@ fedora-rawhide:
         done
     - sleep 60
   tags:
-    - docker-privileged
+    - docker-privileged-xl
   retry: 2
 
 #--------------------------
